@@ -8,7 +8,7 @@ from typing import Any, List, Optional
 from docx import Document
 from pydantic import BaseModel, ConfigDict, Field
 
-from client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, client
+from backend.client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, client
 
 
 class Goal(BaseModel):

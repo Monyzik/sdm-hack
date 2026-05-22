@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from parser_agent import ProjectParser
+from agents.parser_agent import ProjectParser
 
 
 DOCX_DIR = Path("data/project_documents")
