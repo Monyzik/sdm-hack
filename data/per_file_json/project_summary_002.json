@@ -1,0 +1,37 @@
+{
+  "project_name": "Прогнозирование оттока клиентов для малого бизнеса",
+  "goals": [
+    {
+      "goal": "Построить модель прогноза оттока и выделить клиентов для приоритетной коммуникации.",
+      "confidence": 1.0
+    }
+  ],
+  "results": [
+    {
+      "result": "Модель расчета вероятности оттока клиента.",
+      "confidence": 1.0,
+      "measurable": true
+    },
+    {
+      "result": "Сегменты клиентов по уровню риска.",
+      "confidence": 1.0,
+      "measurable": true
+    },
+    {
+      "result": "Список факторов, влияющих на вероятность ухода.",
+      "confidence": 1.0,
+      "measurable": true
+    },
+    {
+      "result": "Рекомендации для удерживающих кампаний.",
+      "confidence": 1.0,
+      "measurable": false
+    }
+  ],
+  "timeline": {
+    "start_date": "01.02.2026",
+    "end_date": "28.06.2026",
+    "duration": null,
+    "confidence": 1.0
+  }
+}

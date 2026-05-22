@@ -1,6 +1,12 @@
 import openai
 import os
 from dotenv import load_dotenv
+from docx import Document
+from typing import List, Optional, Dict
+from pydantic import BaseModel, Field
+from datetime import datetime
+import json
+
 
 load_dotenv()
 
