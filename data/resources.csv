@@ -1,0 +1,25 @@
+id,full_name,role,team,available_hours_per_week,hour_rate,seniority
+R001,Алексей Соколов,Project Manager,PMO,40,4200,senior
+R002,Мария Кузнецова,Business Analyst,Business Analysis,40,3600,middle+
+R003,Дмитрий Волков,Backend Developer,Core Platform,40,4800,senior
+R004,Илья Смирнов,Backend Developer,Core Platform,40,4300,middle+
+R005,Ольга Иванова,Backend Developer,Payments,40,4100,middle
+R006,Павел Никитин,Data Engineer,Data Platform,40,4500,senior
+R007,Наталья Федорова,Data Scientist,Risk Models,40,4700,senior
+R008,Сергей Лебедев,ML Engineer,Risk Models,40,4600,middle+
+R009,Анна Попова,QA Engineer,Quality,40,3100,middle
+R010,Роман Егоров,DevOps Engineer,Platform,40,4400,senior
+R011,Виктория Павлова,Security Engineer,Security,32,5000,senior
+R012,Георгий Орлов,Solution Architect,Enterprise Architecture,32,5200,principal
+R013,Екатерина Васильева,Frontend Developer,Mobile Web,40,3900,middle+
+R014,Кирилл Морозов,Android Developer,Mobile,40,4200,middle+
+R015,Дарья Захарова,iOS Developer,Mobile,40,4300,middle+
+R016,Михаил Зайцев,API Analyst,Integration,40,3500,middle
+R017,Татьяна Белова,QA Automation Engineer,Quality,40,3600,middle+
+R018,Артур Комаров,Product Owner,Digital Bank,32,4700,senior
+R019,Софья Андреева,UX Researcher,CX,32,3300,middle
+R020,Никита Новиков,Backend Developer,CRM Platform,40,4000,middle
+R021,Полина Соколова,Data Analyst,CRM Analytics,40,3400,middle
+R022,Евгений Фомин,Integration Engineer,Payments,40,4300,senior
+R023,Лариса Сергеева,Compliance Officer,Compliance,32,3900,senior
+R024,Владислав Крылов,SRE,Platform,40,4500,middle+

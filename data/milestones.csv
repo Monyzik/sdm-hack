@@ -1,0 +1,21 @@
+id,project_id,name,planned_start_date,planned_end_date,actual_start_date,actual_end_date,status,responsible_team
+M001,P001,Discovery и требования,2026-05-04,2026-05-15,2026-05-04,2026-05-16,Done,Business Analysis
+M002,P001,Модель и витрина признаков,2026-05-18,2026-06-05,2026-05-19,2026-06-08,Done,Risk Models
+M003,P001,Security review и интеграция,2026-06-08,2026-06-12,2026-06-09,,Delayed,Security
+M004,P001,Пилот в кредитном конвейере,2026-06-15,2026-06-30,,,At Risk,Core Platform
+M005,P002,Архитектура streaming-контура,2026-04-27,2026-05-15,2026-04-28,2026-05-17,Done,Enterprise Architecture
+M006,P002,Интеграция с процессингом,2026-05-18,2026-06-05,2026-05-20,,Delayed,Payments
+M007,P002,Модель fraud decisioning,2026-05-25,2026-06-19,2026-05-27,,At Risk,Risk Models
+M008,P002,UAT и промышленный контур,2026-06-22,2026-07-10,,,Planned,Platform
+M009,P003,UX и дизайн-система,2026-05-06,2026-05-22,2026-05-06,2026-05-21,Done,CX
+M010,P003,Разработка клиентских сценариев,2026-05-25,2026-06-12,2026-05-25,2026-06-12,Done,Mobile
+M011,P003,Регрессия и аналитика,2026-06-15,2026-06-26,2026-06-15,,In Progress,Quality
+M012,P003,Pilot release,2026-06-29,2026-07-03,,,Planned,Digital Bank
+M013,P004,API contract и архитектура,2026-05-11,2026-05-29,2026-05-12,2026-06-01,Done,Integration
+M014,P004,СБП и acquiring adapters,2026-06-01,2026-06-19,2026-06-03,,At Risk,Payments
+M015,P004,PCI DSS и безопасность,2026-06-15,2026-06-26,2026-06-17,,At Risk,Security
+M016,P004,Нагрузочное тестирование,2026-06-29,2026-07-17,,,Planned,Platform
+M017,P005,Data discovery,2026-05-13,2026-05-29,2026-05-13,2026-05-30,Done,CRM Analytics
+M018,P005,Golden record,2026-06-01,2026-06-19,2026-06-01,2026-06-18,Done,Data Platform
+M019,P005,API профиля 360,2026-06-22,2026-07-10,,,Planned,CRM Platform
+M020,P005,Пилот с продажами,2026-07-13,2026-07-24,,,Planned,Sales
