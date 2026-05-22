@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -67,6 +67,19 @@ BUDGET_COLUMNS = [
     "currency",
 ]
 
+BUDGET_ITEM_COLUMNS = [
+    "id",
+    "project_id",
+    "category",
+    "item_name",
+    "vendor_name",
+    "planned_amount",
+    "actual_spent",
+    "forecast_amount",
+    "payment_type",
+    "comment",
+]
+
 RISK_COLUMNS = [
     "id",
     "project_id",
@@ -104,41 +117,23 @@ RESOURCE_COLUMNS = [
     "seniority",
 ]
 
-RESOURCE_ALLOCATION_COLUMNS = [
+CAPACITY_PLAN_COLUMNS = [
     "id",
     "resource_id",
     "project_id",
+    "allocation_start_date",
+    "allocation_end_date",
     "planned_hours_per_week",
     "actual_hours_per_week",
+    "source_system",
 ]
-
-EVENT_COLUMNS = [
-    "id",
-    "project_id",
-    "event_type",
-    "entity_type",
-    "entity_id",
-    "old_value",
-    "new_value",
-    "event_time",
-    "description",
-]
-
 
 def iso(value: date | None) -> str:
     return value.isoformat() if value else ""
 
 
-def iso_dt(value: datetime | None) -> str:
-    return value.isoformat(sep=" ", timespec="seconds") if value else ""
-
-
 def d(year: int, month: int, day: int) -> date:
     return date(year, month, day)
-
-
-def dt(year: int, month: int, day: int, hour: int, minute: int = 0) -> datetime:
-    return datetime.combine(d(year, month, day), time(hour, minute))
 
 
 def make_projects() -> list[dict[str, Any]]:
@@ -235,7 +230,7 @@ def make_resources() -> list[dict[str, Any]]:
     ]
 
 
-def make_resource_allocations(resources: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def make_capacity_plan(resources: list[dict[str, Any]]) -> list[dict[str, Any]]:
     templates = [
         ("R001", "P001", 16, 18),
         ("R001", "P004", 14, 14),
@@ -284,11 +279,14 @@ def make_resource_allocations(resources: list[dict[str, Any]]) -> list[dict[str,
     for idx, (resource_id, project_id, planned, actual) in enumerate(templates, start=1):
         rows.append(
             {
-                "id": f"RA{idx:03d}",
+                "id": f"CP{idx:03d}",
                 "resource_id": resource_id,
                 "project_id": project_id,
+                "allocation_start_date": iso(d(2026, 5, 25)),
+                "allocation_end_date": iso(d(2026, 6, 21)),
                 "planned_hours_per_week": planned,
                 "actual_hours_per_week": actual,
+                "source_system": "PMO capacity plan",
             }
         )
     return rows
@@ -577,6 +575,75 @@ def make_budgets() -> list[dict[str, Any]]:
     ]
 
 
+def make_budget_items() -> list[dict[str, Any]]:
+    item_specs = [
+        ("P001", "labor", "Внутренняя команда разработки и аналитики", "", 24_000_000, 22_000_000, 28_000_000, "internal_hours", "Рост из-за переработок backend и data science."),
+        ("P001", "infrastructure", "Dev/test environments для скорингового API", "Internal Cloud", 6_000_000, 5_000_000, 7_500_000, "internal_chargeback", "Нужны дополнительные контуры для security testing."),
+        ("P001", "data", "Подготовка и качество витрины признаков МСБ", "Data Platform", 4_500_000, 4_000_000, 6_000_000, "internal_chargeback", "Дополнительные сверки исторических признаков."),
+        ("P001", "security_audit", "Security review и модель угроз", "Bank Security Office", 3_000_000, 3_200_000, 6_000_000, "internal_chargeback", "Расширение scope после замечаний ИБ."),
+        ("P001", "vendor", "Интеграционные доработки кредитного конвейера", "CreditCore Integrator", 5_000_000, 4_800_000, 8_000_000, "fixed_price", "Зависимость от окна интеграционного тестирования."),
+        ("P001", "licenses", "Лицензии ML monitoring и model registry", "ModelOps Suite", 2_500_000, 2_000_000, 3_000_000, "subscription", "Расширение мониторинга моделей."),
+        ("P001", "contingency", "Резерв на compliance-доработки", "", 3_000_000, 500_000, 3_500_000, "reserve", "Часть резерва уйдет на замечания Security."),
+        ("P002", "labor", "Fraud platform, ML и SRE команда", "", 34_000_000, 31_000_000, 38_000_000, "internal_hours", "Дополнительные часы на performance tuning."),
+        ("P002", "infrastructure", "Streaming platform и feature lookup", "Internal Cloud", 12_000_000, 11_000_000, 16_000_000, "internal_chargeback", "Потребовалось больше capacity на peak load."),
+        ("P002", "vendor", "Anti-fraud rules package", "FraudRules Vendor", 8_000_000, 7_000_000, 10_000_000, "license_plus_services", "Доработка правил для снижения false positive."),
+        ("P002", "integration", "Подключение к карточному процессингу", "Card Processing", 7_000_000, 6_500_000, 9_000_000, "internal_chargeback", "Перенос окна подключения увеличивает стоимость работ."),
+        ("P002", "compliance", "Compliance validation и отчетность", "Compliance Office", 4_000_000, 4_500_000, 6_000_000, "internal_chargeback", "Дополнительная проверка false positive."),
+        ("P002", "monitoring", "Real-time monitoring и алерты", "Observability Platform", 5_000_000, 3_500_000, 6_000_000, "subscription", "Расширение synthetic monitoring."),
+        ("P002", "contingency", "Резерв на latency mitigation", "", 2_000_000, 500_000, 3_000_000, "reserve", "Резерв под оптимизацию real-time контура."),
+        ("P003", "labor", "Mobile, backend и QA команда", "", 24_000_000, 18_000_000, 23_000_000, "internal_hours", "Факт ниже плана за счет стабильного scope."),
+        ("P003", "testing", "Устройства и тестовая ферма", "Mobile Lab", 3_000_000, 2_200_000, 2_600_000, "internal_chargeback", "Покрытие основных устройств."),
+        ("P003", "ux_research", "UX research и usability testing", "CX Lab", 2_500_000, 2_100_000, 2_300_000, "internal_chargeback", "Один дополнительный тест onboarding."),
+        ("P003", "analytics", "Mobile analytics SDK и события", "Analytics Platform", 3_000_000, 2_000_000, 3_000_000, "subscription", "Событийная аналитика для пилота."),
+        ("P003", "release", "Release management и store review", "", 1_000_000, 400_000, 800_000, "internal_hours", "Финальный релиз еще впереди."),
+        ("P003", "infrastructure", "Backend BFF и test environments", "Internal Cloud", 5_500_000, 3_800_000, 5_200_000, "internal_chargeback", "Расход близок к плану."),
+        ("P003", "contingency", "Резерв на стабилизацию релиза", "", 3_000_000, 1_000_000, 3_100_000, "reserve", "Резерв почти не использован."),
+        ("P004", "labor", "Payments backend, integration и QA", "", 20_000_000, 17_000_000, 21_000_000, "internal_hours", "Перераспределение backend с P001."),
+        ("P004", "vendor", "СБП сертификаты и vendor support", "SBP Vendor", 4_000_000, 4_200_000, 7_000_000, "time_and_materials", "Вендорские сертификаты подорожали и задержались."),
+        ("P004", "security_audit", "PCI DSS аудит хранения токенов", "Security Auditor", 3_000_000, 2_800_000, 4_500_000, "fixed_price", "Расширен scope аудита."),
+        ("P004", "infrastructure", "Load testing и резервный контур", "Internal Cloud", 5_000_000, 4_000_000, 5_500_000, "internal_chargeback", "Дополнительный стенд для gateway."),
+        ("P004", "monitoring", "Мониторинг SLA платежей", "Observability Platform", 2_000_000, 1_600_000, 2_000_000, "subscription", "Плановый расход."),
+        ("P004", "licenses", "Gateway security libraries", "SecurePay SDK", 1_500_000, 900_000, 1_000_000, "subscription", "Часть лицензий перенесена."),
+        ("P004", "contingency", "Резерв на vendor delay", "", 2_500_000, 500_000, 2_000_000, "reserve", "Резерв частично уйдет на сертификаты."),
+        ("P005", "labor", "CRM platform, data и analytics команда", "", 18_000_000, 12_500_000, 17_000_000, "internal_hours", "Scope идет по плану."),
+        ("P005", "data_quality", "Инструменты дедупликации и data quality", "Data Quality Toolkit", 4_000_000, 3_000_000, 4_000_000, "subscription", "Контроль качества golden record."),
+        ("P005", "licenses", "MDM и golden record лицензии", "MDM Vendor", 5_000_000, 3_200_000, 5_000_000, "subscription", "Годовая лицензия для пилота."),
+        ("P005", "integration", "Интеграция CRM, DWH и API профиля", "CRM Integrator", 3_000_000, 2_200_000, 3_000_000, "fixed_price", "Плановые интеграционные работы."),
+        ("P005", "compliance", "Матрица доступа и проверка ролей", "Compliance Office", 1_500_000, 800_000, 1_500_000, "internal_chargeback", "Проверка перед пилотом."),
+        ("P005", "training", "Обучение продаж пилотному CRM 360", "Sales Academy", 1_000_000, 300_000, 1_200_000, "internal_chargeback", "Часть обучения еще не проведена."),
+        ("P005", "contingency", "Резерв на data remediation", "", 1_500_000, 500_000, 1_300_000, "reserve", "Небольшой резерв на исправление данных."),
+    ]
+
+    rows = []
+    for idx, spec in enumerate(item_specs, start=1):
+        (
+            project_id,
+            category,
+            item_name,
+            vendor_name,
+            planned_amount,
+            actual_spent,
+            forecast_amount,
+            payment_type,
+            comment,
+        ) = spec
+        rows.append(
+            {
+                "id": f"BI{idx:03d}",
+                "project_id": project_id,
+                "category": category,
+                "item_name": item_name,
+                "vendor_name": vendor_name,
+                "planned_amount": planned_amount,
+                "actual_spent": actual_spent,
+                "forecast_amount": forecast_amount,
+                "payment_type": payment_type,
+                "comment": comment,
+            }
+        )
+    return rows
+
+
 def make_risks(tasks_by_project: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
     risk_specs = [
         ("P001", "Security", "Security может не согласовать обработку персональных данных для скорингового API.", 5, 5, "Виктория Павлова", "Вынести модель угроз на risk committee и подготовить маскирование полей.", "escalated", task_id(tasks_by_project, "P001", 1), d(2026, 6, 10)),
@@ -702,71 +769,13 @@ def find_id(rows: list[dict[str, Any]], **conditions: Any) -> str:
     raise ValueError(f"Row not found: {conditions}")
 
 
-def make_project_events(
-    tasks_by_project: dict[str, list[dict[str, Any]]],
-    milestones: list[dict[str, Any]],
-    budgets: list[dict[str, Any]],
-    risks: list[dict[str, Any]],
-    communications: list[dict[str, Any]],
-    allocations: list[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    p001_security_task = task_id(tasks_by_project, "P001", 1)
-    p001_milestone = find_id(milestones, project_id="P001", name="Security review и интеграция")
-    p001_budget = find_id(budgets, project_id="P001")
-    p001_security_risk = find_id(risks, project_id="P001", risk_type="Security")
-    p001_security_comm = find_id(communications, project_id="P001", to_team="Security")
-    p001_backend_allocation = find_id(allocations, project_id="P001", resource_id="R003")
-
-    event_specs = [
-        ("P001", "milestone_shifted", "milestone", p001_milestone, "planned_end_date=2026-06-12", "planned_end_date=2026-06-26", dt(2026, 6, 9, 16, 20), "Security review по скоринговому API сдвинут на 14 дней после повторного запроса модели угроз."),
-        ("P001", "task_blocked", "task", p001_security_task, "status=In Progress", "status=Blocked; blocker_reason=Security approval pending", dt(2026, 6, 10, 11, 5), "Tasktracker получил blocked-задачу по согласованию Security для обработки персональных данных."),
-        ("P001", "budget_forecast_changed", "budget", p001_budget, "forecast_total_spent=54000000; cost_of_delay_per_day=850000", "forecast_total_spent=62000000; cost_of_delay_per_day=1250000", dt(2026, 6, 12, 15, 30), "Прогноз бюджета и Cost of Delay выросли после переноса Security review и расширения compliance scope."),
-        ("P001", "risk_score_increased", "risk", p001_security_risk, "probability=3; impact=4", "probability=5; impact=5", dt(2026, 6, 10, 18, 10), "Риск Security стал критическим: расчетный score вырос с 12 до 25 после risk committee."),
-        ("P001", "communication_delayed", "communication", p001_security_comm, "status=pending", "status=escalated", dt(2026, 6, 12, 10, 45), "Ответ Security по согласованию данных просрочен и эскалирован владельцу проекта."),
-        ("P001", "resource_overallocated", "resource_allocation", p001_backend_allocation, "planned_hours_per_week=30; total_allocation_percent=120", "actual_hours_per_week=35; total_allocation_percent=145", dt(2026, 6, 13, 12, 0), "Backend lead оказался распределен между P001 и P002 сверх доступной емкости."),
-        ("P002", "milestone_shifted", "milestone", find_id(milestones, project_id="P002", name="Интеграция с процессингом"), "planned_end_date=2026-06-05", "planned_end_date=2026-06-23", dt(2026, 6, 6, 14, 15), "Процессинг перенес окно подключения real-time stream."),
-        ("P002", "risk_score_increased", "risk", find_id(risks, project_id="P002", risk_type="Integration"), "probability=3; impact=4", "probability=5; impact=4", dt(2026, 6, 7, 9, 40), "Расчетный score интеграционного риска вырос с 12 до 20 после отмены первого end-to-end теста."),
-        ("P002", "communication_delayed", "communication", find_id(communications, project_id="P002", to_team="Card Processing"), "status=pending", "status=escalated", dt(2026, 6, 8, 17, 0), "Card Processing не подтвердил новое окно подключения."),
-        ("P004", "task_blocked", "task", task_id(tasks_by_project, "P004", 1), "status=In Progress", "status=Blocked; blocker_reason=vendor certificates missing", dt(2026, 6, 6, 11, 30), "Сертификаты СБП не выданы вендором, тесты gateway заблокированы."),
-        ("P004", "budget_forecast_changed", "budget", find_id(budgets, project_id="P004"), "forecast_total_spent=39000000", "forecast_total_spent=43000000", dt(2026, 6, 14, 16, 10), "Прогноз бюджета gateway вырос из-за дополнительных vendor-сертификатов."),
-        ("P004", "resource_overallocated", "resource_allocation", find_id(allocations, project_id="P004", resource_id="R004"), "actual_hours_per_week=20", "actual_hours_per_week=26; total_allocation_percent=135", dt(2026, 6, 15, 12, 25), "Backend-разработчик Core Platform одновременно закрывает P001 и P004."),
-    ]
-
-    rows = []
-    for idx, spec in enumerate(event_specs, start=1):
-        (
-            project_id,
-            event_type,
-            entity_type,
-            entity_id,
-            old_value,
-            new_value,
-            event_time,
-            description,
-        ) = spec
-        rows.append(
-            {
-                "id": f"EV{idx:03d}",
-                "project_id": project_id,
-                "event_type": event_type,
-                "entity_type": entity_type,
-                "entity_id": entity_id,
-                "old_value": old_value,
-                "new_value": new_value,
-                "event_time": iso_dt(event_time),
-                "description": description,
-            }
-        )
-    return rows
-
-
 def write_csv(filename: str, rows: list[dict[str, Any]], columns: list[str]) -> None:
     DATA_DIR.mkdir(exist_ok=True)
     pd.DataFrame(rows, columns=columns).to_csv(DATA_DIR / filename, index=False)
 
 
 def remove_stale_derived_files() -> None:
-    for filename in ["metrics_snapshots.csv"]:
+    for filename in ["metrics_snapshots.csv", "project_events.csv", "resource_allocations.csv"]:
         path = DATA_DIR / filename
         if path.exists():
             path.unlink()
@@ -775,10 +784,10 @@ def remove_stale_derived_files() -> None:
 def validate_dataset(
     projects: list[dict[str, Any]],
     tasks: list[dict[str, Any]],
-    events: list[dict[str, Any]],
     resources: list[dict[str, Any]],
-    allocations: list[dict[str, Any]],
+    capacity_plan: list[dict[str, Any]],
     budgets: list[dict[str, Any]],
+    budget_items: list[dict[str, Any]],
     milestones: list[dict[str, Any]],
     risks: list[dict[str, Any]],
     communications: list[dict[str, Any]],
@@ -793,7 +802,7 @@ def validate_dataset(
 
     availability = {resource["id"]: resource["available_hours_per_week"] for resource in resources}
     total_actual_by_resource: dict[str, float] = defaultdict(float)
-    for allocation in allocations:
+    for allocation in capacity_plan:
         total_actual_by_resource[allocation["resource_id"]] += allocation["actual_hours_per_week"]
     max_total_allocation = max(
         total_actual_by_resource[resource_id] / availability[resource_id] * 100
@@ -801,22 +810,25 @@ def validate_dataset(
     )
     assert 130 <= max_total_allocation <= 150, max_total_allocation
 
-    required_event_types = {
-        "milestone_shifted",
-        "task_blocked",
-        "budget_forecast_changed",
-        "risk_score_increased",
-        "communication_delayed",
-        "resource_overallocated",
-    }
-    assert required_event_types <= {event["event_type"] for event in events}
-
     negative_roi_projects = [
         budget
         for budget in budgets
         if (budget["expected_economic_effect"] - budget["forecast_total_spent"]) / budget["forecast_total_spent"] < 0
     ]
     assert negative_roi_projects, "Expected at least one project with negative ROI"
+
+    budget_by_project = {budget["project_id"]: budget for budget in budgets}
+    budget_item_sums: dict[str, dict[str, int]] = defaultdict(lambda: {"planned": 0, "actual": 0, "forecast": 0})
+    for item in budget_items:
+        budget_item_sums[item["project_id"]]["planned"] += item["planned_amount"]
+        budget_item_sums[item["project_id"]]["actual"] += item["actual_spent"]
+        budget_item_sums[item["project_id"]]["forecast"] += item["forecast_amount"]
+    for project_id, budget in budget_by_project.items():
+        assert budget_item_sums[project_id]["planned"] == budget["planned_budget"], project_id
+        assert budget_item_sums[project_id]["actual"] == budget["actual_spent"], project_id
+        assert budget_item_sums[project_id]["forecast"] == budget["forecast_total_spent"], project_id
+    assert {item["category"] for item in budget_items} >= {"labor", "infrastructure", "vendor", "licenses", "contingency"}
+
     assert any(milestone["project_id"] == "P001" and milestone["status"] == "Delayed" for milestone in milestones)
     assert any(risk["project_id"] == "P001" and risk["probability"] * risk["impact"] >= 15 for risk in risks)
     assert any(
@@ -828,32 +840,32 @@ def validate_dataset(
 def main() -> None:
     projects = make_projects()
     resources = make_resources()
-    allocations = make_resource_allocations(resources)
+    capacity_plan = make_capacity_plan(resources)
     tasks = make_tasks(resources)
     tasks_by_project = task_lookup(tasks)
     milestones = make_milestones()
     budgets = make_budgets()
+    budget_items = make_budget_items()
     risks = make_risks(tasks_by_project)
     communications = make_communications(tasks_by_project)
-    events = make_project_events(tasks_by_project, milestones, budgets, risks, communications, allocations)
 
-    validate_dataset(projects, tasks, events, resources, allocations, budgets, milestones, risks, communications)
+    validate_dataset(projects, tasks, resources, capacity_plan, budgets, budget_items, milestones, risks, communications)
 
     write_csv("projects.csv", projects, PROJECT_COLUMNS)
     write_csv("tasks.csv", tasks, TASK_COLUMNS)
     write_csv("milestones.csv", milestones, MILESTONE_COLUMNS)
     write_csv("budgets.csv", budgets, BUDGET_COLUMNS)
+    write_csv("budget_items.csv", budget_items, BUDGET_ITEM_COLUMNS)
     write_csv("risks.csv", risks, RISK_COLUMNS)
     write_csv("communications.csv", communications, COMMUNICATION_COLUMNS)
     write_csv("resources.csv", resources, RESOURCE_COLUMNS)
-    write_csv("resource_allocations.csv", allocations, RESOURCE_ALLOCATION_COLUMNS)
-    write_csv("project_events.csv", events, EVENT_COLUMNS)
+    write_csv("capacity_plan.csv", capacity_plan, CAPACITY_PLAN_COLUMNS)
     remove_stale_derived_files()
 
     print(f"Generated demo dataset in {DATA_DIR.resolve()}")
     print(f"Projects: {len(projects)}")
     print(f"Tasks: {len(tasks)}")
-    print(f"Events: {len(events)}")
+    print(f"Budget items: {len(budget_items)}")
 
 
 if __name__ == "__main__":

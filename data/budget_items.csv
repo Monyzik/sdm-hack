@@ -1,0 +1,36 @@
+id,project_id,category,item_name,vendor_name,planned_amount,actual_spent,forecast_amount,payment_type,comment
+BI001,P001,labor,Внутренняя команда разработки и аналитики,,24000000,22000000,28000000,internal_hours,Рост из-за переработок backend и data science.
+BI002,P001,infrastructure,Dev/test environments для скорингового API,Internal Cloud,6000000,5000000,7500000,internal_chargeback,Нужны дополнительные контуры для security testing.
+BI003,P001,data,Подготовка и качество витрины признаков МСБ,Data Platform,4500000,4000000,6000000,internal_chargeback,Дополнительные сверки исторических признаков.
+BI004,P001,security_audit,Security review и модель угроз,Bank Security Office,3000000,3200000,6000000,internal_chargeback,Расширение scope после замечаний ИБ.
+BI005,P001,vendor,Интеграционные доработки кредитного конвейера,CreditCore Integrator,5000000,4800000,8000000,fixed_price,Зависимость от окна интеграционного тестирования.
+BI006,P001,licenses,Лицензии ML monitoring и model registry,ModelOps Suite,2500000,2000000,3000000,subscription,Расширение мониторинга моделей.
+BI007,P001,contingency,Резерв на compliance-доработки,,3000000,500000,3500000,reserve,Часть резерва уйдет на замечания Security.
+BI008,P002,labor,"Fraud platform, ML и SRE команда",,34000000,31000000,38000000,internal_hours,Дополнительные часы на performance tuning.
+BI009,P002,infrastructure,Streaming platform и feature lookup,Internal Cloud,12000000,11000000,16000000,internal_chargeback,Потребовалось больше capacity на peak load.
+BI010,P002,vendor,Anti-fraud rules package,FraudRules Vendor,8000000,7000000,10000000,license_plus_services,Доработка правил для снижения false positive.
+BI011,P002,integration,Подключение к карточному процессингу,Card Processing,7000000,6500000,9000000,internal_chargeback,Перенос окна подключения увеличивает стоимость работ.
+BI012,P002,compliance,Compliance validation и отчетность,Compliance Office,4000000,4500000,6000000,internal_chargeback,Дополнительная проверка false positive.
+BI013,P002,monitoring,Real-time monitoring и алерты,Observability Platform,5000000,3500000,6000000,subscription,Расширение synthetic monitoring.
+BI014,P002,contingency,Резерв на latency mitigation,,2000000,500000,3000000,reserve,Резерв под оптимизацию real-time контура.
+BI015,P003,labor,"Mobile, backend и QA команда",,24000000,18000000,23000000,internal_hours,Факт ниже плана за счет стабильного scope.
+BI016,P003,testing,Устройства и тестовая ферма,Mobile Lab,3000000,2200000,2600000,internal_chargeback,Покрытие основных устройств.
+BI017,P003,ux_research,UX research и usability testing,CX Lab,2500000,2100000,2300000,internal_chargeback,Один дополнительный тест onboarding.
+BI018,P003,analytics,Mobile analytics SDK и события,Analytics Platform,3000000,2000000,3000000,subscription,Событийная аналитика для пилота.
+BI019,P003,release,Release management и store review,,1000000,400000,800000,internal_hours,Финальный релиз еще впереди.
+BI020,P003,infrastructure,Backend BFF и test environments,Internal Cloud,5500000,3800000,5200000,internal_chargeback,Расход близок к плану.
+BI021,P003,contingency,Резерв на стабилизацию релиза,,3000000,1000000,3100000,reserve,Резерв почти не использован.
+BI022,P004,labor,"Payments backend, integration и QA",,20000000,17000000,21000000,internal_hours,Перераспределение backend с P001.
+BI023,P004,vendor,СБП сертификаты и vendor support,SBP Vendor,4000000,4200000,7000000,time_and_materials,Вендорские сертификаты подорожали и задержались.
+BI024,P004,security_audit,PCI DSS аудит хранения токенов,Security Auditor,3000000,2800000,4500000,fixed_price,Расширен scope аудита.
+BI025,P004,infrastructure,Load testing и резервный контур,Internal Cloud,5000000,4000000,5500000,internal_chargeback,Дополнительный стенд для gateway.
+BI026,P004,monitoring,Мониторинг SLA платежей,Observability Platform,2000000,1600000,2000000,subscription,Плановый расход.
+BI027,P004,licenses,Gateway security libraries,SecurePay SDK,1500000,900000,1000000,subscription,Часть лицензий перенесена.
+BI028,P004,contingency,Резерв на vendor delay,,2500000,500000,2000000,reserve,Резерв частично уйдет на сертификаты.
+BI029,P005,labor,"CRM platform, data и analytics команда",,18000000,12500000,17000000,internal_hours,Scope идет по плану.
+BI030,P005,data_quality,Инструменты дедупликации и data quality,Data Quality Toolkit,4000000,3000000,4000000,subscription,Контроль качества golden record.
+BI031,P005,licenses,MDM и golden record лицензии,MDM Vendor,5000000,3200000,5000000,subscription,Годовая лицензия для пилота.
+BI032,P005,integration,"Интеграция CRM, DWH и API профиля",CRM Integrator,3000000,2200000,3000000,fixed_price,Плановые интеграционные работы.
+BI033,P005,compliance,Матрица доступа и проверка ролей,Compliance Office,1500000,800000,1500000,internal_chargeback,Проверка перед пилотом.
+BI034,P005,training,Обучение продаж пилотному CRM 360,Sales Academy,1000000,300000,1200000,internal_chargeback,Часть обучения еще не проведена.
+BI035,P005,contingency,Резерв на data remediation,,1500000,500000,1300000,reserve,Небольшой резерв на исправление данных.
