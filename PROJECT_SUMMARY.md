@@ -20,9 +20,8 @@ MVP "AI Project Control Tower" показывает, как руководите
 - database: `sdm_hack`
 - port: `5432`
 - data volume: `./infra/postgres/data`
-- init scripts: `./infra/postgres/init`
 
-`infra/postgres/data` игнорируется git, потому что там будут локальные файлы PostgreSQL.
+`infra/postgres/data` игнорируется git, потому что там будут локальные файлы PostgreSQL. SQL-таблицы и миграции пока не заведены.
 
 ## Датасет
 
@@ -43,5 +42,5 @@ MVP "AI Project Control Tower" показывает, как руководите
 ## Ветки
 
 - `main` — базовая структура проекта.
-- `dev` — пока пустая относительно первого коммита.
+- `dev` — рабочая ветка разработки.
 - `playground` — ветка для тестов и экспериментов с датасетом.
