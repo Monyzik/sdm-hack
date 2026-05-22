@@ -1,0 +1,6 @@
+pandas==3.0.3
+python-dotenv==1.2.2
+SQLAlchemy==2.0.49
+psycopg2-binary==2.9.12
+openai==2.38.0
+pydantic==2.13.4

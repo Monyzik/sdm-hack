@@ -1,5 +1,4 @@
 import os
-import json
 from typing import Any
 
 from dotenv import load_dotenv
@@ -9,10 +8,7 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-client = OpenAI(
-    api_key=os.getenv("AI_TOKEN"),
-    base_url=os.getenv("AI_URL"),
-)
+DEFAULT_MODEL = os.getenv("AI_MODEL") or "gpt-5.4-mini"
 
 
 class ProjectAnalysisResult(BaseModel):
@@ -34,6 +30,17 @@ def get_response_format() -> dict[str, Any]:
             "schema": schema,
         },
     }
+
+
+def build_client() -> OpenAI:
+    api_key = os.getenv("AI_TOKEN") or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Не задан AI_TOKEN или OPENAI_API_KEY")
+
+    return OpenAI(
+        api_key=api_key,
+        base_url=os.getenv("AI_URL") or None,
+    )
 
 
 SYSTEM_PROMPT = """
@@ -59,9 +66,9 @@ Rules:
 """
 
 
-def call_llm(messages: list[dict[str, str]]) -> str:
+def call_llm(client: OpenAI, messages: list[dict[str, str]], model: str) -> str:
     response = client.chat.completions.create(
-        model="gpt-5.4-mini",
+        model=model,
         messages=messages,
         temperature=0,
         response_format=get_response_format(),
@@ -74,7 +81,16 @@ def call_llm(messages: list[dict[str, str]]) -> str:
     return content
 
 
-def query(document: str, max_attempts: int = 3) -> ProjectAnalysisResult:
+def query(
+    document: str,
+    max_attempts: int = 3,
+    client: OpenAI | None = None,
+    model: str = DEFAULT_MODEL,
+) -> ProjectAnalysisResult:
+    if max_attempts < 1:
+        raise ValueError("max_attempts должен быть больше 0")
+
+    llm_client = client or build_client()
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": document},
@@ -85,16 +101,18 @@ def query(document: str, max_attempts: int = 3) -> ProjectAnalysisResult:
 
     for _ in range(max_attempts):
         try:
-            last_content = call_llm(messages)
+            last_content = None
+            last_content = call_llm(llm_client, messages, model)
             return ProjectAnalysisResult.model_validate_json(last_content)
 
         except Exception as e:
             last_error = e
 
-            messages.append({
-                "role": "assistant",
-                "content": last_content or "",
-            })
+            if last_content is not None:
+                messages.append({
+                    "role": "assistant",
+                    "content": last_content,
+                })
 
             messages.append({
                 "role": "user",

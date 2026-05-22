@@ -11,3 +11,7 @@ EV009,P002,communication_delayed,communication,C006,status=pending,status=escala
 EV010,P004,task_blocked,task,T083,status=In Progress,status=Blocked; blocker_reason=vendor certificates missing,2026-06-06 11:30:00,"Сертификаты СБП не выданы вендором, тесты gateway заблокированы."
 EV011,P004,budget_forecast_changed,budget,B004,forecast_total_spent=39000000,forecast_total_spent=43000000,2026-06-14 16:10:00,Прогноз бюджета gateway вырос из-за дополнительных vendor-сертификатов.
 EV012,P004,resource_overallocated,resource_allocation,RA008,actual_hours_per_week=20,actual_hours_per_week=26; total_allocation_percent=135,2026-06-15 12:25:00,Backend-разработчик Core Platform одновременно закрывает P001 и P004.
+EV013,P003,milestone_shifted,milestone,M011,planned_end_date=2026-06-26,planned_end_date=2026-06-30,2026-06-18 10:20:00,Регрессионный контур мобильного банка сдвинут после расширения проверок по критическим сценариям.
+EV014,P003,communication_delayed,communication,C013,status=pending,status=delayed,2026-06-18 16:05:00,Release Management не подтвердил окно pilot release вовремя.
+EV015,P005,budget_forecast_changed,budget,B005,forecast_total_spent=32000000,forecast_total_spent=33000000,2026-06-17 13:20:00,Forecast по CRM 360 вырос после добавления дополнительных проверок качества данных.
+EV016,P005,resource_overallocated,resource_allocation,RA035,actual_hours_per_week=30,actual_hours_per_week=32,2026-06-18 11:00:00,Backend CRM получил дополнительную загрузку на финальный пилот.
