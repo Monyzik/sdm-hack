@@ -29,5 +29,9 @@ Thumbs.db
 # Logs
 *.log
 
-# Local PostgreSQL data volume
+# Local PostgreSQL data volumes
 infra/postgres/data/
+infra/postgres/data/**
+pgdata/
+postgres-data/
+.postgres-data/
