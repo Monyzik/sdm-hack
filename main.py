@@ -7,6 +7,7 @@ from agents.parser_agent import ProjectParser
 
 
 DOCX_DIR = Path("data/project_documents")
+OUTPUT_FILE = Path("data/batch_output.json")
 PER_FILE_OUTPUT_DIR = Path("data/per_file_json")
 
 
@@ -35,8 +36,6 @@ def main() -> None:
     results = []
 
     for index, file_path in enumerate(files, start=1):
-        if index == 5:
-            break
         print(f"[{index}/{len(files)}] Читаю {file_path.name}")
 
         try:
@@ -66,8 +65,10 @@ def main() -> None:
         "failed": failed,
         "items": results,
     }
+    save_json(OUTPUT_FILE, payload)
 
     print(f"Готово: {payload['processed']}/{payload['total']} файлов обработано")
+    print(f"Общий JSON: {OUTPUT_FILE}")
     print(f"JSON по файлам: {PER_FILE_OUTPUT_DIR}")
 
 

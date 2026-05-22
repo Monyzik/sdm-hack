@@ -1,0 +1,17 @@
+id,project_id,event_type,entity_type,entity_id,old_value,new_value,event_time,description
+EV001,P001,milestone_shifted,milestone,M003,planned_end_date=2026-06-12,planned_end_date=2026-06-26,2026-06-09 16:20:00,Security review по скоринговому API сдвинут на 14 дней после повторного запроса модели угроз.
+EV002,P001,task_blocked,task,T001,status=In Progress,status=Blocked; blocker_reason=Security approval pending,2026-06-10 11:05:00,Tasktracker получил blocked-задачу по согласованию Security для обработки персональных данных.
+EV003,P001,budget_forecast_changed,budget,B001,forecast_total_spent=54000000; cost_of_delay_per_day=850000,forecast_total_spent=62000000; cost_of_delay_per_day=1250000,2026-06-12 15:30:00,Прогноз бюджета и Cost of Delay выросли после переноса Security review и расширения compliance scope.
+EV004,P001,risk_score_increased,risk,RK001,probability=3; impact=4,probability=5; impact=5,2026-06-10 18:10:00,Риск Security стал критическим: расчетный score вырос с 12 до 25 после risk committee.
+EV005,P001,communication_delayed,communication,C001,status=pending,status=escalated,2026-06-12 10:45:00,Ответ Security по согласованию данных просрочен и эскалирован владельцу проекта.
+EV006,P001,resource_overallocated,resource_allocation,RA005,planned_hours_per_week=30; total_allocation_percent=120,actual_hours_per_week=35; total_allocation_percent=145,2026-06-13 12:00:00,Backend lead оказался распределен между P001 и P002 сверх доступной емкости.
+EV007,P002,milestone_shifted,milestone,M006,planned_end_date=2026-06-05,planned_end_date=2026-06-23,2026-06-06 14:15:00,Процессинг перенес окно подключения real-time stream.
+EV008,P002,risk_score_increased,risk,RK007,probability=3; impact=4,probability=5; impact=4,2026-06-07 09:40:00,Расчетный score интеграционного риска вырос с 12 до 20 после отмены первого end-to-end теста.
+EV009,P002,communication_delayed,communication,C006,status=pending,status=escalated,2026-06-08 17:00:00,Card Processing не подтвердил новое окно подключения.
+EV010,P004,task_blocked,task,T083,status=In Progress,status=Blocked; blocker_reason=vendor certificates missing,2026-06-06 11:30:00,"Сертификаты СБП не выданы вендором, тесты gateway заблокированы."
+EV011,P004,budget_forecast_changed,budget,B004,forecast_total_spent=39000000,forecast_total_spent=43000000,2026-06-14 16:10:00,Прогноз бюджета gateway вырос из-за дополнительных vendor-сертификатов.
+EV012,P004,resource_overallocated,resource_allocation,RA008,actual_hours_per_week=20,actual_hours_per_week=26; total_allocation_percent=135,2026-06-15 12:25:00,Backend-разработчик Core Platform одновременно закрывает P001 и P004.
+EV013,P003,milestone_shifted,milestone,M011,planned_end_date=2026-06-26,planned_end_date=2026-06-30,2026-06-18 10:20:00,Регрессионный контур мобильного банка сдвинут после расширения проверок по критическим сценариям.
+EV014,P003,communication_delayed,communication,C013,status=pending,status=delayed,2026-06-18 16:05:00,Release Management не подтвердил окно pilot release вовремя.
+EV015,P005,budget_forecast_changed,budget,B005,forecast_total_spent=32000000,forecast_total_spent=33000000,2026-06-17 13:20:00,Forecast по CRM 360 вырос после добавления дополнительных проверок качества данных.
+EV016,P005,resource_overallocated,resource_allocation,RA035,actual_hours_per_week=30,actual_hours_per_week=32,2026-06-18 11:00:00,Backend CRM получил дополнительную загрузку на финальный пилот.

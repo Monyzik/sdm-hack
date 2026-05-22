@@ -1,0 +1,13 @@
+id,project_id,task_id,depends_on_task_id,dependency_type,is_critical_path,lag_days,reason
+TD001,P001,T005,T001,blocks,True,1,Security approval is required before integration and pilot activities.
+TD002,P001,T006,T002,blocks,True,0,DWH SLA confirmation is needed before feature validation.
+TD003,P001,T009,T004,requires,False,2,Rollback procedure depends on validated model documentation.
+TD004,P002,T034,T031,blocks,True,1,Integration testing waits for the processing window.
+TD005,P002,T035,T032,blocks,True,1,Feature store tuning depends on threat model approval.
+TD006,P002,T036,T034,blocks,True,0,Latency optimization depends on a stable processing adapter.
+TD007,P003,T064,T059,related,False,1,Mobile onboarding should align with UX approval.
+TD008,P003,T066,T064,blocks,False,0,Regression package depends on the stabilized client flow.
+TD009,P004,T086,T083,blocks,True,1,Payment routing depends on vendor certificate delivery.
+TD010,P004,T090,T084,blocks,True,2,Load testing depends on a completed PCI DSS checklist.
+TD011,P005,T112,T109,blocks,True,1,Golden record mapping depends on deduplication rules.
+TD012,P005,T116,T112,related,False,0,Cross-sell segments depend on stable profile quality.

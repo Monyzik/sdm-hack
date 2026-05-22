@@ -1,0 +1,6 @@
+id,project_id,request_date,requested_by,change_type,description,impact_scope,impact_budget,impact_days,status
+CR001,P001,2026-06-12,Security,compliance_scope,Добавить расширенную модель угроз и дополнительные проверки маскирования данных.,medium,8000000,14,under_review
+CR002,P001,2026-06-13,Core Platform,integration_scope,Перенести часть интеграционных сценариев кредитного конвейера в post-pilot.,high,-3000000,-6,proposed
+CR003,P002,2026-06-07,Fraud Platform,performance_tuning,Добавить отдельный спринт на оптимизацию feature lookup до целевых 120 мс.,medium,4000000,8,under_review
+CR004,P004,2026-06-14,Payments,vendor_scope,Закупить дополнительные vendor-сертификаты и расширить sandbox-mock для gateway.,low,4000000,5,approved
+CR005,P005,2026-06-17,CRM Analytics,data_quality,Добавить ручную проверку топ-сегментов после дедупликации golden record.,low,1000000,2,approved

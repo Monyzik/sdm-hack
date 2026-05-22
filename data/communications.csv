@@ -1,0 +1,23 @@
+id,project_id,from_team,to_team,topic,channel,last_message_date,expected_response_date,status,importance,linked_task_id
+C001,P001,Risk Models,Security,Согласование обработки ПДн для скорингового API,Teams,2026-06-04,2026-06-05,escalated,critical,T001
+C002,P001,Data Platform,DWH,SLA витрины признаков МСБ,Email,2026-06-06,2026-06-07,delayed,high,T002
+C003,P001,Core Platform,Credit Conveyor,Окно интеграционного тестирования скоринга,Jira,2026-06-12,2026-06-14,delayed,high,T005
+C004,P001,PMO,Business Owner,Решение по scope cut после роста бюджета,Email,2026-06-17,2026-06-18,pending,high,T009
+C005,P001,Risk Models,Data Quality,Сверка неполных признаков по заявкам МСБ,Confluence,2026-06-13,2026-06-17,responded,medium,T004
+C006,P002,Fraud Platform,Card Processing,Окно подключения transaction stream,Email,2026-06-01,2026-06-03,escalated,critical,T031
+C007,P002,Risk Models,Compliance,Критерии false positive review,Teams,2026-06-07,2026-06-10,delayed,high,T038
+C008,P002,Platform,SRE,CPU profile feature lookup,Jira,2026-06-13,2026-06-14,responded,medium,T036
+C009,P002,Security,Fraud Platform,Threat model для real-time событий,Confluence,2026-06-11,2026-06-13,pending,high,T032
+C010,P002,PMO,Business Owner,Решение по запуску пилота без части правил,Email,2026-06-16,2026-06-18,pending,high,T033
+C011,P003,Mobile,CX,Финальный approve onboarding,Teams,2026-06-15,2026-06-16,responded,medium,T059
+C012,P003,Mobile,Analytics,Событийная схема для нового профиля,Jira,2026-06-14,2026-06-17,responded,medium,T063
+C013,P003,Digital Bank,Release Management,Слот pilot release,Email,2026-06-18,2026-06-19,pending,medium,T068
+C014,P003,Quality,Mobile,Регрессионный прогон critical flows,Jira,2026-06-17,2026-06-18,responded,medium,T066
+C015,P004,Payments,SBP Vendor,Тестовые сертификаты СБП,Email,2026-06-06,2026-06-08,delayed,critical,T083
+C016,P004,Security,Payments,PCI DSS token storage review,Confluence,2026-06-11,2026-06-13,delayed,high,T084
+C017,P004,Platform,SRE,Нагрузочное окно gateway,Teams,2026-06-16,2026-06-17,responded,medium,T090
+C018,P004,PMO,Business Owner,Перенос части merchant-сценариев,Email,2026-06-18,2026-06-19,pending,medium,T085
+C019,P005,CRM Analytics,Data Owners,Правила дедупликации контактов,Teams,2026-06-12,2026-06-14,responded,medium,T110
+C020,P005,CRM Platform,Compliance,Матрица доступа к профилю 360,Confluence,2026-06-13,2026-06-17,pending,medium,T117
+C021,P005,Sales,CRM Platform,Сценарии пилота для регионов,Email,2026-06-18,2026-06-19,pending,low,T113
+C022,P005,Data Platform,CRM Analytics,Сверка golden record после дедупликации,Jira,2026-06-16,2026-06-18,responded,medium,T109

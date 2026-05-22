@@ -1,0 +1,11 @@
+id,project_id,dependency_type,depends_on,owner_team,expected_date,status,criticality,linked_task_id
+D001,P001,internal_system,DWH feature mart,Data Platform,2026-06-07,delayed,high,T002
+D002,P001,approval,Security approval,Security,2026-06-05,blocked,critical,T001
+D003,P001,management_decision,Scope cut decision,PMO,2026-06-18,pending,high,T009
+D004,P002,internal_system,Card processing stream,Card Processing,2026-06-03,blocked,critical,T031
+D005,P002,approval,False positive criteria,Compliance,2026-06-10,delayed,high,T038
+D006,P003,release_window,Pilot release slot,Release Management,2026-06-19,pending,medium,T068
+D007,P004,vendor,SBP test certificates,SBP Vendor,2026-06-08,delayed,critical,T083
+D008,P004,approval,PCI DSS token storage review,Security,2026-06-13,delayed,high,T084
+D009,P005,data_owner,CRM duplicate ownership,Data Owners,2026-06-14,responded,medium,T110
+D010,P005,approval,Profile 360 access matrix,Compliance,2026-06-17,pending,medium,T117
