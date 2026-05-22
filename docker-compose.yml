@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sdm_hack_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sdm_hack}
+      POSTGRES_USER: ${POSTGRES_USER:-sdm_hack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sdm_hack_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ./infra/postgres/data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sdm_hack
+
+networks:
+  sdm_hack:
+    driver: bridge
