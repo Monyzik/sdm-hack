@@ -22,7 +22,6 @@ def update_project_from_schema(
     file_path: Path,
 ) -> Project:
     project_id = project_id_from_docx_path(file_path)
-    print(project_id)
     project = session.get(Project, project_id)
     if project is None:
         raise ValueError(

@@ -9,22 +9,22 @@
   "results": [
     {
       "result": "Скоринговая модель риска подозрительной транзакции.",
-      "confidence": 1.0,
+      "confidence": 0.95,
       "measurable": true
     },
     {
       "result": "Правила приоритизации операций для проверки.",
-      "confidence": 1.0,
+      "confidence": 0.95,
       "measurable": true
     },
     {
       "result": "Дашборд контроля качества антифрод-сигналов.",
-      "confidence": 1.0,
+      "confidence": 0.95,
       "measurable": true
     },
     {
       "result": "Описание сценария пилотного внедрения.",
-      "confidence": 1.0,
+      "confidence": 0.95,
       "measurable": true
     }
   ],

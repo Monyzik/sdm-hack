@@ -10,12 +10,12 @@
     {
       "result": "Модель прогноза спроса на наличность",
       "confidence": 1.0,
-      "measurable": false
+      "measurable": true
     },
     {
       "result": "Рекомендованные объемы пополнения по банкоматам",
       "confidence": 1.0,
-      "measurable": false
+      "measurable": true
     },
     {
       "result": "Оценка экономического эффекта от оптимизации инкассации",
@@ -25,7 +25,7 @@
     {
       "result": "Отчет о качестве прогноза по регионам",
       "confidence": 1.0,
-      "measurable": false
+      "measurable": true
     }
   ],
   "timeline": {

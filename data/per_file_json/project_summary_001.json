@@ -28,6 +28,11 @@
       "measurable": true
     },
     {
+      "result": "Подготовлены данные и описание источников.",
+      "confidence": 0.95,
+      "measurable": true
+    },
+    {
       "result": "Модель или аналитический прототип достигает целевых метрик (ROC-AUC >= 0.75, F1-score >= 0.62).",
       "confidence": 0.95,
       "measurable": true
@@ -41,7 +46,7 @@
   "timeline": {
     "start_date": "2026-01-01",
     "end_date": "2026-04-28",
-    "duration": null,
+    "duration": "4 месяца",
     "confidence": 0.95
   }
 }
