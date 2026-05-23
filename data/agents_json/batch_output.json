@@ -1,0 +1,1541 @@
+{
+  "docx_events": {
+    "source": "data/project_documents",
+    "total": 6,
+    "processed": 5,
+    "failed": 1,
+    "items": [
+      {
+        "file": "project_summary_001.docx",
+        "event_type": "docx_changed",
+        "project_id": "P001",
+        "parsed_project": {
+          "project_name": "Система кредитного скоринга для физических лиц",
+          "goals": [
+            {
+              "goal": "Разработать модель, которая оценивает вероятность дефолта клиента и помогает принимать кредитное решение.",
+              "confidence": 0.95
+            }
+          ],
+          "results": [
+            {
+              "result": "Обученная модель расчета вероятности дефолта.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Таблица сравнения моделей и выбранная лучшая модель.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Интерпретация ключевых факторов риска.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Рекомендации по внедрению в кредитный процесс.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Подготовлены данные и описание источников.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Модель или аналитический прототип достигает целевых метрик (ROC-AUC >= 0.75, F1-score >= 0.62).",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Итоговый отчет согласован с заказчиком.",
+              "confidence": 0.95,
+              "measurable": true
+            }
+          ],
+          "timeline": {
+            "start_date": "2026-01-01",
+            "end_date": "2026-04-28",
+            "duration": "4 месяца",
+            "confidence": 0.95
+          }
+        },
+        "monitoring": {
+          "project": {
+            "id": "P001",
+            "name": "Система кредитного скоринга для физических лиц",
+            "owner_name": "Елена Морозова",
+            "status": "red",
+            "priority": "critical",
+            "start_date": "2026-01-01",
+            "planned_end_date": "2026-04-28",
+            "business_goal": "Разработать модель, которая оценивает вероятность дефолта клиента и помогает принимать кредитное решение.",
+            "expected_result": "Обученная модель расчета вероятности дефолта.\nТаблица сравнения моделей и выбранная лучшая модель.\nИнтерпретация ключевых факторов риска.\nРекомендации по внедрению в кредитный процесс.\nПодготовлены данные и описание источников.\nМодель или аналитический прототип достигает целевых метрик (ROC-AUC >= 0.75, F1-score >= 0.62).\nИтоговый отчет согласован с заказчиком."
+          },
+          "metrics": {
+            "overdue_tasks": 0,
+            "blocked_tasks": 5,
+            "delayed_milestones": 0,
+            "open_high_risks": 5,
+            "overdue_communications": 0,
+            "critical_dependencies": 2,
+            "pending_decisions": 2,
+            "budget_deviation_pct": 0.2916666666666667,
+            "details": {
+              "overdue_tasks": [],
+              "blocked_tasks": [
+                {
+                  "id": "T001",
+                  "title": "Получить согласование Security для скорингового API",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-06-10",
+                  "actual_end_date": null,
+                  "estimated_hours": 34,
+                  "spent_hours": 19,
+                  "is_blocked": true,
+                  "blocker_reason": "Ожидается заключение Security по доступу к персональным данным",
+                  "assignee_name": "Мария Кузнецова"
+                },
+                {
+                  "id": "T002",
+                  "title": "Согласовать витрину признаков из АБС",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-05-27",
+                  "actual_end_date": null,
+                  "estimated_hours": 32,
+                  "spent_hours": 33,
+                  "is_blocked": true,
+                  "blocker_reason": "Нет подтверждения SLA от DWH",
+                  "assignee_name": "Павел Никитин"
+                },
+                {
+                  "id": "T003",
+                  "title": "Согласовать маппинг полей CRM и кредитного конвейера",
+                  "status": "Blocked",
+                  "priority": "high",
+                  "planned_due_date": "2026-06-04",
+                  "actual_end_date": null,
+                  "estimated_hours": 76,
+                  "spent_hours": 61,
+                  "is_blocked": true,
+                  "blocker_reason": "Не выделен backend reviewer",
+                  "assignee_name": "Мария Кузнецова"
+                },
+                {
+                  "id": "T004",
+                  "title": "Подготовить валидацию модели PD",
+                  "status": "Blocked",
+                  "priority": "high",
+                  "planned_due_date": "2026-06-14",
+                  "actual_end_date": null,
+                  "estimated_hours": 38,
+                  "spent_hours": 45,
+                  "is_blocked": true,
+                  "blocker_reason": "Не согласована схема маскирования данных",
+                  "assignee_name": "Георгий Орлов"
+                },
+                {
+                  "id": "T005",
+                  "title": "Протестировать endpoint расчета scorecard",
+                  "status": "Blocked",
+                  "priority": "high",
+                  "planned_due_date": "2026-06-16",
+                  "actual_end_date": null,
+                  "estimated_hours": 30,
+                  "spent_hours": 31,
+                  "is_blocked": true,
+                  "blocker_reason": "Зависимость от кредитного конвейера перенесена на следующий спринт",
+                  "assignee_name": "Мария Кузнецова"
+                }
+              ],
+              "delayed_milestones": [],
+              "open_high_risks": [
+                {
+                  "id": "RK001",
+                  "risk_type": "Security",
+                  "description": "Security может не согласовать обработку персональных данных для скорингового API.",
+                  "probability": 5,
+                  "impact": 5,
+                  "status": "escalated",
+                  "owner_name": "Виктория Павлова",
+                  "mitigation_plan": "Вынести модель угроз на risk committee и подготовить маскирование полей."
+                },
+                {
+                  "id": "RK002",
+                  "risk_type": "Resource",
+                  "description": "Backend lead распределен между двумя critical-проектами и работает выше доступной емкости.",
+                  "probability": 4,
+                  "impact": 5,
+                  "status": "active",
+                  "owner_name": "Елена Морозова",
+                  "mitigation_plan": "Перенести часть задач на второго backend и зафиксировать WIP limit."
+                },
+                {
+                  "id": "RK003",
+                  "risk_type": "Budget",
+                  "description": "Прогноз бюджета превышает план из-за доработок Security и интеграций.",
+                  "probability": 4,
+                  "impact": 4,
+                  "status": "active",
+                  "owner_name": "Елена Морозова",
+                  "mitigation_plan": "Согласовать scope cut и отдельный резерв на compliance-доработки."
+                },
+                {
+                  "id": "RK004",
+                  "risk_type": "Dependency",
+                  "description": "DWH не подтвердил стабильный SLA на витрину признаков МСБ.",
+                  "probability": 3,
+                  "impact": 5,
+                  "status": "mitigating",
+                  "owner_name": "Павел Никитин",
+                  "mitigation_plan": "Согласовать fallback extract и ежедневный контроль качества данных."
+                },
+                {
+                  "id": "RK005",
+                  "risk_type": "Data Quality",
+                  "description": "Исторические признаки по части заявок МСБ неполные.",
+                  "probability": 3,
+                  "impact": 4,
+                  "status": "active",
+                  "owner_name": "Наталья Федорова",
+                  "mitigation_plan": "Запустить сверку с кредитным конвейером и исключить неполные сэмплы."
+                }
+              ],
+              "overdue_communications": [],
+              "critical_dependencies": [
+                {
+                  "id": "D001",
+                  "dependency_type": "internal_system",
+                  "depends_on": "DWH feature mart",
+                  "owner_team": "Data Platform",
+                  "expected_date": "2026-06-07",
+                  "status": "delayed",
+                  "criticality": "high"
+                },
+                {
+                  "id": "D003",
+                  "dependency_type": "management_decision",
+                  "depends_on": "Scope cut decision",
+                  "owner_team": "PMO",
+                  "expected_date": "2026-06-18",
+                  "status": "pending",
+                  "criticality": "high"
+                }
+              ],
+              "pending_decisions": [
+                {
+                  "id": "DEC001",
+                  "decision_type": "scope_change",
+                  "description": "Перенести часть интеграции в post-pilot, чтобы разблокировать Security review.",
+                  "decision_owner": "Елена Морозова",
+                  "status": "pending",
+                  "decision_date": "2026-06-12"
+                },
+                {
+                  "id": "DEC002",
+                  "decision_type": "budget_reserve",
+                  "description": "Согласовать дополнительный резерв на compliance-доработки или сократить scope пилота.",
+                  "decision_owner": "Steering Committee",
+                  "status": "pending",
+                  "decision_date": "2026-06-13"
+                }
+              ]
+            }
+          },
+          "alerts": [
+            {
+              "level": "Critical",
+              "metric": "blocked_tasks",
+              "message": "Есть заблокированные задачи: 5"
+            },
+            {
+              "level": "Warning",
+              "metric": "open_high_risks",
+              "message": "Есть открытые высокие риски: 5"
+            },
+            {
+              "level": "Critical",
+              "metric": "critical_dependencies",
+              "message": "Есть критичные незакрытые зависимости: 2"
+            },
+            {
+              "level": "Warning",
+              "metric": "pending_decisions",
+              "message": "Есть незакрытые решения: 2"
+            },
+            {
+              "level": "Warning",
+              "metric": "budget_deviation_pct",
+              "message": "Прогнозный бюджет выше плана на 29.2%"
+            }
+          ]
+        },
+        "error": null
+      },
+      {
+        "file": "project_summary_002.docx",
+        "event_type": "docx_changed",
+        "project_id": "P002",
+        "parsed_project": {
+          "project_name": "Прогнозирование оттока клиентов для малого бизнеса",
+          "goals": [
+            {
+              "goal": "Построить модель прогноза оттока и выделить клиентов для приоритетной коммуникации.",
+              "confidence": 1.0
+            }
+          ],
+          "results": [
+            {
+              "result": "Модель расчета вероятности оттока клиента.",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Сегменты клиентов по уровню риска.",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Список факторов, влияющих на вероятность ухода.",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Рекомендации для удерживающих кампаний.",
+              "confidence": 1.0,
+              "measurable": false
+            }
+          ],
+          "timeline": {
+            "start_date": "2026-02-01",
+            "end_date": "2026-06-28",
+            "duration": null,
+            "confidence": 1.0
+          }
+        },
+        "monitoring": {
+          "project": {
+            "id": "P002",
+            "name": "Прогнозирование оттока клиентов для малого бизнеса",
+            "owner_name": "Андрей Романов",
+            "status": "red",
+            "priority": "critical",
+            "start_date": "2026-02-01",
+            "planned_end_date": "2026-06-28",
+            "business_goal": "Построить модель прогноза оттока и выделить клиентов для приоритетной коммуникации.",
+            "expected_result": "Модель расчета вероятности оттока клиента.\nСегменты клиентов по уровню риска.\nСписок факторов, влияющих на вероятность ухода.\nРекомендации для удерживающих кампаний."
+          },
+          "metrics": {
+            "overdue_tasks": 0,
+            "blocked_tasks": 4,
+            "delayed_milestones": 0,
+            "open_high_risks": 5,
+            "overdue_communications": 0,
+            "critical_dependencies": 1,
+            "pending_decisions": 1,
+            "budget_deviation_pct": 0.2222222222222222,
+            "details": {
+              "overdue_tasks": [],
+              "blocked_tasks": [
+                {
+                  "id": "T031",
+                  "title": "Настроить streaming pipeline транзакций",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-05-29",
+                  "actual_end_date": null,
+                  "estimated_hours": 32,
+                  "spent_hours": 33,
+                  "is_blocked": true,
+                  "blocker_reason": "Процессинг не подтвердил окно подключения",
+                  "assignee_name": "Ольга Иванова"
+                },
+                {
+                  "id": "T032",
+                  "title": "Согласовать правила блокировки high-risk операций",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-06-03",
+                  "actual_end_date": null,
+                  "estimated_hours": 29,
+                  "spent_hours": 19,
+                  "is_blocked": true,
+                  "blocker_reason": "Security запросила дополнительную модель угроз",
+                  "assignee_name": "Виктория Павлова"
+                },
+                {
+                  "id": "T033",
+                  "title": "Согласовать интеграцию с процессингом карт",
+                  "status": "Blocked",
+                  "priority": "high",
+                  "planned_due_date": "2026-06-09",
+                  "actual_end_date": null,
+                  "estimated_hours": 12,
+                  "spent_hours": 18,
+                  "is_blocked": true,
+                  "blocker_reason": "Недоступен стенд потоковой обработки",
+                  "assignee_name": "Сергей Лебедев"
+                },
+                {
+                  "id": "T034",
+                  "title": "Интегрировать витрину расследований fraud cases",
+                  "status": "Blocked",
+                  "priority": "high",
+                  "planned_due_date": "2026-06-13",
+                  "actual_end_date": null,
+                  "estimated_hours": 15,
+                  "spent_hours": 22,
+                  "is_blocked": true,
+                  "blocker_reason": "Не согласованы правила false positive review",
+                  "assignee_name": "Сергей Лебедев"
+                }
+              ],
+              "delayed_milestones": [],
+              "open_high_risks": [
+                {
+                  "id": "RK006",
+                  "risk_type": "Performance",
+                  "description": "Latency real-time decisioning превышает целевой лимит 120 мс на peak load.",
+                  "probability": 4,
+                  "impact": 5,
+                  "status": "escalated",
+                  "owner_name": "Сергей Лебедев",
+                  "mitigation_plan": "Оптимизировать feature lookup и включить circuit breaker."
+                },
+                {
+                  "id": "RK007",
+                  "risk_type": "Integration",
+                  "description": "Процессинг карт переносит окно подключения и блокирует end-to-end тесты.",
+                  "probability": 5,
+                  "impact": 4,
+                  "status": "escalated",
+                  "owner_name": "Евгений Фомин",
+                  "mitigation_plan": "Эскалировать слот подключения и подготовить stub-контур."
+                },
+                {
+                  "id": "RK008",
+                  "risk_type": "Compliance",
+                  "description": "Нужно доказать контролируемый уровень false positive для операций клиентов.",
+                  "probability": 4,
+                  "impact": 4,
+                  "status": "active",
+                  "owner_name": "Лариса Сергеева",
+                  "mitigation_plan": "Подготовить отчетность по тестовой выборке и критерии ручного разбора."
+                },
+                {
+                  "id": "RK009",
+                  "risk_type": "Security",
+                  "description": "Дополнительная модель угроз задерживает доступ к продуктивным событиям.",
+                  "probability": 3,
+                  "impact": 5,
+                  "status": "active",
+                  "owner_name": "Виктория Павлова",
+                  "mitigation_plan": "Провести threat modeling workshop и согласовать read-only доступ."
+                },
+                {
+                  "id": "RK010",
+                  "risk_type": "Resource",
+                  "description": "ML engineer перегружен задачами расследований и performance tuning.",
+                  "probability": 3,
+                  "impact": 4,
+                  "status": "mitigating",
+                  "owner_name": "Андрей Романов",
+                  "mitigation_plan": "Выделить отдельный слот на оптимизацию модели."
+                }
+              ],
+              "overdue_communications": [],
+              "critical_dependencies": [
+                {
+                  "id": "D005",
+                  "dependency_type": "approval",
+                  "depends_on": "False positive criteria",
+                  "owner_team": "Compliance",
+                  "expected_date": "2026-06-10",
+                  "status": "delayed",
+                  "criticality": "high"
+                }
+              ],
+              "pending_decisions": [
+                {
+                  "id": "DEC003",
+                  "decision_type": "pilot_scope",
+                  "description": "Запускать пилот fraud decisioning без части правил до завершения интеграции с процессингом.",
+                  "decision_owner": "Андрей Романов",
+                  "status": "pending",
+                  "decision_date": "2026-06-07"
+                }
+              ]
+            }
+          },
+          "alerts": [
+            {
+              "level": "Critical",
+              "metric": "blocked_tasks",
+              "message": "Есть заблокированные задачи: 4"
+            },
+            {
+              "level": "Warning",
+              "metric": "open_high_risks",
+              "message": "Есть открытые высокие риски: 5"
+            },
+            {
+              "level": "Critical",
+              "metric": "critical_dependencies",
+              "message": "Есть критичные незакрытые зависимости: 1"
+            },
+            {
+              "level": "Warning",
+              "metric": "pending_decisions",
+              "message": "Есть незакрытые решения: 1"
+            },
+            {
+              "level": "Warning",
+              "metric": "budget_deviation_pct",
+              "message": "Прогнозный бюджет выше плана на 22.2%"
+            }
+          ]
+        },
+        "error": null
+      },
+      {
+        "file": "project_summary_003.docx",
+        "event_type": "docx_changed",
+        "project_id": "P003",
+        "parsed_project": {
+          "project_name": "Выявление подозрительных транзакций для премиальных клиентов",
+          "goals": [
+            {
+              "goal": "Создать модель выявления подозрительных транзакций и механизм приоритизации операций для проверки.",
+              "confidence": 1.0
+            }
+          ],
+          "results": [
+            {
+              "result": "Скоринговая модель риска подозрительной транзакции.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Правила приоритизации операций для проверки.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Дашборд контроля качества антифрод-сигналов.",
+              "confidence": 0.95,
+              "measurable": true
+            },
+            {
+              "result": "Описание сценария пилотного внедрения.",
+              "confidence": 0.95,
+              "measurable": true
+            }
+          ],
+          "timeline": {
+            "start_date": "2026-03-01",
+            "end_date": "2026-05-28",
+            "duration": null,
+            "confidence": 1.0
+          }
+        },
+        "monitoring": {
+          "project": {
+            "id": "P003",
+            "name": "Выявление подозрительных транзакций для премиальных клиентов",
+            "owner_name": "Мария Громова",
+            "status": "green",
+            "priority": "high",
+            "start_date": "2026-03-01",
+            "planned_end_date": "2026-05-28",
+            "business_goal": "Создать модель выявления подозрительных транзакций и механизм приоритизации операций для проверки.",
+            "expected_result": "Скоринговая модель риска подозрительной транзакции.\nПравила приоритизации операций для проверки.\nДашборд контроля качества антифрод-сигналов.\nОписание сценария пилотного внедрения."
+          },
+          "metrics": {
+            "overdue_tasks": 0,
+            "blocked_tasks": 1,
+            "delayed_milestones": 0,
+            "open_high_risks": 0,
+            "overdue_communications": 0,
+            "critical_dependencies": 0,
+            "pending_decisions": 0,
+            "budget_deviation_pct": -0.047619047619047616,
+            "details": {
+              "overdue_tasks": [],
+              "blocked_tasks": [
+                {
+                  "id": "T059",
+                  "title": "Настроить новый onboarding клиента",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-06-16",
+                  "actual_end_date": null,
+                  "estimated_hours": 40,
+                  "spent_hours": 37,
+                  "is_blocked": true,
+                  "blocker_reason": "Ожидается финальный UX approve по onboarding",
+                  "assignee_name": "Анна Попова"
+                }
+              ],
+              "delayed_milestones": [],
+              "open_high_risks": [],
+              "overdue_communications": [],
+              "critical_dependencies": [],
+              "pending_decisions": []
+            }
+          },
+          "alerts": [
+            {
+              "level": "Critical",
+              "metric": "blocked_tasks",
+              "message": "Есть заблокированные задачи: 1"
+            }
+          ]
+        },
+        "error": null
+      },
+      {
+        "file": "project_summary_004.docx",
+        "event_type": "docx_changed",
+        "project_id": "P004",
+        "parsed_project": {
+          "project_name": "Прогнозирование потребности в наличности для зарплатных клиентов",
+          "goals": [
+            {
+              "goal": "Разработать модель прогноза спроса на наличность и рекомендовать объемы пополнения банкоматов",
+              "confidence": 1.0
+            }
+          ],
+          "results": [
+            {
+              "result": "Модель прогноза спроса на наличность",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Рекомендованные объемы пополнения по банкоматам",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Оценка экономического эффекта от оптимизации инкассации",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Отчет о качестве прогноза по регионам",
+              "confidence": 1.0,
+              "measurable": true
+            }
+          ],
+          "timeline": {
+            "start_date": "2026-04-01",
+            "end_date": "2026-07-28",
+            "duration": null,
+            "confidence": 1.0
+          }
+        },
+        "monitoring": {
+          "project": {
+            "id": "P004",
+            "name": "Прогнозирование потребности в наличности для зарплатных клиентов",
+            "owner_name": "Сергей Ковалев",
+            "status": "yellow",
+            "priority": "high",
+            "start_date": "2026-04-01",
+            "planned_end_date": "2026-07-28",
+            "business_goal": "Разработать модель прогноза спроса на наличность и рекомендовать объемы пополнения банкоматов",
+            "expected_result": "Модель прогноза спроса на наличность\nРекомендованные объемы пополнения по банкоматам\nОценка экономического эффекта от оптимизации инкассации\nОтчет о качестве прогноза по регионам"
+          },
+          "metrics": {
+            "overdue_tasks": 0,
+            "blocked_tasks": 2,
+            "delayed_milestones": 0,
+            "open_high_risks": 3,
+            "overdue_communications": 0,
+            "critical_dependencies": 1,
+            "pending_decisions": 0,
+            "budget_deviation_pct": 0.13157894736842105,
+            "details": {
+              "overdue_tasks": [],
+              "blocked_tasks": [
+                {
+                  "id": "T083",
+                  "title": "Подготовить единый payment API",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-06-05",
+                  "actual_end_date": null,
+                  "estimated_hours": 72,
+                  "spent_hours": 57,
+                  "is_blocked": true,
+                  "blocker_reason": "Вендор СБП задерживает тестовые сертификаты",
+                  "assignee_name": "Татьяна Белова"
+                },
+                {
+                  "id": "T084",
+                  "title": "Протестировать коннектор СБП",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-06-12",
+                  "actual_end_date": null,
+                  "estimated_hours": 43,
+                  "spent_hours": 46,
+                  "is_blocked": true,
+                  "blocker_reason": "PCI DSS checklist возвращен на доработку",
+                  "assignee_name": "Евгений Фомин"
+                }
+              ],
+              "delayed_milestones": [],
+              "open_high_risks": [
+                {
+                  "id": "RK014",
+                  "risk_type": "Vendor",
+                  "description": "Вендор СБП задерживает тестовые сертификаты для gateway.",
+                  "probability": 4,
+                  "impact": 4,
+                  "status": "active",
+                  "owner_name": "Сергей Ковалев",
+                  "mitigation_plan": "Эскалация через vendor manager и подготовка sandbox-mock."
+                },
+                {
+                  "id": "RK015",
+                  "risk_type": "Security",
+                  "description": "PCI DSS checklist требует дополнительного аудита хранения токенов.",
+                  "probability": 3,
+                  "impact": 5,
+                  "status": "active",
+                  "owner_name": "Виктория Павлова",
+                  "mitigation_plan": "Разделить scope аудита и вынести спорные пункты на CAB."
+                },
+                {
+                  "id": "RK016",
+                  "risk_type": "Performance",
+                  "description": "Gateway может не выдержать пиковые платежные окна без SRE-тюнинга.",
+                  "probability": 3,
+                  "impact": 4,
+                  "status": "mitigating",
+                  "owner_name": "Владислав Крылов",
+                  "mitigation_plan": "Добавить synthetic load и автоалерты по latency."
+                }
+              ],
+              "overdue_communications": [],
+              "critical_dependencies": [
+                {
+                  "id": "D008",
+                  "dependency_type": "approval",
+                  "depends_on": "PCI DSS token storage review",
+                  "owner_team": "Security",
+                  "expected_date": "2026-06-13",
+                  "status": "delayed",
+                  "criticality": "high"
+                }
+              ],
+              "pending_decisions": []
+            }
+          },
+          "alerts": [
+            {
+              "level": "Critical",
+              "metric": "blocked_tasks",
+              "message": "Есть заблокированные задачи: 2"
+            },
+            {
+              "level": "Warning",
+              "metric": "open_high_risks",
+              "message": "Есть открытые высокие риски: 3"
+            },
+            {
+              "level": "Critical",
+              "metric": "critical_dependencies",
+              "message": "Есть критичные незакрытые зависимости: 1"
+            },
+            {
+              "level": "Warning",
+              "metric": "budget_deviation_pct",
+              "message": "Прогнозный бюджет выше плана на 13.2%"
+            }
+          ]
+        },
+        "error": null
+      },
+      {
+        "file": "project_summary_005.docx",
+        "event_type": "docx_changed",
+        "project_id": "P005",
+        "parsed_project": {
+          "project_name": "Прогнозирование потребности в наличности для зарплатных клиентов",
+          "goals": [
+            {
+              "goal": "Разработать модель прогноза спроса на наличность и рекомендовать объемы пополнения банкоматов",
+              "confidence": 1.0
+            }
+          ],
+          "results": [
+            {
+              "result": "Модель прогноза спроса на наличность",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Рекомендованные объемы пополнения по банкоматам",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Оценка экономического эффекта от оптимизации инкассации",
+              "confidence": 1.0,
+              "measurable": true
+            },
+            {
+              "result": "Отчет о качестве прогноза по регионам",
+              "confidence": 1.0,
+              "measurable": true
+            }
+          ],
+          "timeline": {
+            "start_date": "2026-04-01",
+            "end_date": "2026-07-28",
+            "duration": null,
+            "confidence": 1.0
+          }
+        },
+        "monitoring": {
+          "project": {
+            "id": "P005",
+            "name": "Прогнозирование потребности в наличности для зарплатных клиентов",
+            "owner_name": "Ольга Беляева",
+            "status": "green",
+            "priority": "medium",
+            "start_date": "2026-04-01",
+            "planned_end_date": "2026-07-28",
+            "business_goal": "Разработать модель прогноза спроса на наличность и рекомендовать объемы пополнения банкоматов",
+            "expected_result": "Модель прогноза спроса на наличность\nРекомендованные объемы пополнения по банкоматам\nОценка экономического эффекта от оптимизации инкассации\nОтчет о качестве прогноза по регионам"
+          },
+          "metrics": {
+            "overdue_tasks": 0,
+            "blocked_tasks": 1,
+            "delayed_milestones": 0,
+            "open_high_risks": 1,
+            "overdue_communications": 0,
+            "critical_dependencies": 0,
+            "pending_decisions": 0,
+            "budget_deviation_pct": -0.029411764705882353,
+            "details": {
+              "overdue_tasks": [],
+              "blocked_tasks": [
+                {
+                  "id": "T109",
+                  "title": "Согласовать golden record клиента",
+                  "status": "Blocked",
+                  "priority": "critical",
+                  "planned_due_date": "2026-06-14",
+                  "actual_end_date": null,
+                  "estimated_hours": 26,
+                  "spent_hours": 19,
+                  "is_blocked": true,
+                  "blocker_reason": "Не получено подтверждение владельца данных по CRM-дублям",
+                  "assignee_name": "Михаил Зайцев"
+                }
+              ],
+              "delayed_milestones": [],
+              "open_high_risks": [
+                {
+                  "id": "RK018",
+                  "risk_type": "Data Quality",
+                  "description": "Дубликаты клиентов в CRM и DWH расходятся по ключевым атрибутам.",
+                  "probability": 3,
+                  "impact": 4,
+                  "status": "active",
+                  "owner_name": "Полина Соколова",
+                  "mitigation_plan": "Ввести confidence score для golden record и ручную валидацию топ-сегментов."
+                }
+              ],
+              "overdue_communications": [],
+              "critical_dependencies": [],
+              "pending_decisions": []
+            }
+          },
+          "alerts": [
+            {
+              "level": "Critical",
+              "metric": "blocked_tasks",
+              "message": "Есть заблокированные задачи: 1"
+            },
+            {
+              "level": "Warning",
+              "metric": "open_high_risks",
+              "message": "Есть открытые высокие риски: 1"
+            }
+          ]
+        },
+        "error": null
+      },
+      {
+        "file": "project_summary_006.docx",
+        "event_type": "docx_added",
+        "project_id": null,
+        "parsed_project": null,
+        "monitoring": null,
+        "error": "Проект P006 не найден в таблице projects. Сначала загрузи базовые проекты из CSV."
+      }
+    ]
+  },
+  "project_monitoring": {
+    "total": 5,
+    "processed": 5,
+    "failed": 0,
+    "items": [
+      {
+        "project_id": "P001",
+        "project": {
+          "id": "P001",
+          "name": "Система кредитного скоринга для физических лиц",
+          "owner_name": "Елена Морозова",
+          "status": "red",
+          "priority": "critical",
+          "start_date": "2026-01-01",
+          "planned_end_date": "2026-04-28",
+          "business_goal": "Разработать модель, которая оценивает вероятность дефолта клиента и помогает принимать кредитное решение.",
+          "expected_result": "Обученная модель расчета вероятности дефолта.\nТаблица сравнения моделей и выбранная лучшая модель.\nИнтерпретация ключевых факторов риска.\nРекомендации по внедрению в кредитный процесс.\nПодготовлены данные и описание источников.\nМодель или аналитический прототип достигает целевых метрик (ROC-AUC >= 0.75, F1-score >= 0.62).\nИтоговый отчет согласован с заказчиком."
+        },
+        "metrics": {
+          "overdue_tasks": 0,
+          "blocked_tasks": 5,
+          "delayed_milestones": 0,
+          "open_high_risks": 5,
+          "overdue_communications": 0,
+          "critical_dependencies": 2,
+          "pending_decisions": 2,
+          "budget_deviation_pct": 0.2916666666666667,
+          "details": {
+            "overdue_tasks": [],
+            "blocked_tasks": [
+              {
+                "id": "T001",
+                "title": "Получить согласование Security для скорингового API",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-06-10",
+                "actual_end_date": null,
+                "estimated_hours": 34,
+                "spent_hours": 19,
+                "is_blocked": true,
+                "blocker_reason": "Ожидается заключение Security по доступу к персональным данным",
+                "assignee_name": "Мария Кузнецова"
+              },
+              {
+                "id": "T002",
+                "title": "Согласовать витрину признаков из АБС",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-05-27",
+                "actual_end_date": null,
+                "estimated_hours": 32,
+                "spent_hours": 33,
+                "is_blocked": true,
+                "blocker_reason": "Нет подтверждения SLA от DWH",
+                "assignee_name": "Павел Никитин"
+              },
+              {
+                "id": "T003",
+                "title": "Согласовать маппинг полей CRM и кредитного конвейера",
+                "status": "Blocked",
+                "priority": "high",
+                "planned_due_date": "2026-06-04",
+                "actual_end_date": null,
+                "estimated_hours": 76,
+                "spent_hours": 61,
+                "is_blocked": true,
+                "blocker_reason": "Не выделен backend reviewer",
+                "assignee_name": "Мария Кузнецова"
+              },
+              {
+                "id": "T004",
+                "title": "Подготовить валидацию модели PD",
+                "status": "Blocked",
+                "priority": "high",
+                "planned_due_date": "2026-06-14",
+                "actual_end_date": null,
+                "estimated_hours": 38,
+                "spent_hours": 45,
+                "is_blocked": true,
+                "blocker_reason": "Не согласована схема маскирования данных",
+                "assignee_name": "Георгий Орлов"
+              },
+              {
+                "id": "T005",
+                "title": "Протестировать endpoint расчета scorecard",
+                "status": "Blocked",
+                "priority": "high",
+                "planned_due_date": "2026-06-16",
+                "actual_end_date": null,
+                "estimated_hours": 30,
+                "spent_hours": 31,
+                "is_blocked": true,
+                "blocker_reason": "Зависимость от кредитного конвейера перенесена на следующий спринт",
+                "assignee_name": "Мария Кузнецова"
+              }
+            ],
+            "delayed_milestones": [],
+            "open_high_risks": [
+              {
+                "id": "RK001",
+                "risk_type": "Security",
+                "description": "Security может не согласовать обработку персональных данных для скорингового API.",
+                "probability": 5,
+                "impact": 5,
+                "status": "escalated",
+                "owner_name": "Виктория Павлова",
+                "mitigation_plan": "Вынести модель угроз на risk committee и подготовить маскирование полей."
+              },
+              {
+                "id": "RK002",
+                "risk_type": "Resource",
+                "description": "Backend lead распределен между двумя critical-проектами и работает выше доступной емкости.",
+                "probability": 4,
+                "impact": 5,
+                "status": "active",
+                "owner_name": "Елена Морозова",
+                "mitigation_plan": "Перенести часть задач на второго backend и зафиксировать WIP limit."
+              },
+              {
+                "id": "RK003",
+                "risk_type": "Budget",
+                "description": "Прогноз бюджета превышает план из-за доработок Security и интеграций.",
+                "probability": 4,
+                "impact": 4,
+                "status": "active",
+                "owner_name": "Елена Морозова",
+                "mitigation_plan": "Согласовать scope cut и отдельный резерв на compliance-доработки."
+              },
+              {
+                "id": "RK004",
+                "risk_type": "Dependency",
+                "description": "DWH не подтвердил стабильный SLA на витрину признаков МСБ.",
+                "probability": 3,
+                "impact": 5,
+                "status": "mitigating",
+                "owner_name": "Павел Никитин",
+                "mitigation_plan": "Согласовать fallback extract и ежедневный контроль качества данных."
+              },
+              {
+                "id": "RK005",
+                "risk_type": "Data Quality",
+                "description": "Исторические признаки по части заявок МСБ неполные.",
+                "probability": 3,
+                "impact": 4,
+                "status": "active",
+                "owner_name": "Наталья Федорова",
+                "mitigation_plan": "Запустить сверку с кредитным конвейером и исключить неполные сэмплы."
+              }
+            ],
+            "overdue_communications": [],
+            "critical_dependencies": [
+              {
+                "id": "D001",
+                "dependency_type": "internal_system",
+                "depends_on": "DWH feature mart",
+                "owner_team": "Data Platform",
+                "expected_date": "2026-06-07",
+                "status": "delayed",
+                "criticality": "high"
+              },
+              {
+                "id": "D003",
+                "dependency_type": "management_decision",
+                "depends_on": "Scope cut decision",
+                "owner_team": "PMO",
+                "expected_date": "2026-06-18",
+                "status": "pending",
+                "criticality": "high"
+              }
+            ],
+            "pending_decisions": [
+              {
+                "id": "DEC001",
+                "decision_type": "scope_change",
+                "description": "Перенести часть интеграции в post-pilot, чтобы разблокировать Security review.",
+                "decision_owner": "Елена Морозова",
+                "status": "pending",
+                "decision_date": "2026-06-12"
+              },
+              {
+                "id": "DEC002",
+                "decision_type": "budget_reserve",
+                "description": "Согласовать дополнительный резерв на compliance-доработки или сократить scope пилота.",
+                "decision_owner": "Steering Committee",
+                "status": "pending",
+                "decision_date": "2026-06-13"
+              }
+            ]
+          }
+        },
+        "alerts": [
+          {
+            "level": "Critical",
+            "metric": "blocked_tasks",
+            "message": "Есть заблокированные задачи: 5"
+          },
+          {
+            "level": "Warning",
+            "metric": "open_high_risks",
+            "message": "Есть открытые высокие риски: 5"
+          },
+          {
+            "level": "Critical",
+            "metric": "critical_dependencies",
+            "message": "Есть критичные незакрытые зависимости: 2"
+          },
+          {
+            "level": "Warning",
+            "metric": "pending_decisions",
+            "message": "Есть незакрытые решения: 2"
+          },
+          {
+            "level": "Warning",
+            "metric": "budget_deviation_pct",
+            "message": "Прогнозный бюджет выше плана на 29.2%"
+          }
+        ],
+        "error": null
+      },
+      {
+        "project_id": "P002",
+        "project": {
+          "id": "P002",
+          "name": "Прогнозирование оттока клиентов для малого бизнеса",
+          "owner_name": "Андрей Романов",
+          "status": "red",
+          "priority": "critical",
+          "start_date": "2026-02-01",
+          "planned_end_date": "2026-06-28",
+          "business_goal": "Построить модель прогноза оттока и выделить клиентов для приоритетной коммуникации.",
+          "expected_result": "Модель расчета вероятности оттока клиента.\nСегменты клиентов по уровню риска.\nСписок факторов, влияющих на вероятность ухода.\nРекомендации для удерживающих кампаний."
+        },
+        "metrics": {
+          "overdue_tasks": 0,
+          "blocked_tasks": 4,
+          "delayed_milestones": 0,
+          "open_high_risks": 5,
+          "overdue_communications": 0,
+          "critical_dependencies": 1,
+          "pending_decisions": 1,
+          "budget_deviation_pct": 0.2222222222222222,
+          "details": {
+            "overdue_tasks": [],
+            "blocked_tasks": [
+              {
+                "id": "T031",
+                "title": "Настроить streaming pipeline транзакций",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-05-29",
+                "actual_end_date": null,
+                "estimated_hours": 32,
+                "spent_hours": 33,
+                "is_blocked": true,
+                "blocker_reason": "Процессинг не подтвердил окно подключения",
+                "assignee_name": "Ольга Иванова"
+              },
+              {
+                "id": "T032",
+                "title": "Согласовать правила блокировки high-risk операций",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-06-03",
+                "actual_end_date": null,
+                "estimated_hours": 29,
+                "spent_hours": 19,
+                "is_blocked": true,
+                "blocker_reason": "Security запросила дополнительную модель угроз",
+                "assignee_name": "Виктория Павлова"
+              },
+              {
+                "id": "T033",
+                "title": "Согласовать интеграцию с процессингом карт",
+                "status": "Blocked",
+                "priority": "high",
+                "planned_due_date": "2026-06-09",
+                "actual_end_date": null,
+                "estimated_hours": 12,
+                "spent_hours": 18,
+                "is_blocked": true,
+                "blocker_reason": "Недоступен стенд потоковой обработки",
+                "assignee_name": "Сергей Лебедев"
+              },
+              {
+                "id": "T034",
+                "title": "Интегрировать витрину расследований fraud cases",
+                "status": "Blocked",
+                "priority": "high",
+                "planned_due_date": "2026-06-13",
+                "actual_end_date": null,
+                "estimated_hours": 15,
+                "spent_hours": 22,
+                "is_blocked": true,
+                "blocker_reason": "Не согласованы правила false positive review",
+                "assignee_name": "Сергей Лебедев"
+              }
+            ],
+            "delayed_milestones": [],
+            "open_high_risks": [
+              {
+                "id": "RK006",
+                "risk_type": "Performance",
+                "description": "Latency real-time decisioning превышает целевой лимит 120 мс на peak load.",
+                "probability": 4,
+                "impact": 5,
+                "status": "escalated",
+                "owner_name": "Сергей Лебедев",
+                "mitigation_plan": "Оптимизировать feature lookup и включить circuit breaker."
+              },
+              {
+                "id": "RK007",
+                "risk_type": "Integration",
+                "description": "Процессинг карт переносит окно подключения и блокирует end-to-end тесты.",
+                "probability": 5,
+                "impact": 4,
+                "status": "escalated",
+                "owner_name": "Евгений Фомин",
+                "mitigation_plan": "Эскалировать слот подключения и подготовить stub-контур."
+              },
+              {
+                "id": "RK008",
+                "risk_type": "Compliance",
+                "description": "Нужно доказать контролируемый уровень false positive для операций клиентов.",
+                "probability": 4,
+                "impact": 4,
+                "status": "active",
+                "owner_name": "Лариса Сергеева",
+                "mitigation_plan": "Подготовить отчетность по тестовой выборке и критерии ручного разбора."
+              },
+              {
+                "id": "RK009",
+                "risk_type": "Security",
+                "description": "Дополнительная модель угроз задерживает доступ к продуктивным событиям.",
+                "probability": 3,
+                "impact": 5,
+                "status": "active",
+                "owner_name": "Виктория Павлова",
+                "mitigation_plan": "Провести threat modeling workshop и согласовать read-only доступ."
+              },
+              {
+                "id": "RK010",
+                "risk_type": "Resource",
+                "description": "ML engineer перегружен задачами расследований и performance tuning.",
+                "probability": 3,
+                "impact": 4,
+                "status": "mitigating",
+                "owner_name": "Андрей Романов",
+                "mitigation_plan": "Выделить отдельный слот на оптимизацию модели."
+              }
+            ],
+            "overdue_communications": [],
+            "critical_dependencies": [
+              {
+                "id": "D005",
+                "dependency_type": "approval",
+                "depends_on": "False positive criteria",
+                "owner_team": "Compliance",
+                "expected_date": "2026-06-10",
+                "status": "delayed",
+                "criticality": "high"
+              }
+            ],
+            "pending_decisions": [
+              {
+                "id": "DEC003",
+                "decision_type": "pilot_scope",
+                "description": "Запускать пилот fraud decisioning без части правил до завершения интеграции с процессингом.",
+                "decision_owner": "Андрей Романов",
+                "status": "pending",
+                "decision_date": "2026-06-07"
+              }
+            ]
+          }
+        },
+        "alerts": [
+          {
+            "level": "Critical",
+            "metric": "blocked_tasks",
+            "message": "Есть заблокированные задачи: 4"
+          },
+          {
+            "level": "Warning",
+            "metric": "open_high_risks",
+            "message": "Есть открытые высокие риски: 5"
+          },
+          {
+            "level": "Critical",
+            "metric": "critical_dependencies",
+            "message": "Есть критичные незакрытые зависимости: 1"
+          },
+          {
+            "level": "Warning",
+            "metric": "pending_decisions",
+            "message": "Есть незакрытые решения: 1"
+          },
+          {
+            "level": "Warning",
+            "metric": "budget_deviation_pct",
+            "message": "Прогнозный бюджет выше плана на 22.2%"
+          }
+        ],
+        "error": null
+      },
+      {
+        "project_id": "P003",
+        "project": {
+          "id": "P003",
+          "name": "Выявление подозрительных транзакций для премиальных клиентов",
+          "owner_name": "Мария Громова",
+          "status": "green",
+          "priority": "high",
+          "start_date": "2026-03-01",
+          "planned_end_date": "2026-05-28",
+          "business_goal": "Создать модель выявления подозрительных транзакций и механизм приоритизации операций для проверки.",
+          "expected_result": "Скоринговая модель риска подозрительной транзакции.\nПравила приоритизации операций для проверки.\nДашборд контроля качества антифрод-сигналов.\nОписание сценария пилотного внедрения."
+        },
+        "metrics": {
+          "overdue_tasks": 0,
+          "blocked_tasks": 1,
+          "delayed_milestones": 0,
+          "open_high_risks": 0,
+          "overdue_communications": 0,
+          "critical_dependencies": 0,
+          "pending_decisions": 0,
+          "budget_deviation_pct": -0.047619047619047616,
+          "details": {
+            "overdue_tasks": [],
+            "blocked_tasks": [
+              {
+                "id": "T059",
+                "title": "Настроить новый onboarding клиента",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-06-16",
+                "actual_end_date": null,
+                "estimated_hours": 40,
+                "spent_hours": 37,
+                "is_blocked": true,
+                "blocker_reason": "Ожидается финальный UX approve по onboarding",
+                "assignee_name": "Анна Попова"
+              }
+            ],
+            "delayed_milestones": [],
+            "open_high_risks": [],
+            "overdue_communications": [],
+            "critical_dependencies": [],
+            "pending_decisions": []
+          }
+        },
+        "alerts": [
+          {
+            "level": "Critical",
+            "metric": "blocked_tasks",
+            "message": "Есть заблокированные задачи: 1"
+          }
+        ],
+        "error": null
+      },
+      {
+        "project_id": "P004",
+        "project": {
+          "id": "P004",
+          "name": "Прогнозирование потребности в наличности для зарплатных клиентов",
+          "owner_name": "Сергей Ковалев",
+          "status": "yellow",
+          "priority": "high",
+          "start_date": "2026-04-01",
+          "planned_end_date": "2026-07-28",
+          "business_goal": "Разработать модель прогноза спроса на наличность и рекомендовать объемы пополнения банкоматов",
+          "expected_result": "Модель прогноза спроса на наличность\nРекомендованные объемы пополнения по банкоматам\nОценка экономического эффекта от оптимизации инкассации\nОтчет о качестве прогноза по регионам"
+        },
+        "metrics": {
+          "overdue_tasks": 0,
+          "blocked_tasks": 2,
+          "delayed_milestones": 0,
+          "open_high_risks": 3,
+          "overdue_communications": 0,
+          "critical_dependencies": 1,
+          "pending_decisions": 0,
+          "budget_deviation_pct": 0.13157894736842105,
+          "details": {
+            "overdue_tasks": [],
+            "blocked_tasks": [
+              {
+                "id": "T083",
+                "title": "Подготовить единый payment API",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-06-05",
+                "actual_end_date": null,
+                "estimated_hours": 72,
+                "spent_hours": 57,
+                "is_blocked": true,
+                "blocker_reason": "Вендор СБП задерживает тестовые сертификаты",
+                "assignee_name": "Татьяна Белова"
+              },
+              {
+                "id": "T084",
+                "title": "Протестировать коннектор СБП",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-06-12",
+                "actual_end_date": null,
+                "estimated_hours": 43,
+                "spent_hours": 46,
+                "is_blocked": true,
+                "blocker_reason": "PCI DSS checklist возвращен на доработку",
+                "assignee_name": "Евгений Фомин"
+              }
+            ],
+            "delayed_milestones": [],
+            "open_high_risks": [
+              {
+                "id": "RK014",
+                "risk_type": "Vendor",
+                "description": "Вендор СБП задерживает тестовые сертификаты для gateway.",
+                "probability": 4,
+                "impact": 4,
+                "status": "active",
+                "owner_name": "Сергей Ковалев",
+                "mitigation_plan": "Эскалация через vendor manager и подготовка sandbox-mock."
+              },
+              {
+                "id": "RK015",
+                "risk_type": "Security",
+                "description": "PCI DSS checklist требует дополнительного аудита хранения токенов.",
+                "probability": 3,
+                "impact": 5,
+                "status": "active",
+                "owner_name": "Виктория Павлова",
+                "mitigation_plan": "Разделить scope аудита и вынести спорные пункты на CAB."
+              },
+              {
+                "id": "RK016",
+                "risk_type": "Performance",
+                "description": "Gateway может не выдержать пиковые платежные окна без SRE-тюнинга.",
+                "probability": 3,
+                "impact": 4,
+                "status": "mitigating",
+                "owner_name": "Владислав Крылов",
+                "mitigation_plan": "Добавить synthetic load и автоалерты по latency."
+              }
+            ],
+            "overdue_communications": [],
+            "critical_dependencies": [
+              {
+                "id": "D008",
+                "dependency_type": "approval",
+                "depends_on": "PCI DSS token storage review",
+                "owner_team": "Security",
+                "expected_date": "2026-06-13",
+                "status": "delayed",
+                "criticality": "high"
+              }
+            ],
+            "pending_decisions": []
+          }
+        },
+        "alerts": [
+          {
+            "level": "Critical",
+            "metric": "blocked_tasks",
+            "message": "Есть заблокированные задачи: 2"
+          },
+          {
+            "level": "Warning",
+            "metric": "open_high_risks",
+            "message": "Есть открытые высокие риски: 3"
+          },
+          {
+            "level": "Critical",
+            "metric": "critical_dependencies",
+            "message": "Есть критичные незакрытые зависимости: 1"
+          },
+          {
+            "level": "Warning",
+            "metric": "budget_deviation_pct",
+            "message": "Прогнозный бюджет выше плана на 13.2%"
+          }
+        ],
+        "error": null
+      },
+      {
+        "project_id": "P005",
+        "project": {
+          "id": "P005",
+          "name": "Прогнозирование потребности в наличности для зарплатных клиентов",
+          "owner_name": "Ольга Беляева",
+          "status": "green",
+          "priority": "medium",
+          "start_date": "2026-04-01",
+          "planned_end_date": "2026-07-28",
+          "business_goal": "Разработать модель прогноза спроса на наличность и рекомендовать объемы пополнения банкоматов",
+          "expected_result": "Модель прогноза спроса на наличность\nРекомендованные объемы пополнения по банкоматам\nОценка экономического эффекта от оптимизации инкассации\nОтчет о качестве прогноза по регионам"
+        },
+        "metrics": {
+          "overdue_tasks": 0,
+          "blocked_tasks": 1,
+          "delayed_milestones": 0,
+          "open_high_risks": 1,
+          "overdue_communications": 0,
+          "critical_dependencies": 0,
+          "pending_decisions": 0,
+          "budget_deviation_pct": -0.029411764705882353,
+          "details": {
+            "overdue_tasks": [],
+            "blocked_tasks": [
+              {
+                "id": "T109",
+                "title": "Согласовать golden record клиента",
+                "status": "Blocked",
+                "priority": "critical",
+                "planned_due_date": "2026-06-14",
+                "actual_end_date": null,
+                "estimated_hours": 26,
+                "spent_hours": 19,
+                "is_blocked": true,
+                "blocker_reason": "Не получено подтверждение владельца данных по CRM-дублям",
+                "assignee_name": "Михаил Зайцев"
+              }
+            ],
+            "delayed_milestones": [],
+            "open_high_risks": [
+              {
+                "id": "RK018",
+                "risk_type": "Data Quality",
+                "description": "Дубликаты клиентов в CRM и DWH расходятся по ключевым атрибутам.",
+                "probability": 3,
+                "impact": 4,
+                "status": "active",
+                "owner_name": "Полина Соколова",
+                "mitigation_plan": "Ввести confidence score для golden record и ручную валидацию топ-сегментов."
+              }
+            ],
+            "overdue_communications": [],
+            "critical_dependencies": [],
+            "pending_decisions": []
+          }
+        },
+        "alerts": [
+          {
+            "level": "Critical",
+            "metric": "blocked_tasks",
+            "message": "Есть заблокированные задачи: 1"
+          },
+          {
+            "level": "Warning",
+            "metric": "open_high_risks",
+            "message": "Есть открытые высокие риски: 1"
+          }
+        ],
+        "error": null
+      }
+    ]
+  }
+}

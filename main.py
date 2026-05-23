@@ -1,186 +1,148 @@
-import os
+from __future__ import annotations
+
 import json
-from typing import Any
+from datetime import date
+from pathlib import Path
 
-from dotenv import load_dotenv
-from openai import OpenAI
-from pydantic import BaseModel, Field
-
-
-load_dotenv()
-
-client = OpenAI(
-    api_key=os.getenv("AI_TOKEN"),
-    base_url=os.getenv("AI_URL"),
+from agents.project_control_graph import (
+    DocxEventType,
+    ProjectControlData,
+    build_project_control_graph,
 )
+from backend.app.database.models import Base
+from backend.app.database.session import create_engine_from_env, create_session_factory
 
 
-class ProjectAnalysisResult(BaseModel):
-    reasoning: str = Field(description="Краткое обоснование вывода")
-    project_goal: str = Field(description="Основная цель проекта")
-    budget: str = Field(description="Бюджет текущего проекта")
-    confidence: int = Field(ge=0, le=100, description="Уверенность 0-100")
+DOCX_DIR = Path("data/project_documents")
+OUTPUT_FILE = Path("data/agents_json/batch_output.json")
+PER_FILE_OUTPUT_DIR = Path("data/per_file_json")
+MONITORING_OUTPUT_FILE = Path("data/agents_json/project_monitoring_output.json")
 
 
-def get_response_format() -> dict[str, Any]:
-    schema = ProjectAnalysisResult.model_json_schema()
-    schema["additionalProperties"] = False
-
-    return {
-        "type": "json_schema",
-        "json_schema": {
-            "name": "project_analysis_result",
-            "strict": True,
-            "schema": schema,
-        },
-    }
-
-
-SYSTEM_PROMPT = """
-You are an AI agent for project documentation analysis.
-
-Your task:
-1. Analyze the provided project document.
-2. Extract the main project goal.
-3. Extract the budget of the current project.
-4. Provide a short reasoning.
-5. Return the result strictly according to the JSON schema.
-
-Rules:
-- Always respond in Russian.
-- Return only valid JSON.
-- Do not use markdown.
-- Do not invent information.
-- If information is missing, return "не найдено".
-- Do not confuse the current project budget with budgets of old pilots or related initiatives.
-- Extract the budget as accurately as possible.
-- Keep the project goal concise and meaningful.
-- confidence must reflect extraction certainty from 0 to 100.
-"""
-
-
-def call_llm(messages: list[dict[str, str]]) -> str:
-    response = client.chat.completions.create(
-        model="gpt-5.4-mini",
-        messages=messages,
-        temperature=0,
-        response_format=get_response_format(),
+def get_docx_files(folder: Path) -> list[Path]:
+    files = sorted(
+        file_path
+        for file_path in folder.glob("*.docx")
+        if not file_path.name.startswith("~$")
     )
-
-    content = response.choices[0].message.content
-    if not content:
-        raise RuntimeError("Модель вернула пустой ответ")
-
-    return content
+    if not files:
+        raise FileNotFoundError(f"В папке нет DOCX-файлов: {folder}")
+    return files
 
 
-def query(document: str, max_attempts: int = 3) -> ProjectAnalysisResult:
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": document},
-    ]
+def json_default(value: object) -> str:
+    if isinstance(value, date):
+        return value.isoformat()
+    return str(value)
 
-    last_error: Exception | None = None
-    last_content: str | None = None
 
-    for _ in range(max_attempts):
-        try:
-            last_content = call_llm(messages)
-            return ProjectAnalysisResult.model_validate_json(last_content)
+def detect_docx_event(file_path: Path) -> DocxEventType:
+    parsed_json_path = PER_FILE_OUTPUT_DIR / f"{file_path.stem}.json"
+    if parsed_json_path.exists():
+        return "docx_changed"
+    return "docx_added"
 
-        except Exception as e:
-            last_error = e
 
-            messages.append({
-                "role": "assistant",
-                "content": last_content or "",
-            })
-
-            messages.append({
-                "role": "user",
-                "content": (
-                    "Previous response failed validation.\n\n"
-                    f"Error:\n{e}\n\n"
-                    "Return again only valid JSON according to the schema."
-                ),
-            })
-
-    raise RuntimeError(
-        f"Не удалось получить валидный JSON после {max_attempts} попыток"
-    ) from last_error
+def save_json(path: Path, payload: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, default=json_default) + "\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> None:
-    document = """ПРОЕКТНАЯ ЗАПИСКА № БК-42/17
+    files = get_docx_files(DOCX_DIR)
+    event_results = []
+    monitoring_results = []
+    engine = create_engine_from_env()
+    Base.metadata.create_all(engine)
+    session_factory = create_session_factory(engine)
+    graph = build_project_control_graph(session_factory=session_factory)
 
-Дата подготовки: 14.05.2026
-Подразделение: Департамент цифровой трансформации
-Куратор: Управление операционной эффективности
+    print("Обработка DOCX-событий через LangGraph")
+    for index, file_path in enumerate(files, start=1):
+        event_type = detect_docx_event(file_path)
+        print(f"[{index}/{len(files)}] {event_type}: {file_path.name}")
 
-1. Общий контекст
+        try:
+            result = graph.invoke(
+                ProjectControlData(
+                    event_type=event_type,
+                    file_path=str(file_path),
+                ).model_dump()
+            )
+            parsed_project = result.get("parsed_project")
+            monitoring = result.get("monitoring")
+            project_id = result.get("project_id")
 
-В рамках стратегической инициативы банка на 2026–2027 годы рассматривается несколько направлений развития внутренних цифровых сервисов. Среди них: оптимизация процессов согласования договоров, обновление клиентских анкет, развитие BI-витрин для продуктовых команд, а также автоматизация контроля проектных портфелей.
+            if parsed_project:
+                save_json(PER_FILE_OUTPUT_DIR / f"{file_path.stem}.json", parsed_project)
+            if monitoring:
+                monitoring_results.append(
+                    {
+                        "project_id": project_id,
+                        "project": monitoring["project"],
+                        "metrics": monitoring["metrics"],
+                        "alerts": monitoring["alerts"],
+                        "error": None,
+                    }
+                )
 
-По результатам совещания от 07.04.2026 было отмечено, что текущая нагрузка на руководителей проектов выросла на 31%, при этом количество параллельно сопровождаемых инициатив увеличилось с 8 до 15 на одного руководителя. Отдельно обсуждалась необходимость улучшения прозрачности проектных статусов, однако данная тема не является самостоятельной целью текущего проекта.
+            event_results.append(
+                {
+                    "file": file_path.name,
+                    "event_type": event_type,
+                    "project_id": project_id,
+                    "parsed_project": parsed_project,
+                    "monitoring": monitoring,
+                    "error": None,
+                }
+            )
+        except Exception as exc:
+            print(exc)
+            event_results.append(
+                {
+                    "file": file_path.name,
+                    "event_type": event_type,
+                    "project_id": None,
+                    "parsed_project": None,
+                    "monitoring": None,
+                    "error": str(exc),
+                }
+            )
 
-2. Предпосылки
+    failed = sum(1 for item in event_results if item["error"])
+    monitoring_failed = sum(1 for item in monitoring_results if item["error"])
+    payload = {
+        "docx_events": {
+            "source": str(DOCX_DIR),
+            "total": len(event_results),
+            "processed": len(event_results) - failed,
+            "failed": failed,
+            "items": event_results,
+        },
+        "project_monitoring": {
+            "total": len(monitoring_results),
+            "processed": len(monitoring_results) - monitoring_failed,
+            "failed": monitoring_failed,
+            "items": monitoring_results,
+        },
+    }
 
-В 2025 году банк уже запускал пилот по автоматической классификации задач в task tracker. Бюджет пилота составлял 3,2 млн ₽, но он был закрыт после завершения исследования применимости технологии. Также в архиве присутствует смежный проект по построению витрины проектных KPI с плановым бюджетом 6,8 млн ₽.
+    save_json(OUTPUT_FILE, payload)
+    save_json(MONITORING_OUTPUT_FILE, monitoring_results)
 
-Текущий документ относится к новой инициативе и не должен смешиваться с указанными выше пилотами.
-
-3. Описание инициативы
-
-Проект направлен на создание цифрового помощника руководителя проекта, который будет автоматически анализировать данные из task tracker, проектных планов, бюджетных таблиц, реестров рисков и коммуникационных карт, выявлять отклонения по срокам, бюджету и ресурсам, а также формировать рекомендации по снижению рисков для руководителя проекта.
-
-Ключевая цель проекта: разработать и внедрить AI-инструмент для автоматизации мониторинга состояния банковских проектов и поддержки руководителей проектов в принятии управленческих решений.
-
-4. Ожидаемые эффекты
-
-Ожидается снижение времени ручной подготовки проектной отчетности на 40–50%, повышение своевременности выявления рисков и уменьшение количества незамеченных отклонений по критическим инициативам.
-
-Дополнительные эффекты:
-- ускорение подготовки weekly status report;
-- автоматическое выявление просроченных задач;
-- обнаружение перерасхода бюджета;
-- формирование кратких executive summary;
-- снижение нагрузки на PMO.
-
-5. Финансовые параметры
-
-Предварительная оценка затрат на инфраструктуру составляет 1,4 млн ₽.
-Оценка затрат на интеграции с внутренними системами — 2,1 млн ₽.
-Резерв на доработки после пилота — 900 тыс. ₽.
-Фонд оплаты внешней команды разработки — 5,6 млн ₽.
-Внутренние трудозатраты сотрудников банка учитываются отдельно и не входят в бюджет проекта.
-
-Итоговый утвержденный бюджет текущего проекта составляет 10 млн ₽, включая разработку, интеграции, тестирование, инфраструктуру и пилотное внедрение.
-
-6. Ограничения
-
-Проект не предполагает замену существующей системы управления проектами. Инструмент должен работать как аналитический слой поверх существующих источников данных.
-
-7. Риски
-
-Основные риски:
-- неполнота исторических данных;
-- различия в форматах ведения проектов;
-- ограничение доступа к бюджетной информации;
-- сопротивление пользователей;
-- необходимость согласования с ИБ.
-
-8. Коммуникации
-
-Еженедельные статусы предоставляются в PMO по пятницам до 16:00.
-Демо для бизнес-заказчиков запланировано на 28.06.2026.
-Отдельный бюджет на коммуникационную кампанию не выделяется.
-
-9. Примечание
-
-Все суммы в документе указаны справочно, кроме утвержденного бюджета текущего проекта в разделе 5."""
-    result = query(document)
-
-    print(result.model_dump_json(indent=2, ensure_ascii=False))
+    print(
+        f"DOCX-события: {payload['docx_events']['processed']}/{payload['docx_events']['total']} обработано"
+    )
+    print(
+        "Мониторинг: "
+        f"{payload['project_monitoring']['processed']}/{payload['project_monitoring']['total']} проектов обработано"
+    )
+    print(f"Общий JSON: {OUTPUT_FILE}")
+    print(f"JSON мониторинга: {MONITORING_OUTPUT_FILE}")
+    print(f"JSON по файлам: {PER_FILE_OUTPUT_DIR}")
 
 
 if __name__ == "__main__":

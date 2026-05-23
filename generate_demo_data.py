@@ -210,6 +210,80 @@ CHANGE_REQUEST_COLUMNS = [
     "status",
 ]
 
+TASK_DEPENDENCY_COLUMNS = [
+    "id",
+    "project_id",
+    "task_id",
+    "depends_on_task_id",
+    "dependency_type",
+    "is_critical_path",
+    "lag_days",
+    "reason",
+]
+
+BUDGET_ITEM_COLUMNS = [
+    "id",
+    "project_id",
+    "budget_id",
+    "category",
+    "item_name",
+    "planned_amount",
+    "actual_amount",
+    "forecast_amount",
+    "owner_team",
+]
+
+COMMUNICATION_MESSAGE_COLUMNS = [
+    "id",
+    "project_id",
+    "communication_id",
+    "message_time",
+    "sender_team",
+    "recipient_team",
+    "channel",
+    "message_type",
+    "status",
+    "summary",
+    "linked_task_id",
+    "is_escalation",
+]
+
+DEPENDENCY_COLUMNS = [
+    "id",
+    "project_id",
+    "dependency_type",
+    "depends_on",
+    "owner_team",
+    "expected_date",
+    "status",
+    "criticality",
+    "linked_task_id",
+]
+
+DECISION_COLUMNS = [
+    "id",
+    "project_id",
+    "decision_date",
+    "decision_type",
+    "description",
+    "decision_owner",
+    "status",
+    "linked_milestone_id",
+]
+
+CHANGE_REQUEST_COLUMNS = [
+    "id",
+    "project_id",
+    "request_date",
+    "requested_by",
+    "change_type",
+    "description",
+    "impact_scope",
+    "impact_budget",
+    "impact_days",
+    "status",
+]
+
 
 def iso(value: date | None) -> str:
     return value.isoformat() if value else ""
@@ -1152,6 +1226,459 @@ def make_task_comments(
                 "source_system": "tasktracker",
             }
         )
+    return rows
+
+
+def make_dependencies(tasks_by_project: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    specs = [
+        (
+            "P001",
+            "internal_system",
+            "DWH feature mart",
+            "Data Platform",
+            d(2026, 6, 7),
+            "delayed",
+            "high",
+            task_id(tasks_by_project, "P001", 2),
+        ),
+        (
+            "P001",
+            "approval",
+            "Security approval",
+            "Security",
+            d(2026, 6, 5),
+            "blocked",
+            "critical",
+            task_id(tasks_by_project, "P001", 1),
+        ),
+        (
+            "P001",
+            "management_decision",
+            "Scope cut decision",
+            "PMO",
+            d(2026, 6, 18),
+            "pending",
+            "high",
+            task_id(tasks_by_project, "P001", 9),
+        ),
+        (
+            "P002",
+            "internal_system",
+            "Card processing stream",
+            "Card Processing",
+            d(2026, 6, 3),
+            "blocked",
+            "critical",
+            task_id(tasks_by_project, "P002", 1),
+        ),
+        (
+            "P002",
+            "approval",
+            "False positive criteria",
+            "Compliance",
+            d(2026, 6, 10),
+            "delayed",
+            "high",
+            task_id(tasks_by_project, "P002", 8),
+        ),
+        (
+            "P003",
+            "release_window",
+            "Pilot release slot",
+            "Release Management",
+            d(2026, 6, 19),
+            "pending",
+            "medium",
+            task_id(tasks_by_project, "P003", 10),
+        ),
+        (
+            "P004",
+            "vendor",
+            "SBP test certificates",
+            "SBP Vendor",
+            d(2026, 6, 8),
+            "delayed",
+            "critical",
+            task_id(tasks_by_project, "P004", 1),
+        ),
+        (
+            "P004",
+            "approval",
+            "PCI DSS token storage review",
+            "Security",
+            d(2026, 6, 13),
+            "delayed",
+            "high",
+            task_id(tasks_by_project, "P004", 2),
+        ),
+        (
+            "P005",
+            "data_owner",
+            "CRM duplicate ownership",
+            "Data Owners",
+            d(2026, 6, 14),
+            "responded",
+            "medium",
+            task_id(tasks_by_project, "P005", 2),
+        ),
+        (
+            "P005",
+            "approval",
+            "Profile 360 access matrix",
+            "Compliance",
+            d(2026, 6, 17),
+            "pending",
+            "medium",
+            task_id(tasks_by_project, "P005", 9),
+        ),
+    ]
+
+    rows = []
+    for idx, (project_id, dependency_type, depends_on, owner_team, expected_date, status, criticality, linked_task_id) in enumerate(
+        specs,
+        start=1,
+    ):
+        rows.append(
+            {
+                "id": f"D{idx:03d}",
+                "project_id": project_id,
+                "dependency_type": dependency_type,
+                "depends_on": depends_on,
+                "owner_team": owner_team,
+                "expected_date": iso(expected_date),
+                "status": status,
+                "criticality": criticality,
+                "linked_task_id": linked_task_id,
+            }
+        )
+    return rows
+
+
+def make_decisions(milestones: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    specs = [
+        (
+            "P001",
+            d(2026, 6, 12),
+            "scope_change",
+            "Перенести часть интеграции в post-pilot, чтобы разблокировать Security review.",
+            "Елена Морозова",
+            "pending",
+            find_id(milestones, project_id="P001", name="Security review и интеграция"),
+        ),
+        (
+            "P001",
+            d(2026, 6, 13),
+            "budget_reserve",
+            "Согласовать дополнительный резерв на compliance-доработки или сократить scope пилота.",
+            "Steering Committee",
+            "pending",
+            find_id(milestones, project_id="P001", name="Пилот в кредитном конвейере"),
+        ),
+        (
+            "P002",
+            d(2026, 6, 7),
+            "pilot_scope",
+            "Запускать пилот fraud decisioning без части правил до завершения интеграции с процессингом.",
+            "Андрей Романов",
+            "pending",
+            find_id(milestones, project_id="P002", name="Интеграция с процессингом"),
+        ),
+        (
+            "P003",
+            d(2026, 6, 18),
+            "release_go",
+            "Подтвердить окно pilot release после расширенного регрессионного прогона.",
+            "Артур Комаров",
+            "approved",
+            find_id(milestones, project_id="P003", name="Pilot release"),
+        ),
+        (
+            "P004",
+            d(2026, 6, 14),
+            "vendor_escalation",
+            "Эскалировать задержку сертификатов СБП через vendor manager.",
+            "Сергей Ковалев",
+            "approved",
+            find_id(milestones, project_id="P004", name="СБП и acquiring adapters"),
+        ),
+        (
+            "P005",
+            d(2026, 6, 17),
+            "data_governance",
+            "Зафиксировать владельца правил дедупликации и критерии качества golden record.",
+            "Ольга Беляева",
+            "approved",
+            find_id(milestones, project_id="P005", name="Golden record"),
+        ),
+    ]
+
+    rows = []
+    for idx, (project_id, decision_date, decision_type, description, owner, status, milestone_id) in enumerate(
+        specs,
+        start=1,
+    ):
+        rows.append(
+            {
+                "id": f"DEC{idx:03d}",
+                "project_id": project_id,
+                "decision_date": iso(decision_date),
+                "decision_type": decision_type,
+                "description": description,
+                "decision_owner": owner,
+                "status": status,
+                "linked_milestone_id": milestone_id,
+            }
+        )
+    return rows
+
+
+def make_change_requests() -> list[dict[str, Any]]:
+    specs = [
+        (
+            "P001",
+            d(2026, 6, 12),
+            "Security",
+            "compliance_scope",
+            "Добавить расширенную модель угроз и дополнительные проверки маскирования данных.",
+            "medium",
+            8_000_000,
+            14,
+            "under_review",
+        ),
+        (
+            "P001",
+            d(2026, 6, 13),
+            "Core Platform",
+            "integration_scope",
+            "Перенести часть интеграционных сценариев кредитного конвейера в post-pilot.",
+            "high",
+            -3_000_000,
+            -6,
+            "proposed",
+        ),
+        (
+            "P002",
+            d(2026, 6, 7),
+            "Fraud Platform",
+            "performance_tuning",
+            "Добавить отдельный спринт на оптимизацию feature lookup до целевых 120 мс.",
+            "medium",
+            4_000_000,
+            8,
+            "under_review",
+        ),
+        (
+            "P004",
+            d(2026, 6, 14),
+            "Payments",
+            "vendor_scope",
+            "Закупить дополнительные vendor-сертификаты и расширить sandbox-mock для gateway.",
+            "low",
+            4_000_000,
+            5,
+            "approved",
+        ),
+        (
+            "P005",
+            d(2026, 6, 17),
+            "CRM Analytics",
+            "data_quality",
+            "Добавить ручную проверку топ-сегментов после дедупликации golden record.",
+            "low",
+            1_000_000,
+            2,
+            "approved",
+        ),
+    ]
+
+    rows = []
+    for idx, (project_id, request_date, requested_by, change_type, description, scope, budget, days, status) in enumerate(
+        specs,
+        start=1,
+    ):
+        rows.append(
+            {
+                "id": f"CR{idx:03d}",
+                "project_id": project_id,
+                "request_date": iso(request_date),
+                "requested_by": requested_by,
+                "change_type": change_type,
+                "description": description,
+                "impact_scope": scope,
+                "impact_budget": budget,
+                "impact_days": days,
+                "status": status,
+            }
+        )
+    return rows
+
+
+def make_task_dependencies(tasks_by_project: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    specs = [
+        ("P001", 5, 1, "blocks", True, 1, "Security approval is required before integration and pilot activities."),
+        ("P001", 6, 2, "blocks", True, 0, "DWH SLA confirmation is needed before feature validation."),
+        ("P001", 9, 4, "requires", False, 2, "Rollback procedure depends on validated model documentation."),
+        ("P002", 4, 1, "blocks", True, 1, "Integration testing waits for the processing window."),
+        ("P002", 5, 2, "blocks", True, 1, "Feature store tuning depends on threat model approval."),
+        ("P002", 6, 4, "blocks", True, 0, "Latency optimization depends on a stable processing adapter."),
+        ("P003", 6, 1, "related", False, 1, "Mobile onboarding should align with UX approval."),
+        ("P003", 8, 6, "blocks", False, 0, "Regression package depends on the stabilized client flow."),
+        ("P004", 4, 1, "blocks", True, 1, "Payment routing depends on vendor certificate delivery."),
+        ("P004", 8, 2, "blocks", True, 2, "Load testing depends on a completed PCI DSS checklist."),
+        ("P005", 4, 1, "blocks", True, 1, "Golden record mapping depends on deduplication rules."),
+        ("P005", 8, 4, "related", False, 0, "Cross-sell segments depend on stable profile quality."),
+    ]
+
+    rows = []
+    for idx, (project_id, task_number, depends_on_number, dependency_type, is_critical, lag_days, reason) in enumerate(
+            specs, start=1):
+        rows.append(
+            {
+                "id": f"TD{idx:03d}",
+                "project_id": project_id,
+                "task_id": task_id(tasks_by_project, project_id, task_number),
+                "depends_on_task_id": task_id(tasks_by_project, project_id, depends_on_number),
+                "dependency_type": dependency_type,
+                "is_critical_path": is_critical,
+                "lag_days": lag_days,
+                "reason": reason,
+            }
+        )
+    return rows
+
+
+def make_budget_line_items(budgets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    budget_id = {row["project_id"]: row["id"] for row in budgets}
+    specs = [
+        ("P001", "Engineering", "Model development", "Risk Models", 10_000_000, 8_500_000, 11_000_000),
+        ("P001", "Integration", "Core Platform integration", "Core Platform", 14_000_000, 12_000_000, 18_000_000),
+        ("P001", "Compliance", "Security and approvals", "Security", 16_000_000, 13_000_000, 20_000_000),
+        ("P001", "Testing", "Pilot rollout", "PMO", 8_000_000, 8_000_000, 13_000_000),
+        ("P002", "Engineering", "Streaming core", "Fraud Platform", 20_000_000, 18_000_000, 24_000_000),
+        ("P002", "Integration", "Card processing adapter", "Payments", 18_000_000, 16_000_000, 20_000_000),
+        ("P002", "Modeling", "Feature store and scoring", "Risk Models", 20_000_000, 14_000_000, 22_000_000),
+        ("P002", "Compliance", "UAT and sign-off", "Compliance", 14_000_000, 16_000_000, 22_000_000),
+        ("P003", "UX", "Mobile UX and design", "Mobile", 10_000_000, 8_000_000, 9_000_000),
+        ("P003", "Product", "Client scenarios", "Mobile", 10_000_000, 7_000_000, 8_000_000),
+        ("P003", "Analytics", "Event tracking", "CRM Analytics", 12_000_000, 9_000_000, 12_000_000),
+        ("P003", "Release", "Stabilization", "Quality", 10_000_000, 5_500_000, 11_000_000),
+        ("P004", "Engineering", "Gateway core", "Payments", 10_000_000, 9_000_000, 11_000_000),
+        ("P004", "Integration", "SBP and acquiring adapters", "Payments", 12_000_000, 8_000_000, 13_000_000),
+        ("P004", "Security", "PCI DSS workstream", "Security", 8_000_000, 7_000_000, 9_000_000),
+        ("P004", "Observability", "Load testing and monitoring", "Platform", 8_000_000, 7_000_000, 10_000_000),
+        ("P005", "Data Quality", "Golden record and dedupe", "CRM Analytics", 9_000_000, 6_000_000, 8_000_000),
+        ("P005", "Engineering", "CRM profile API", "CRM Platform", 9_000_000, 6_000_000, 8_000_000),
+        ("P005", "Governance", "Data quality controls", "Data Platform", 8_000_000, 5_000_000, 8_000_000),
+        ("P005", "Rollout", "Pilot rollout", "Sales", 8_000_000, 5_500_000, 9_000_000),
+    ]
+
+    rows = []
+    for idx, (project_id, category, item_name, owner_team, planned_amount, actual_amount, forecast_amount) in enumerate(specs, start=1):
+        rows.append(
+            {
+                "id": f"BI{idx:03d}",
+                "project_id": project_id,
+                "budget_id": budget_id[project_id],
+                "category": category,
+                "item_name": item_name,
+                "planned_amount": planned_amount,
+                "actual_amount": actual_amount,
+                "forecast_amount": forecast_amount,
+                "owner_team": owner_team,
+            }
+        )
+    return rows
+
+
+def make_communication_messages(communications: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    next_id = 1
+    for communication in communications:
+        project_id = communication["project_id"]
+        comm_id = communication["id"]
+        topic = communication["topic"]
+        channel = communication["channel"]
+        from_team = communication["from_team"]
+        to_team = communication["to_team"]
+        last_date = parse_date(communication["last_message_date"])
+        response_date = parse_date(communication["expected_response_date"])
+        linked_task_id = communication["linked_task_id"]
+        ensure(last_date is not None, f"Communication {comm_id} has no last_message_date")
+        ensure(response_date is not None, f"Communication {comm_id} has no expected_response_date")
+
+        rows.append(
+            {
+                "id": f"CM{next_id:03d}",
+                "project_id": project_id,
+                "communication_id": comm_id,
+                "message_time": iso_dt(dt(last_date.year, last_date.month, last_date.day, 9, 15)),
+                "sender_team": from_team,
+                "recipient_team": to_team,
+                "channel": channel,
+                "message_type": "request",
+                "status": "sent",
+                "summary": f"Первичный запрос по теме: {topic}",
+                "linked_task_id": linked_task_id,
+                "is_escalation": False,
+            }
+        )
+        next_id += 1
+
+        if communication["status"] == "responded":
+            sender_team, recipient_team, message_type, status, summary, escalation = (
+                to_team,
+                from_team,
+                "response",
+                "replied",
+                f"Ответ по теме: {topic}",
+                False,
+            )
+        elif communication["status"] == "escalated":
+            sender_team, recipient_team, message_type, status, summary, escalation = (
+                "PMO",
+                to_team,
+                "escalation",
+                "escalated",
+                f"Эскалация по теме: {topic}",
+                True,
+            )
+        elif communication["status"] == "delayed":
+            sender_team, recipient_team, message_type, status, summary, escalation = (
+                from_team,
+                to_team,
+                "reminder",
+                "waiting",
+                f"Напоминание по теме: {topic}",
+                False,
+            )
+        else:
+            sender_team, recipient_team, message_type, status, summary, escalation = (
+                from_team,
+                to_team,
+                "follow_up",
+                "waiting",
+                f"Фоллоу-ап по теме: {topic}",
+                False,
+            )
+
+        rows.append(
+            {
+                "id": f"CM{next_id:03d}",
+                "project_id": project_id,
+                "communication_id": comm_id,
+                "message_time": iso_dt(dt(response_date.year, response_date.month, response_date.day, 15, 30)),
+                "sender_team": sender_team,
+                "recipient_team": recipient_team,
+                "channel": channel,
+                "message_type": message_type,
+                "status": status,
+                "summary": summary,
+                "linked_task_id": linked_task_id,
+                "is_escalation": escalation,
+            }
+        )
+        next_id += 1
+
     return rows
 
 
