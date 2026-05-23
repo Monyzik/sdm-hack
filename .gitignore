@@ -44,3 +44,7 @@ infra/postgres/data/**
 pgdata/
 postgres-data/
 .postgres-data/
+
+data/agents_json/*
+data/per_file_json/*
+
