@@ -3,43 +3,43 @@
   "goals": [
     {
       "goal": "Разработать модель, которая оценивает вероятность дефолта клиента и помогает принимать кредитное решение.",
-      "confidence": 0.95
+      "confidence": 1.0
     }
   ],
   "results": [
     {
       "result": "Обученная модель расчета вероятности дефолта.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Таблица сравнения моделей и выбранная лучшая модель.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Интерпретация ключевых факторов риска.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Рекомендации по внедрению в кредитный процесс.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Подготовлены данные и описание источников.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Модель или аналитический прототип достигает целевых метрик (ROC-AUC >= 0.75, F1-score >= 0.62).",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Итоговый отчет согласован с заказчиком.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     }
   ],
@@ -47,6 +47,6 @@
     "start_date": "2026-01-01",
     "end_date": "2026-04-28",
     "duration": "4 месяца",
-    "confidence": 0.95
+    "confidence": 1.0
   }
 }

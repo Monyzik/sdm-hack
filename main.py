@@ -85,6 +85,8 @@ def main() -> None:
                         "project": monitoring["project"],
                         "metrics": monitoring["metrics"],
                         "alerts": monitoring["alerts"],
+                        "analysis": monitoring["analysis"],
+                        "notification_draft": monitoring["notification_draft"],
                         "error": None,
                     }
                 )

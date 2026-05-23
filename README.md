@@ -36,7 +36,7 @@ python generate_demo_data.py
 docker compose up -d postgres
 ```
 
-4. Создать таблицы:
+4. Создать ORM-таблицы вручную, если нужно только подготовить схему:
 
 ```bash
 python -m backend.app.database.init_db --drop-existing
@@ -90,8 +90,8 @@ curl "http://localhost:8000/api/v1/summaries/projects/P001?as_of=2026-06-19"
 python -m agents.llm
 ```
 
-13. Остановить инфраструктуру:
 
+13. Остановить инфраструктуру:
 ```bash
 docker compose down
 ```
@@ -198,13 +198,17 @@ Summary считает completion, blocked и overdue задачи, high risks, 
 
 Основной workflow цифрового руководителя лежит в `agents/project_control_graph.py`. Отдельный граф мониторинга лежит в `agents/project_monitor_graph.py`.
 
-Граф мониторинга работает поверх PostgreSQL:
+1. загружает проект и связанные сущности из `projects`, `tasks`, `milestones`, `risks`, `communications`, `dependencies`, `decisions`, `budgets`;
+2. детерминированно считает базовые метрики;
+3. классифицирует алерты;
+4. запускает `ProjectAnalystAgent`, который по метрикам и алертам готовит управленческую сводку, причины проблем, рекомендации, вопросы тимлиду и флаг эскалации;
+5. запускает `ProjectInternalNotificationAgent`, который готовит `notification_draft` для внутреннего push-уведомления в сервисе.
 
-1. Загружает проект и связанные сущности из `projects`, `tasks`, `milestones`, `risks`, `communications`, `dependencies`, `decisions`, `budgets`.
-2. Детерминированно считает базовые метрики.
-3. Классифицирует алерты.
 
-Запуск для одного проекта:
+В основном пайплайне этот граф вызывает главный оркестратор
+`agents/project_control_graph.py`, а полный запуск проекта остается через `python main.py`.
+
+Для изолированной проверки мониторинга одного проекта можно запустить подграф напрямую:
 
 ```bash
 python -m agents.project_monitor_graph P001

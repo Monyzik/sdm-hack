@@ -10,6 +10,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 
+from agents.internal_notification_agent import ProjectInternalNotificationAgent
+from agents.project_analysis_agent import ProjectAnalystAgent
 from backend.app.database.models import (
     Budget,
     Communication,
@@ -39,6 +41,8 @@ class ProjectMonitorData(BaseModel):
     budget: dict[str, Any] | None = None
     metrics: dict[str, Any] = Field(default_factory=dict)
     alerts: list[dict[str, Any]] = Field(default_factory=list)
+    analysis: dict[str, Any] | None = None
+    notification_draft: dict[str, Any] | None = None
 
 
 def state_value(state: ProjectMonitorData | dict[str, Any], key: str, default: Any = None) -> Any:
@@ -320,20 +324,57 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
     return {"alerts": alerts}
 
 
-def build_project_monitor_graph(session_factory: sessionmaker | None = None):
+def analyze_project_node(agent: ProjectAnalystAgent) -> Any:
+    def analyze_project(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+        analysis = agent.analyze(
+            project=state_value(state, "project", {}),
+            metrics=state_value(state, "metrics", {}),
+            alerts=state_value(state, "alerts", []),
+        )
+        return {"analysis": analysis.model_dump(mode="json")}
+
+    return analyze_project
+
+
+def draft_notification_node(agent: ProjectInternalNotificationAgent) -> Any:
+    def draft_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+        notification_draft = agent.draft(
+            project=state_value(state, "project", {}),
+            metrics=state_value(state, "metrics", {}),
+            alerts=state_value(state, "alerts", []),
+            analysis=state_value(state, "analysis", {}),
+        )
+        return {"notification_draft": notification_draft.model_dump(mode="json")}
+
+    return draft_notification
+
+
+def build_project_monitor_graph(
+    session_factory: sessionmaker | None = None,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
+):
     if session_factory is None:
         engine = create_engine_from_env()
         session_factory = create_session_factory(engine)
+    if analyst is None:
+        analyst = ProjectAnalystAgent()
+    if notification_agent is None:
+        notification_agent = ProjectInternalNotificationAgent()
 
     graph = StateGraph(ProjectMonitorData)
     graph.add_node("load_project_context", load_project_context_node(session_factory))
     graph.add_node("calculate_metrics", calculate_metrics)
     graph.add_node("classify_alerts", classify_alerts)
+    graph.add_node("analyze_project", analyze_project_node(analyst))
+    graph.add_node("draft_notification", draft_notification_node(notification_agent))
 
     graph.add_edge(START, "load_project_context")
     graph.add_edge("load_project_context", "calculate_metrics")
     graph.add_edge("calculate_metrics", "classify_alerts")
-    graph.add_edge("classify_alerts", END)
+    graph.add_edge("classify_alerts", "analyze_project")
+    graph.add_edge("analyze_project", "draft_notification")
+    graph.add_edge("draft_notification", END)
 
     return graph.compile()
 
@@ -342,8 +383,14 @@ def run_project_monitor(
     project_id: str,
     as_of: date | None = None,
     session_factory: sessionmaker | None = None,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
 ) -> dict[str, Any]:
-    graph = build_project_monitor_graph(session_factory)
+    graph = build_project_monitor_graph(
+        session_factory=session_factory,
+        analyst=analyst,
+        notification_agent=notification_agent,
+    )
     initial_state = ProjectMonitorData(project_id=project_id)
     if as_of:
         initial_state.as_of = as_of
@@ -370,6 +417,8 @@ def main() -> None:
                 "project": result["project"],
                 "metrics": result["metrics"],
                 "alerts": result["alerts"],
+                "analysis": result["analysis"],
+                "notification_draft": result["notification_draft"],
             },
             ensure_ascii=False,
             indent=2,

@@ -7,6 +7,8 @@ from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 from sqlalchemy.orm import sessionmaker
 
+from agents.internal_notification_agent import ProjectInternalNotificationAgent
+from agents.project_analysis_agent import ProjectAnalystAgent
 from agents.parser_agent import ProjectData, ProjectParser
 from agents.project_monitor_graph import run_project_monitor
 from backend.app.database.project_import import update_project_from_schema
@@ -63,7 +65,11 @@ def update_project_node(session_factory: sessionmaker) -> Any:
     return update_project
 
 
-def monitor_project_node(session_factory: sessionmaker) -> Any:
+def monitor_project_node(
+    session_factory: sessionmaker,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
+) -> Any:
     def monitor_project(state: ProjectControlData | dict[str, Any]) -> dict[str, Any]:
         project_id = state_value(state, "project_id")
         if not project_id:
@@ -72,6 +78,8 @@ def monitor_project_node(session_factory: sessionmaker) -> Any:
         monitoring_result = run_project_monitor(
             project_id,
             session_factory=session_factory,
+            analyst=analyst,
+            notification_agent=notification_agent,
         )
 
         return {
@@ -79,6 +87,8 @@ def monitor_project_node(session_factory: sessionmaker) -> Any:
                 "project": monitoring_result["project"],
                 "metrics": monitoring_result["metrics"],
                 "alerts": monitoring_result["alerts"],
+                "analysis": monitoring_result["analysis"],
+                "notification_draft": monitoring_result["notification_draft"],
             },
         }
 
@@ -88,6 +98,8 @@ def monitor_project_node(session_factory: sessionmaker) -> Any:
 def build_project_control_graph(
     session_factory: sessionmaker | None = None,
     parser: ProjectParser | None = None,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
 ):
     if session_factory is None:
         engine = create_engine_from_env()
@@ -98,7 +110,10 @@ def build_project_control_graph(
     graph = StateGraph(ProjectControlData)
     graph.add_node("parse_docx", parse_docx_node(parser))
     graph.add_node("update_project", update_project_node(session_factory))
-    graph.add_node("monitor_project", monitor_project_node(session_factory))
+    graph.add_node(
+        "monitor_project",
+        monitor_project_node(session_factory, analyst, notification_agent),
+    )
 
     graph.add_edge(START, "parse_docx")
     graph.add_edge("parse_docx", "update_project")
@@ -112,8 +127,14 @@ def run_project_control_event(
     file_path: str | Path,
     event_type: DocxEventType = "docx_changed",
     session_factory: sessionmaker | None = None,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
 ) -> dict[str, Any]:
-    graph = build_project_control_graph(session_factory=session_factory)
+    graph = build_project_control_graph(
+        session_factory=session_factory,
+        analyst=analyst,
+        notification_agent=notification_agent,
+    )
     initial_state = ProjectControlData(
         event_type=event_type,
         file_path=str(Path(file_path)),
