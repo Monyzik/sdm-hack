@@ -94,9 +94,9 @@ def write_table(
 
 def prepare_schema(connection: Connection, recreate: bool) -> None:
     if recreate:
-        Base.metadata.drop_all(connection)
         for table_name in LEGACY_TABLES:
             connection.execute(text(f"DROP TABLE IF EXISTS {table_name} CASCADE"))
+        Base.metadata.drop_all(connection)
     Base.metadata.create_all(connection)
 
 

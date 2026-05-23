@@ -7,7 +7,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from backend.client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, client
+from agents.yandex_client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, get_yandex_client
 
 
 HealthStatus = Literal["green", "yellow", "red"]
@@ -47,6 +47,7 @@ class ProjectAnalystAgent:
             )
 
         self.model = f"gpt://{YANDEX_CLOUD_FOLDER}/{YANDEX_CLOUD_MODEL}"
+        self.client = get_yandex_client()
         self.temperature = temperature
         self.max_context_chars = max_context_chars
 
@@ -99,7 +100,7 @@ class ProjectAnalystAgent:
 7. confidence отражает полноту входных данных и согласованность выводов.
 """
 
-        response = client.chat.completions.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {

@@ -7,7 +7,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from backend.client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, client
+from agents.yandex_client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, get_yandex_client
 
 
 NotificationSeverity = Literal["info", "warning", "critical"]
@@ -43,6 +43,7 @@ class ProjectInternalNotificationAgent:
             )
 
         self.model = f"gpt://{YANDEX_CLOUD_FOLDER}/{YANDEX_CLOUD_MODEL}"
+        self.client = get_yandex_client()
         self.temperature = temperature
         self.max_context_chars = max_context_chars
 
@@ -111,7 +112,7 @@ class ProjectInternalNotificationAgent:
 11. Используй только факты из входных данных, не выдумывай людей, даты и причины.
 """
 
-        response = client.chat.completions.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {
