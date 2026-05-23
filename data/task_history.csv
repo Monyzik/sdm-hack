@@ -1,0 +1,17 @@
+id,project_id,task_id,changed_at,field_changed,old_value,new_value,changed_by,source_system
+TH001,P001,T001,2026-06-10 11:05:00,status,In Progress,Blocked,R011,tasktracker
+TH002,P001,T001,2026-06-10 11:06:00,blocker_reason,,Security approval pending,R011,tasktracker
+TH003,P001,T002,2026-06-07 10:20:00,planned_due_date,2026-06-03,2026-06-07,R006,tasktracker
+TH004,P001,T005,2026-06-12 15:40:00,status,To Do,Blocked,R003,tasktracker
+TH005,P001,T006,2026-06-13 12:15:00,assignee_id,R004,R003,R001,tasktracker
+TH006,P002,T031,2026-06-03 14:10:00,status,In Progress,Blocked,R022,tasktracker
+TH007,P002,T034,2026-06-06 16:30:00,planned_due_date,2026-06-05,2026-06-23,R001,tasktracker
+TH008,P002,T036,2026-06-12 18:00:00,spent_hours,46,72,R010,tasktracker
+TH009,P003,T066,2026-06-18 10:20:00,planned_due_date,2026-06-26,2026-06-30,R017,tasktracker
+TH010,P003,T068,2026-06-18 16:05:00,status,To Do,In Progress,R018,tasktracker
+TH011,P004,T083,2026-06-06 11:30:00,status,In Progress,Blocked,R022,tasktracker
+TH012,P004,T084,2026-06-12 13:10:00,status,Review,Blocked,R011,tasktracker
+TH013,P004,T090,2026-06-15 12:25:00,assignee_id,R024,R004,R001,tasktracker
+TH014,P005,T110,2026-06-14 09:50:00,status,In Progress,Review,R021,tasktracker
+TH015,P005,T115,2026-06-17 13:20:00,estimated_hours,32,48,R021,tasktracker
+TH016,P005,T117,2026-06-18 11:00:00,status,To Do,In Progress,R023,tasktracker

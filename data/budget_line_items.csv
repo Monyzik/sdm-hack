@@ -1,0 +1,21 @@
+id,project_id,budget_id,category,item_name,planned_amount,actual_amount,forecast_amount,owner_team
+BI001,P001,B001,Engineering,Model development,10000000,8500000,11000000,Risk Models
+BI002,P001,B001,Integration,Core Platform integration,14000000,12000000,18000000,Core Platform
+BI003,P001,B001,Compliance,Security and approvals,16000000,13000000,20000000,Security
+BI004,P001,B001,Testing,Pilot rollout,8000000,8000000,13000000,PMO
+BI005,P002,B002,Engineering,Streaming core,20000000,18000000,24000000,Fraud Platform
+BI006,P002,B002,Integration,Card processing adapter,18000000,16000000,20000000,Payments
+BI007,P002,B002,Modeling,Feature store and scoring,20000000,14000000,22000000,Risk Models
+BI008,P002,B002,Compliance,UAT and sign-off,14000000,16000000,22000000,Compliance
+BI009,P003,B003,UX,Mobile UX and design,10000000,8000000,9000000,Mobile
+BI010,P003,B003,Product,Client scenarios,10000000,7000000,8000000,Mobile
+BI011,P003,B003,Analytics,Event tracking,12000000,9000000,12000000,CRM Analytics
+BI012,P003,B003,Release,Stabilization,10000000,5500000,11000000,Quality
+BI013,P004,B004,Engineering,Gateway core,10000000,9000000,11000000,Payments
+BI014,P004,B004,Integration,SBP and acquiring adapters,12000000,8000000,13000000,Payments
+BI015,P004,B004,Security,PCI DSS workstream,8000000,7000000,9000000,Security
+BI016,P004,B004,Observability,Load testing and monitoring,8000000,7000000,10000000,Platform
+BI017,P005,B005,Data Quality,Golden record and dedupe,9000000,6000000,8000000,CRM Analytics
+BI018,P005,B005,Engineering,CRM profile API,9000000,6000000,8000000,CRM Platform
+BI019,P005,B005,Governance,Data quality controls,8000000,5000000,8000000,Data Platform
+BI020,P005,B005,Rollout,Pilot rollout,8000000,5500000,9000000,Sales

@@ -1,4 +1,36 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sdm_hack_frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    ports:
+      - "${FRONTEND_PORT:-5180}:5180"
+    depends_on:
+      - backend
+    networks:
+      - sdm_hack
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sdm_hack_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - sdm_hack
+
   postgres:
     image: postgres:16-alpine
     container_name: sdm_hack_postgres

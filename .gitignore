@@ -29,6 +29,12 @@ Thumbs.db
 # Logs
 *.log
 
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/tsconfig.tsbuildinfo
+
 # Local PostgreSQL data volumes
 infra/postgres/data/
 infra/postgres/data/**

@@ -1,0 +1,7 @@
+id,project_id,decision_date,decision_type,description,decision_owner,status,linked_milestone_id
+DEC001,P001,2026-06-12,scope_change,"Перенести часть интеграции в post-pilot, чтобы разблокировать Security review.",Елена Морозова,pending,M003
+DEC002,P001,2026-06-13,budget_reserve,Согласовать дополнительный резерв на compliance-доработки или сократить scope пилота.,Steering Committee,pending,M004
+DEC003,P002,2026-06-07,pilot_scope,Запускать пилот fraud decisioning без части правил до завершения интеграции с процессингом.,Андрей Романов,pending,M006
+DEC004,P003,2026-06-18,release_go,Подтвердить окно pilot release после расширенного регрессионного прогона.,Артур Комаров,approved,M012
+DEC005,P004,2026-06-14,vendor_escalation,Эскалировать задержку сертификатов СБП через vendor manager.,Сергей Ковалев,approved,M014
+DEC006,P005,2026-06-17,data_governance,Зафиксировать владельца правил дедупликации и критерии качества golden record.,Ольга Беляева,approved,M018

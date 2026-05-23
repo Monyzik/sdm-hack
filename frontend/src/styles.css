@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  background: #f6f7f9;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: #18212f;
+  background: #f6f7f9;
+}
+
+button,
+input,
+select,
+textarea {
+  letter-spacing: 0;
+}
