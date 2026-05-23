@@ -17,6 +17,15 @@ class TaskSignal(BaseModel):
     blocker_reason: str | None = None
 
 
+class MilestoneSignal(BaseModel):
+    id: str
+    name: str
+    status: str
+    planned_end_date: date
+    delay_days: int
+    responsible_team: str
+
+
 class BudgetSummary(BaseModel):
     planned_budget: int
     actual_spent: int
@@ -108,6 +117,7 @@ class ProjectSummary(BaseModel):
     total_tasks_count: int
     completed_tasks_count: int
     overdue_tasks_count: int
+    delayed_milestones_count: int
     blocked_tasks_count: int
     high_risk_count: int
     dependency_risk_count: int
@@ -124,6 +134,7 @@ class ProjectSummary(BaseModel):
     key_signals: list[str]
     blocked_tasks: list[TaskSignal]
     overdue_tasks: list[TaskSignal]
+    delayed_milestones: list[MilestoneSignal]
     top_risks: list[RiskSignal]
     delayed_communications: list[CommunicationSignal]
     overloaded_resources: list[ResourceLoadSignal]
@@ -158,4 +169,3 @@ class PortfolioSummary(BaseModel):
     portfolio_health_score: int
     top_portfolio_signals: list[str]
     projects: list[PortfolioProjectSummary]
-
