@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import date
 from pathlib import Path
 from typing import Any, List, Optional
 
@@ -29,8 +30,8 @@ class Result(BaseModel):
 class Timeline(BaseModel):
     """Сроки проекта."""
 
-    start_date: Optional[str] = Field(None, description="Дата начала")
-    end_date: Optional[str] = Field(None, description="Дата окончания")
+    start_date: Optional[date] = Field(None, description="Дата начала")
+    end_date: Optional[date] = Field(None, description="Дата окончания")
     duration: Optional[str] = Field(None, description="Длительность")
     confidence: float = Field(ge=0.0, le=1.0, description="Уверенность")
 
@@ -56,8 +57,8 @@ class ProjectData(BaseModel):
                     }
                 ],
                 "timeline": {
-                    "start_date": "01.03.2026",
-                    "end_date": "31.05.2026",
+                    "start_date": "2026-03-01",
+                    "end_date": "2026-05-31",
                     "confidence": 0.95,
                 },
             }
@@ -139,7 +140,7 @@ class ProjectParser:
 1. project_name бери из названия документа или полей "Название проекта", "Название", "Карточка инициативы".
 2. goals бери из разделов "Цель проекта", "Целевое состояние", "Главная цель".
 3. results бери из разделов "Ожидаемый результат", "Планируемые результаты", "Что должно быть получено" и критериев приемки, если они описывают конечные проверяемые результаты.
-4. timeline бери из разделов или полей "Плановый срок", "Сроки", "Срок реализации", "Период выполнения".
+4. timeline бери из разделов или полей "Плановый срок", "Сроки", "Срок реализации", "Период выполнения". Даты возвращай в формате YYYY-MM-DD.
 5. confidence оценивает явность источника:
    - 0.9-1.0: прямое явное указание;
    - 0.7-0.89: информация следует из текста;

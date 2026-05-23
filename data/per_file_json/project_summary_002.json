@@ -29,8 +29,8 @@
     }
   ],
   "timeline": {
-    "start_date": "01.02.2026",
-    "end_date": "28.06.2026",
+    "start_date": "2026-02-01",
+    "end_date": "2026-06-28",
     "duration": null,
     "confidence": 1.0
   }

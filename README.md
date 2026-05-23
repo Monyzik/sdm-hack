@@ -42,13 +42,31 @@ python -m backend.database.init_db --drop-existing
 python load_demo_data_to_db.py
 ```
 
-6. Проверить статус:
+6. Обновить часть полей проектов из DOCX-паспортов:
+
+```bash
+python main.py
+```
+
+DOCX-файлы читаются из `data/project_documents`. Сначала проекты должны быть загружены из CSV, потому что DOCX-пайплайн не создает новые строки в `projects`, а только обновляет существующие проекты `P001`, `P002` и т.д.
+
+Из DOCX в таблицу `projects` записываются только поля:
+
+- `project_name` -> `projects.name`;
+- `timeline.start_date` -> `projects.start_date`;
+- `timeline.end_date` -> `projects.planned_end_date`;
+- `goals` -> `projects.business_goal`;
+- `results` -> `projects.expected_result`.
+
+Остальные поля проекта (`owner_name`, `status`, `priority`, `business_value` и другие) остаются из CSV.
+
+7. Проверить статус:
 
 ```bash
 docker compose ps
 ```
 
-7. Остановить инфраструктуру:
+8. Остановить инфраструктуру:
 
 ```bash
 docker compose down

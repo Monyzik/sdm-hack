@@ -9,29 +9,29 @@
   "results": [
     {
       "result": "Скоринговая модель риска подозрительной транзакции.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Правила приоритизации операций для проверки.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Дашборд контроля качества антифрод-сигналов.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     },
     {
       "result": "Описание сценария пилотного внедрения.",
-      "confidence": 0.95,
+      "confidence": 1.0,
       "measurable": true
     }
   ],
   "timeline": {
-    "start_date": "01.03.2026",
-    "end_date": "28.05.2026",
-    "duration": "3 месяца",
+    "start_date": "2026-03-01",
+    "end_date": "2026-05-28",
+    "duration": null,
     "confidence": 1.0
   }
 }
