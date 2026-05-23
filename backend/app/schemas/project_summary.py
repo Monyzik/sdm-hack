@@ -105,6 +105,18 @@ class ChangeRequestSignal(BaseModel):
     description: str
 
 
+class OwnerActionLoadSignal(BaseModel):
+    owner_name: str
+    owner_type: str
+    action_count: int
+    blocked_tasks_count: int = 0
+    overdue_tasks_count: int = 0
+    dependency_count: int = 0
+    decision_count: int = 0
+    change_request_count: int = 0
+    communication_count: int = 0
+
+
 class ProjectSummary(BaseModel):
     project_id: str
     project_name: str
@@ -123,8 +135,28 @@ class ProjectSummary(BaseModel):
     dependency_risk_count: int
     pending_decision_count: int
     open_change_request_count: int
+    dependency_sla_breach_count: int
 
     budget: BudgetSummary | None
+    milestone_slip_days: int
+    critical_path_delay_days: int
+    blocked_age_days: int
+    decision_age_days: int
+    net_change_request_impact_days: int
+    net_change_request_impact_budget: int
+    scope_churn_rate: float
+    burn_rate_percent: float
+    schedule_variance_percent: float
+    stale_tasks_count: int
+    max_status_age_days: int
+    estimate_overrun_percent: float
+    workload_imbalance_index: float
+    key_person_dependency_percent: float
+    critical_task_silence_days: int
+    communication_silence_days: int
+    data_freshness_days: int
+    cost_of_delay_exposure: int
+    risk_trend: str
     resource_overload_percent: float
     max_communication_delay_days: int
     project_health_score: int = Field(ge=0, le=100)
@@ -141,6 +173,7 @@ class ProjectSummary(BaseModel):
     risky_dependencies: list[DependencySignal]
     pending_decisions: list[DecisionSignal]
     open_change_requests: list[ChangeRequestSignal]
+    owner_action_load: list[OwnerActionLoadSignal]
 
 
 class PortfolioProjectSummary(BaseModel):

@@ -220,6 +220,7 @@ def project_monitor_metrics(metrics: ProjectMetrics) -> dict[str, Any]:
         "dependency_risk_count": metrics.dependency_risk_count,
         "pending_decision_count": metrics.pending_decision_count,
         "open_change_request_count": metrics.open_change_request_count,
+        "dependency_sla_breach_count": metrics.dependency_sla_breach_count,
         "budget_deviation_percent": None
         if metrics.budget is None
         else metrics.budget.budget_deviation_percent,
@@ -228,6 +229,25 @@ def project_monitor_metrics(metrics: ProjectMetrics) -> dict[str, Any]:
         "risk_adjusted_roi_percent": None
         if metrics.budget is None
         else metrics.budget.risk_adjusted_roi_percent,
+        "milestone_slip_days": metrics.milestone_slip_days,
+        "critical_path_delay_days": metrics.critical_path_delay_days,
+        "blocked_age_days": metrics.blocked_age_days,
+        "decision_age_days": metrics.decision_age_days,
+        "net_change_request_impact_days": metrics.net_change_request_impact_days,
+        "net_change_request_impact_budget": metrics.net_change_request_impact_budget,
+        "scope_churn_rate": metrics.scope_churn_rate,
+        "burn_rate_percent": metrics.burn_rate_percent,
+        "schedule_variance_percent": metrics.schedule_variance_percent,
+        "stale_tasks_count": metrics.stale_tasks_count,
+        "max_status_age_days": metrics.max_status_age_days,
+        "estimate_overrun_percent": metrics.estimate_overrun_percent,
+        "workload_imbalance_index": metrics.workload_imbalance_index,
+        "key_person_dependency_percent": metrics.key_person_dependency_percent,
+        "critical_task_silence_days": metrics.critical_task_silence_days,
+        "communication_silence_days": metrics.communication_silence_days,
+        "data_freshness_days": metrics.data_freshness_days,
+        "cost_of_delay_exposure": metrics.cost_of_delay_exposure,
+        "risk_trend": metrics.risk_trend,
         "resource_overload_percent": metrics.resource_overload_percent,
         "max_communication_delay_days": metrics.max_communication_delay_days,
         "project_health_score": metrics.project_health_score,
@@ -253,6 +273,7 @@ def project_monitor_metrics(metrics: ProjectMetrics) -> dict[str, Any]:
             "pending_decisions": dump_signals(metrics.pending_decisions),
             "open_change_requests": dump_signals(metrics.open_change_requests),
             "overloaded_resources": dump_signals(metrics.overloaded_resources),
+            "owner_action_load": dump_signals(metrics.owner_action_load),
         },
     }
 
@@ -283,6 +304,10 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
     critical_dependencies = metric_count(metrics, "dependency_risk_count", "critical_dependencies")
     pending_decisions = metric_count(metrics, "pending_decision_count", "pending_decisions")
     open_change_requests = metric_count(metrics, "open_change_request_count", "open_change_requests")
+    critical_path_delay_days = metric_count(metrics, "critical_path_delay_days")
+    dependency_sla_breach_count = metric_count(metrics, "dependency_sla_breach_count")
+    cost_of_delay_exposure = metric_count(metrics, "cost_of_delay_exposure")
+    stale_tasks_count = metric_count(metrics, "stale_tasks_count")
 
     if overdue_tasks > 0:
         alerts.append(
@@ -346,6 +371,38 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
                 "level": "Warning",
                 "metric": "open_change_requests",
                 "message": f"Есть открытые change requests: {open_change_requests}",
+            }
+        )
+    if critical_path_delay_days > 0:
+        alerts.append(
+            {
+                "level": "Critical",
+                "metric": "critical_path_delay_days",
+                "message": f"Critical path задержан на {critical_path_delay_days} дней",
+            }
+        )
+    if dependency_sla_breach_count > 0:
+        alerts.append(
+            {
+                "level": "Warning",
+                "metric": "dependency_sla_breach_count",
+                "message": f"Есть SLA breach по зависимостям: {dependency_sla_breach_count}",
+            }
+        )
+    if cost_of_delay_exposure > 0:
+        alerts.append(
+            {
+                "level": "Warning",
+                "metric": "cost_of_delay_exposure",
+                "message": f"Cost of delay exposure: {cost_of_delay_exposure}",
+            }
+        )
+    if stale_tasks_count > 3:
+        alerts.append(
+            {
+                "level": "Warning",
+                "metric": "stale_tasks_count",
+                "message": f"Есть зависшие задачи: {stale_tasks_count}",
             }
         )
 

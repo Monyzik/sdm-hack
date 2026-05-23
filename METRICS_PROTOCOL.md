@@ -66,34 +66,51 @@
 
 > P001 в красной зоне не просто из-за просроченных задач. Основная причина: Security approval просрочен, DWH dependency delayed, forecast бюджета выше плана, есть pending decision по scope cut.
 
-## Рекомендуемые новые метрики
+## Реализованные дополнительные метрики
 
-| Метрика | Источник | Зачем добавить |
+Эти метрики больше не являются roadmap: они реализованы в `backend/app/services/metrics.py`, включены в `PROJECT_METRIC_PROTOCOL`, возвращаются через `ProjectSummary` и используются агентским графом `agents/project_monitor_graph.py`.
+
+| Метрика | Источник | Как помогает РП |
 |---|---|---|
-| `milestone_slip_days` | `milestones` | Покажет сдвиг ключевых этапов, а не только отдельных задач. |
-| `critical_path_delay_days` | `task_dependencies`, `tasks`, `milestones` | Позволит объяснять, какие зависимости реально двигают финальную дату проекта. |
-| `blocked_age_days` | `task_history`, `tasks` | Отличит новый блокер от старого, который уже требует эскалации. |
-| `decision_age_days` | `decisions` | Покажет, сколько дней управленческое решение висит без владельца. |
-| `net_change_request_impact_days` | `change_requests` | Суммарно покажет влияние открытых CR на срок. |
-| `net_change_request_impact_budget` | `change_requests` | Суммарно покажет влияние открытых CR на бюджет. |
-| `dependency_sla_breach_count` | `dependencies` | Покажет команды/вендоров, которые системно нарушают ожидаемые даты. |
-| `scope_churn_rate` | `change_requests`, `task_history` | Покажет нестабильность scope: много изменений означает риск по сроку и бюджету. |
-| `burn_rate_percent` | `budgets`, `milestones`, `tasks` | Сравнит расход бюджета с фактическим прогрессом. |
-| `schedule_variance_percent` | `tasks`, `milestones` | Покажет отставание от календарного плана в процентах. |
-| `risk_trend` | `risks`, `task_history` или будущие snapshots | Покажет, рисковый профиль улучшается или ухудшается за неделю. |
-| `communication_silence_days` | `communication_messages`, `task_comments` | Найдет зависшие темы, где давно не было ответа или follow-up. |
-| `data_freshness_days` | все source-таблицы | Покажет, можно ли доверять summary: старые данные дают ложную уверенность. |
-| `owner_action_load` | `tasks`, `decisions`, `dependencies`, `change_requests` | Покажет, сколько действий висит на конкретном владельце или команде. |
-| `cost_of_delay_exposure` | `budgets`, `milestones`, `dependencies` | Оценит денежный ущерб от текущей задержки. |
+| `milestone_slip_days` | `milestones` | Показывает максимальный сдвиг ключевой вехи, а не только количество задержанных вех. |
+| `critical_path_delay_days` | `task_dependencies`, `tasks` | Показывает, какая задержка на critical path реально двигает срок проекта. |
+| `blocked_age_days` | `task_history`, `tasks` | Отличает новый блокер от старого блокера, который уже требует эскалации. |
+| `decision_age_days` | `decisions` | Показывает, сколько дней висит самое старое управленческое решение. |
+| `net_change_request_impact_days` | `change_requests` | Суммирует влияние открытых CR на срок. |
+| `net_change_request_impact_budget` | `change_requests` | Суммирует влияние открытых CR на бюджет. |
+| `dependency_sla_breach_count` | `dependencies` | Показывает открытые зависимости, где expected date уже нарушена. |
+| `scope_churn_rate` | `change_requests`, `task_history`, `tasks` | Показывает нестабильность scope через CR и изменения сроков/оценок задач. |
+| `burn_rate_percent` | `budgets` | Показывает долю потраченного бюджета от плана. |
+| `schedule_variance_percent` | `tasks` | Сравнивает фактическую готовность с плановой готовностью по due dates. |
+| `risk_trend` | `risks` | Даёт текущий proxy-тренд рисков по статусам high-risk записей. |
+| `communication_silence_days` | `communications` | Находит открытые коммуникации, где давно не было последнего сообщения. |
+| `data_freshness_days` | source layer events | Показывает, можно ли доверять summary: старые данные дают ложную уверенность. |
+| `owner_action_load` | `tasks`, `dependencies`, `decisions`, `change_requests`, `communications` | Показывает, на ком сконцентрированы блокеры, решения, CR и просроченные коммуникации. |
+| `cost_of_delay_exposure` | `budgets`, `milestones`, `task_dependencies`, `dependencies`, `communications` | Переводит текущую задержку в денежный exposure через cost of delay per day. |
 
-## Приоритет внедрения
+## Метрики из файла "Поля и метрики"
 
-1. `milestone_slip_days`, `critical_path_delay_days`, `blocked_age_days`.
-2. `decision_age_days`, `net_change_request_impact_days`, `net_change_request_impact_budget`.
-3. `burn_rate_percent`, `schedule_variance_percent`, `cost_of_delay_exposure`.
-4. `risk_trend`, `scope_churn_rate`, `data_freshness_days`.
+Из `docs/Поля и метрики.xlsx` взяты только метрики, которые можно посчитать из текущей модели данных без выдуманных полей и ML-заглушек.
 
-Первый блок нужен для объяснения “почему проект красный”. Второй блок нужен для списка управленческих решений. Третий блок нужен для финансового разговора с заказчиком и PMO. Четвертый блок нужен для качества прогноза и долгосрочного контроля портфеля.
+| Метрика | Источник | Как помогает РП |
+|---|---|---|
+| `stale_tasks_count` | `task_history`, `tasks` | Показывает открытые задачи без смены статуса больше 5 дней. |
+| `max_status_age_days` | `task_history`, `tasks` | Показывает максимальный возраст текущего статуса среди открытых задач. |
+| `estimate_overrun_percent` | `tasks` | Показывает отклонение `spent_hours` от `estimated_hours`. |
+| `workload_imbalance_index` | `tasks` | Показывает, насколько неравномерно открытые задачи распределены по исполнителям. |
+| `key_person_dependency_percent` | `tasks` | Показывает максимальную долю открытых задач на одном исполнителе. |
+| `critical_task_silence_days` | `tasks`, `task_comments` | Показывает, сколько дней нет комментариев по critical/high задачам. |
+
+## Осознанно не реализовано
+
+Часть метрик из Excel пока нельзя посчитать корректно из текущих таблиц:
+
+- `deadline_slip_probability`, `completion_forecast`, `budget_overrun_forecast`, `quality_forecast`, `burnout` требуют отдельной прогнозной модели или исторических snapshots.
+- `test_coverage`, `bug/story ratio`, `reopen percent`, `technical debt` требуют таблиц по тестам, дефектам, reopen-событиям и техдолгу.
+- `sprint_goal_risk`, `velocity drop`, `meetings load` требуют сущностей sprint, velocity history и календаря встреч.
+- `negative tone`, `conflict signals`, `unanswered questions` требуют NLP-разбора сообщений и отдельной разметки коммуникаций.
+
+Их лучше добавлять после расширения source layer, чтобы метрики не стали декоративными числами без управленческой достоверности.
 
 ## Минимальный weekly status для РП
 
