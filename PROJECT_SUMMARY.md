@@ -4,7 +4,7 @@ MVP "AI Project Control Tower" показывает, как руководите
 
 ## Текущая структура
 
-- `backend/` — будущий backend API.
+- `backend/` — будущий backend API и текущий SQLAlchemy ORM-слой для демо-БД.
 - `frontend/` — будущий web-интерфейс.
 - `agents/` — будущие AI-агенты и сценарии анализа.
 - `infra/` — инфраструктурные файлы и локальные volume-директории.
@@ -21,7 +21,7 @@ MVP "AI Project Control Tower" показывает, как руководите
 - port: `5432`
 - data volume: `./infra/postgres/data`
 
-`infra/postgres/data` игнорируется git, потому что там будут локальные файлы PostgreSQL. SQL-таблицы и миграции пока не заведены.
+`infra/postgres/data` игнорируется git, потому что там будут локальные файлы PostgreSQL. Таблицы создаются через ORM-модели в `backend/database/models.py`.
 
 ## Датасет
 
@@ -37,7 +37,9 @@ MVP "AI Project Control Tower" показывает, как руководите
 - health score;
 - event log изменений.
 
-`metrics_snapshots.csv` и `project_events.csv` намеренно не считаются исходными таблицами.
+Дополнительные source-таблицы `dependencies.csv`, `decisions.csv` и `change_requests.csv` нужны для сценариев root cause analysis, decision assistant и weekly status generator.
+
+`metrics_snapshots.csv` намеренно не считается исходной таблицей.
 
 ## Ветки
 

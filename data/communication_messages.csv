@@ -1,0 +1,45 @@
+id,project_id,communication_id,message_time,sender_team,recipient_team,channel,message_type,status,summary,linked_task_id,is_escalation
+CM001,P001,C001,2026-06-04 09:15:00,Risk Models,Security,Teams,request,sent,Первичный запрос по теме: Согласование обработки ПДн для скорингового API,T001,False
+CM002,P001,C001,2026-06-05 15:30:00,PMO,Security,Teams,escalation,escalated,Эскалация по теме: Согласование обработки ПДн для скорингового API,T001,True
+CM003,P001,C002,2026-06-06 09:15:00,Data Platform,DWH,Email,request,sent,Первичный запрос по теме: SLA витрины признаков МСБ,T002,False
+CM004,P001,C002,2026-06-07 15:30:00,Data Platform,DWH,Email,reminder,waiting,Напоминание по теме: SLA витрины признаков МСБ,T002,False
+CM005,P001,C003,2026-06-12 09:15:00,Core Platform,Credit Conveyor,Jira,request,sent,Первичный запрос по теме: Окно интеграционного тестирования скоринга,T005,False
+CM006,P001,C003,2026-06-14 15:30:00,Core Platform,Credit Conveyor,Jira,reminder,waiting,Напоминание по теме: Окно интеграционного тестирования скоринга,T005,False
+CM007,P001,C004,2026-06-17 09:15:00,PMO,Business Owner,Email,request,sent,Первичный запрос по теме: Решение по scope cut после роста бюджета,T009,False
+CM008,P001,C004,2026-06-18 15:30:00,PMO,Business Owner,Email,follow_up,waiting,Фоллоу-ап по теме: Решение по scope cut после роста бюджета,T009,False
+CM009,P001,C005,2026-06-13 09:15:00,Risk Models,Data Quality,Confluence,request,sent,Первичный запрос по теме: Сверка неполных признаков по заявкам МСБ,T004,False
+CM010,P001,C005,2026-06-17 15:30:00,Data Quality,Risk Models,Confluence,response,replied,Ответ по теме: Сверка неполных признаков по заявкам МСБ,T004,False
+CM011,P002,C006,2026-06-01 09:15:00,Fraud Platform,Card Processing,Email,request,sent,Первичный запрос по теме: Окно подключения transaction stream,T031,False
+CM012,P002,C006,2026-06-03 15:30:00,PMO,Card Processing,Email,escalation,escalated,Эскалация по теме: Окно подключения transaction stream,T031,True
+CM013,P002,C007,2026-06-07 09:15:00,Risk Models,Compliance,Teams,request,sent,Первичный запрос по теме: Критерии false positive review,T038,False
+CM014,P002,C007,2026-06-10 15:30:00,Risk Models,Compliance,Teams,reminder,waiting,Напоминание по теме: Критерии false positive review,T038,False
+CM015,P002,C008,2026-06-13 09:15:00,Platform,SRE,Jira,request,sent,Первичный запрос по теме: CPU profile feature lookup,T036,False
+CM016,P002,C008,2026-06-14 15:30:00,SRE,Platform,Jira,response,replied,Ответ по теме: CPU profile feature lookup,T036,False
+CM017,P002,C009,2026-06-11 09:15:00,Security,Fraud Platform,Confluence,request,sent,Первичный запрос по теме: Threat model для real-time событий,T032,False
+CM018,P002,C009,2026-06-13 15:30:00,Security,Fraud Platform,Confluence,follow_up,waiting,Фоллоу-ап по теме: Threat model для real-time событий,T032,False
+CM019,P002,C010,2026-06-16 09:15:00,PMO,Business Owner,Email,request,sent,Первичный запрос по теме: Решение по запуску пилота без части правил,T033,False
+CM020,P002,C010,2026-06-18 15:30:00,PMO,Business Owner,Email,follow_up,waiting,Фоллоу-ап по теме: Решение по запуску пилота без части правил,T033,False
+CM021,P003,C011,2026-06-15 09:15:00,Mobile,CX,Teams,request,sent,Первичный запрос по теме: Финальный approve onboarding,T059,False
+CM022,P003,C011,2026-06-16 15:30:00,CX,Mobile,Teams,response,replied,Ответ по теме: Финальный approve onboarding,T059,False
+CM023,P003,C012,2026-06-14 09:15:00,Mobile,Analytics,Jira,request,sent,Первичный запрос по теме: Событийная схема для нового профиля,T063,False
+CM024,P003,C012,2026-06-17 15:30:00,Analytics,Mobile,Jira,response,replied,Ответ по теме: Событийная схема для нового профиля,T063,False
+CM025,P003,C013,2026-06-18 09:15:00,Digital Bank,Release Management,Email,request,sent,Первичный запрос по теме: Слот pilot release,T068,False
+CM026,P003,C013,2026-06-19 15:30:00,Digital Bank,Release Management,Email,follow_up,waiting,Фоллоу-ап по теме: Слот pilot release,T068,False
+CM027,P003,C014,2026-06-17 09:15:00,Quality,Mobile,Jira,request,sent,Первичный запрос по теме: Регрессионный прогон critical flows,T066,False
+CM028,P003,C014,2026-06-18 15:30:00,Mobile,Quality,Jira,response,replied,Ответ по теме: Регрессионный прогон critical flows,T066,False
+CM029,P004,C015,2026-06-06 09:15:00,Payments,SBP Vendor,Email,request,sent,Первичный запрос по теме: Тестовые сертификаты СБП,T083,False
+CM030,P004,C015,2026-06-08 15:30:00,Payments,SBP Vendor,Email,reminder,waiting,Напоминание по теме: Тестовые сертификаты СБП,T083,False
+CM031,P004,C016,2026-06-11 09:15:00,Security,Payments,Confluence,request,sent,Первичный запрос по теме: PCI DSS token storage review,T084,False
+CM032,P004,C016,2026-06-13 15:30:00,Security,Payments,Confluence,reminder,waiting,Напоминание по теме: PCI DSS token storage review,T084,False
+CM033,P004,C017,2026-06-16 09:15:00,Platform,SRE,Teams,request,sent,Первичный запрос по теме: Нагрузочное окно gateway,T090,False
+CM034,P004,C017,2026-06-17 15:30:00,SRE,Platform,Teams,response,replied,Ответ по теме: Нагрузочное окно gateway,T090,False
+CM035,P004,C018,2026-06-18 09:15:00,PMO,Business Owner,Email,request,sent,Первичный запрос по теме: Перенос части merchant-сценариев,T085,False
+CM036,P004,C018,2026-06-19 15:30:00,PMO,Business Owner,Email,follow_up,waiting,Фоллоу-ап по теме: Перенос части merchant-сценариев,T085,False
+CM037,P005,C019,2026-06-12 09:15:00,CRM Analytics,Data Owners,Teams,request,sent,Первичный запрос по теме: Правила дедупликации контактов,T110,False
+CM038,P005,C019,2026-06-14 15:30:00,Data Owners,CRM Analytics,Teams,response,replied,Ответ по теме: Правила дедупликации контактов,T110,False
+CM039,P005,C020,2026-06-13 09:15:00,CRM Platform,Compliance,Confluence,request,sent,Первичный запрос по теме: Матрица доступа к профилю 360,T117,False
+CM040,P005,C020,2026-06-17 15:30:00,CRM Platform,Compliance,Confluence,follow_up,waiting,Фоллоу-ап по теме: Матрица доступа к профилю 360,T117,False
+CM041,P005,C021,2026-06-18 09:15:00,Sales,CRM Platform,Email,request,sent,Первичный запрос по теме: Сценарии пилота для регионов,T113,False
+CM042,P005,C021,2026-06-19 15:30:00,Sales,CRM Platform,Email,follow_up,waiting,Фоллоу-ап по теме: Сценарии пилота для регионов,T113,False
+CM043,P005,C022,2026-06-16 09:15:00,Data Platform,CRM Analytics,Jira,request,sent,Первичный запрос по теме: Сверка golden record после дедупликации,T109,False
+CM044,P005,C022,2026-06-18 15:30:00,CRM Analytics,Data Platform,Jira,response,replied,Ответ по теме: Сверка golden record после дедупликации,T109,False

@@ -29,6 +29,9 @@ Thumbs.db
 # Logs
 *.log
 
+# Generated DOCX dataset samples
+data/project_documents/project_summary_*.docx
+
 # Local PostgreSQL data volumes
 infra/postgres/data/
 infra/postgres/data/**
