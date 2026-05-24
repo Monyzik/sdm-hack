@@ -19,44 +19,24 @@ export function PortfolioSidebar({
 }: PortfolioSidebarProps) {
   return (
     <Card>
-      <h2 className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-900 dark:border-slate-800 dark:text-slate-100">
-        Портфель проектов
-      </h2>
-      <ul className="space-y-3 bg-slate-50 p-4 dark:bg-transparent">
+      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          Проекты
+        </h2>
+        <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+          {projects.length}
+        </span>
+      </div>
+      <ul className="divide-y divide-slate-100 dark:divide-slate-800">
         {projects.map((project) => {
           const isActive = project.project_id === selectedProjectId;
-          const content = (
-            <>
-              <div className="flex items-start justify-between gap-2">
-                <span className="line-clamp-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                  {project.project_name}
-                </span>
-                <span className="text-sm font-semibold tabular-nums text-slate-950 dark:text-slate-50">
-                  {project.project_health_score}
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <span className="truncate">{project.owner_name}</span>
-                <RiskBadge level={project.risk_level} />
-              </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <span className="tabular-nums">
-                  {Math.round(project.completion_percent)}%
-                </span>
-                <span className="tabular-nums">
-                  {project.overdue_tasks_count + project.blocked_tasks_count}{" "}
-                  сигн.
-                </span>
-              </div>
-              <ProgressBar
-                value={project.completion_percent}
-                tone={healthTone(project.project_health_score)}
-                ariaLabel={`Готовность проекта ${project.project_name}: ${Math.round(
-                  project.completion_percent,
-                )}%`}
-              />
-            </>
-          );
+          const totalSignals =
+            project.overdue_tasks_count + project.blocked_tasks_count;
+          const rowClasses = `relative flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition ${
+            isActive
+              ? "bg-slate-100 dark:bg-slate-800/70"
+              : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+          }`;
 
           return (
             <li key={project.project_id}>
@@ -65,24 +45,74 @@ export function PortfolioSidebar({
                   type="button"
                   aria-current={isActive ? "true" : undefined}
                   onClick={() => onSelect(project.project_id)}
-                  className={`flex w-full flex-col gap-2 rounded-xl border px-4 py-3 text-left shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
-                    isActive
-                      ? "border-slate-300 bg-white shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-800/70 dark:shadow-none"
-                      : "border-slate-200 bg-white shadow-slate-200/50 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/60 dark:shadow-none dark:hover:bg-slate-800/50"
-                  }`}
+                  className={`${rowClasses} focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400`}
                 >
-                  {content}
+                  <span className="relative z-10 min-w-0 grid flex-1 gap-1">
+                    <span className="line-clamp-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {project.project_name}
+                    </span>
+                    <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <span className="truncate">{project.owner_name}</span>
+                      <span className="tabular-nums">
+                        {Math.round(project.completion_percent)}%
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <RiskBadge level={project.risk_level} />
+                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                        {totalSignals} сигн.
+                      </span>
+                    </span>
+                    <ProgressBar
+                      value={project.completion_percent}
+                      tone={healthTone(project.project_health_score)}
+                      ariaLabel={`Готовность проекта ${project.project_name}: ${Math.round(
+                        project.completion_percent,
+                      )}%`}
+                    />
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold tabular-nums text-slate-950 dark:text-slate-50">
+                    <span className="inline-grid min-w-[2.5rem] justify-items-end">
+                      {project.project_health_score}
+                    </span>
+                  </span>
                 </button>
               ) : (
                 <div
                   aria-current={isActive ? "true" : undefined}
-                  className={`flex w-full flex-col gap-2 rounded-xl border px-4 py-3 shadow-sm ${
-                    isActive
-                      ? "border-slate-300 bg-white shadow-slate-200/60 dark:border-slate-700 dark:bg-slate-800/70 dark:shadow-none"
-                      : "border-slate-200 bg-white shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900/60 dark:shadow-none"
+                  className={`flex w-full items-center gap-3 px-3.5 py-2.5 ${
+                    isActive ? "bg-slate-100 dark:bg-slate-800/70" : ""
                   }`}
                 >
-                  {content}
+                  <span className="min-w-0 grid flex-1 gap-1">
+                    <span className="line-clamp-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {project.project_name}
+                    </span>
+                    <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                      <span className="truncate">{project.owner_name}</span>
+                      <span className="tabular-nums">
+                        {Math.round(project.completion_percent)}%
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <RiskBadge level={project.risk_level} />
+                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                        {totalSignals} сигн.
+                      </span>
+                    </span>
+                    <ProgressBar
+                      value={project.completion_percent}
+                      tone={healthTone(project.project_health_score)}
+                      ariaLabel={`Готовность проекта ${project.project_name}: ${Math.round(
+                        project.completion_percent,
+                      )}%`}
+                    />
+                  </span>
+                  <span className="shrink-0 text-sm font-semibold tabular-nums text-slate-950 dark:text-slate-50">
+                    <span className="inline-grid min-w-[2.5rem] justify-items-end">
+                      {project.project_health_score}
+                    </span>
+                  </span>
                 </div>
               )}
             </li>

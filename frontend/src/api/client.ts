@@ -10,6 +10,7 @@ import type {
   PortfolioAttentionSummary,
   PortfolioSummary,
   ProjectManagerBrief,
+  ProjectQuestionAnswer,
   ProjectSummary,
 } from "./types";
 
@@ -32,10 +33,11 @@ async function requestFrom<T>(
   baseUrl: string,
   path: string,
   signal?: AbortSignal,
+  init?: RequestInit,
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${baseUrl}${path}`, { signal });
+    response = await fetch(`${baseUrl}${path}`, { ...init, signal });
   } catch {
     throw new ApiError(
       "Не удалось связаться с сервером. Проверьте, что сервис запущен.",
@@ -44,10 +46,15 @@ async function requestFrom<T>(
   }
 
   if (!response.ok) {
-    throw new ApiError(
-      `Запрос завершился с ошибкой ${response.status}`,
-      response.status,
-    );
+    let message = `Запрос завершился с ошибкой ${response.status}`;
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      const payload = (await response.json()) as { detail?: unknown };
+      if (typeof payload.detail === "string") {
+        message = payload.detail;
+      }
+    }
+    throw new ApiError(message, response.status);
   }
 
   return (await response.json()) as T;
@@ -101,5 +108,23 @@ export function fetchProjectBrief(
     AGENTS_API_URL,
     `/api/v1/agents/projects/${encodeURIComponent(projectId)}/brief?${query.toString()}`,
     signal,
+  );
+}
+
+export function askProjectAgent(
+  projectId: string,
+  question: string,
+  asOf: string,
+  signal?: AbortSignal,
+): Promise<ProjectQuestionAnswer> {
+  return requestFrom<ProjectQuestionAnswer>(
+    AGENTS_API_URL,
+    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/ask`,
+    signal,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question, as_of: asOf, max_depth: 2 }),
+    },
   );
 }

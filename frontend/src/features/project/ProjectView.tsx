@@ -1,11 +1,10 @@
 import { AlertTriangle, Clock3 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { ProjectSummary } from "../../api/types";
 import { useProjectBrief } from "../../hooks/useProjectBrief";
 import { AS_OF_DATE } from "../../lib/constants";
 import { ProjectHeader } from "./ProjectHeader";
-import { ProjectMetrics } from "./ProjectMetrics";
 import { AgentBriefPanel } from "./panels/AgentBriefPanel";
 import { BudgetPanel } from "./panels/BudgetPanel";
 import { ChangeRequestsPanel } from "./panels/ChangeRequestsPanel";
@@ -25,7 +24,16 @@ export function ProjectView({ project }: { project: ProjectSummary }) {
   const [activeTab, setActiveTab] = useState<
     "summary" | "work" | "coordination"
   >("summary");
-  const briefQuery = useProjectBrief(project.project_id, AS_OF_DATE);
+  const [isBriefRequested, setIsBriefRequested] = useState(false);
+  const briefQuery = useProjectBrief(
+    project.project_id,
+    AS_OF_DATE,
+    activeTab === "summary" && isBriefRequested,
+  );
+
+  useEffect(() => {
+    setIsBriefRequested(false);
+  }, [project.project_id]);
 
   const tabs = useMemo(
     () => [
@@ -52,7 +60,6 @@ export function ProjectView({ project }: { project: ProjectSummary }) {
   return (
     <div className="flex flex-col gap-4">
       <ProjectHeader project={project} />
-      <ProjectMetrics project={project} />
 
       <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
         {tabs.map((tab) => (
@@ -85,17 +92,25 @@ export function ProjectView({ project }: { project: ProjectSummary }) {
       {activeTab === "summary" ? (
         <div className="flex flex-col gap-4">
           <AgentBriefPanel
-            brief={briefQuery.data}
+            brief={isBriefRequested ? briefQuery.data : undefined}
             isLoading={briefQuery.isFetching}
             errorMessage={
-              briefQuery.isError
+              isBriefRequested && briefQuery.isError
                 ? "Агент сейчас недоступен или вернул некорректный ответ"
                 : null
             }
+            hasRequested={isBriefRequested}
+            onRequest={() => {
+              if (isBriefRequested) {
+                void briefQuery.refetch();
+                return;
+              }
+              setIsBriefRequested(true);
+            }}
           />
-          <KeySignalsPanel signals={project.key_signals} />
+          <KeySignalsPanel signals={project.key_signals.slice(0, 5)} />
           <BudgetPanel budget={project.budget} />
-          <RisksPanel risks={project.top_risks} />
+          <RisksPanel risks={project.top_risks.slice(0, 5)} />
         </div>
       ) : null}
 

@@ -8,13 +8,51 @@ from typing import Any, Literal
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from agents.yandex_client import get_yandex_client, get_yandex_model_uri
 
+try:
+    from langgraph.graph import END, START, StateGraph
+except ModuleNotFoundError:
+    END = START = StateGraph = None
+
 
 TECHNICAL_ID_RE = re.compile(r"\b(?:T|TD|RK|C|D|DEC|CR|R|Р)\d{3}\b")
+
+
+class BusinessImpact(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    delay_days: int | None = Field(None, description="Оценка задержки в днях из входных метрик.")
+    cost_of_delay: int | None = Field(None, description="Денежный exposure задержки из входных метрик.")
+    budget_delta: int | None = Field(None, description="Отклонение или impact бюджета из входных данных.")
+    impact_summary: str = Field(description="Короткое объяснение управленческого impact.")
+
+
+class AgentActionItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    action: str = Field(description="Конкретное действие, которое можно поручить.")
+    owner_hint: str = Field(description="Кому адресовать действие по входным фактам.")
+    deadline: str = Field(description="Срок реакции человеческим языком, без выдуманной даты.")
+    success_signal: str = Field(description="Как понять, что действие сработало.")
+
+
+class DraftMessage(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    recipient_hint: str = Field(description="Кому отправить сообщение по входным фактам.")
+    subject: str = Field(description="Короткая тема сообщения.")
+    body: str = Field(description="Готовый черновик сообщения без технических id.")
+
+
+class FollowUpCheck(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    check_after: str = Field(description="Когда агент должен проверить изменения.")
+    success_condition: str = Field(description="Какой факт во входных данных будет означать улучшение.")
+    escalation_condition: str = Field(description="Что считать поводом для следующей эскалации.")
 
 
 class ProjectManagerBrief(BaseModel):
@@ -39,6 +77,20 @@ class ProjectManagerBrief(BaseModel):
         min_length=2,
         max_length=3,
         description="Реальные развилки решения с компромиссами.",
+    )
+    business_impact: BusinessImpact = Field(
+        description="Перевод проблемы в срок, деньги и управленческий impact."
+    )
+    next_actions: list[AgentActionItem] = Field(
+        min_length=1,
+        max_length=3,
+        description="Поручения, которые можно создать в системе по рекомендации агента.",
+    )
+    draft_message: DraftMessage = Field(
+        description="Черновик управленческого сообщения владельцу блокера или решения."
+    )
+    follow_up_check: FollowUpCheck = Field(
+        description="Правило последующей проверки, чтобы агент не заканчивался текстом."
     )
     watchouts: list[str] = Field(
         min_length=1,
@@ -94,6 +146,10 @@ Backend не присылает готовые выводы. Он присыла
 - сначала найди узкое место и цепочку зависимостей из problem_tasks и task_dependency_edges;
 - потом сформулируй управленческую развилку: что именно надо решить, какие есть опции и цена каждой;
 - recommended_move должен быть одним ходом, а не списком поручений;
+- business_impact заполни только из метрик и фактов: задержка, cost of delay, бюджетный impact, краткий смысл;
+- next_actions должны быть готовыми поручениями с владельцем, сроком реакции и измеримым признаком успеха;
+- draft_message должен быть готовым коротким сообщением владельцу блокера, решения или зависимости;
+- follow_up_check должен описывать, что агент проверит после действия и когда нужна повторная эскалация;
 - watchouts используй для вещей, которые могут выглядеть правильными, но не решат проблему;
 - если вывод не следует из problem_context, не пиши его;
 - все использованные id положи только в поле evidence_ids;
@@ -169,7 +225,8 @@ def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None 
     return (
         retry_note
         + "Сформируй управленческую рекомендацию по JSON problem context.\n"
-        + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей и развилку решения.\n"
+        + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей, развилку решения, "
+        + "business impact, поручение, черновик сообщения и follow-up проверку.\n"
         + "Ответ будет распарсен в строгую Pydantic-схему ProjectManagerBrief.\n\n"
         + "JSON problem context:\n"
         + json.dumps(problem_context, ensure_ascii=False)
@@ -190,7 +247,7 @@ def fetch_problem_context_node(backend_api_url: str) -> Any:
     return fetch_problem_context
 
 
-def generate_brief_node(agent: ProjectBriefAgent) -> Any:
+def generate_brief_node(agent: Any) -> Any:
     def generate_brief(state: ProjectBriefData | dict[str, Any]) -> dict[str, Any]:
         problem_context = state_value(state, "problem_context")
         if problem_context is None:
@@ -204,10 +261,14 @@ def generate_brief_node(agent: ProjectBriefAgent) -> Any:
 
 def build_project_brief_graph(
     backend_api_url: str | None = None,
-    agent: ProjectBriefAgent | None = None,
+    agent: Any | None = None,
 ):
+    if StateGraph is None or START is None or END is None:
+        raise RuntimeError("LangGraph не установлен в окружении агента.")
+
     backend_api_url = backend_api_url or os.getenv("BACKEND_API_URL", "http://backend:8000")
-    agent = agent or ProjectBriefAgent()
+    if agent is None:
+        agent = ProjectBriefAgent()
 
     graph = StateGraph(ProjectBriefData)
     graph.add_node("fetch_problem_context", fetch_problem_context_node(backend_api_url))
@@ -223,7 +284,7 @@ def run_project_brief(
     as_of: date | None = None,
     max_depth: int = 2,
     backend_api_url: str | None = None,
-    agent: ProjectBriefAgent | None = None,
+    agent: Any | None = None,
 ) -> ProjectManagerBrief:
     graph = build_project_brief_graph(backend_api_url=backend_api_url, agent=agent)
     initial_state = ProjectBriefData(project_id=project_id, as_of=as_of, max_depth=max_depth)
@@ -267,6 +328,36 @@ def _clean_brief(brief: ProjectManagerBrief, problem_context: dict[str, Any]) ->
     brief.critical_path = [_limit_text(_clean_text_value(item, replacements), 180) for item in brief.critical_path]
     brief.recommended_move = _limit_text(_clean_text_value(brief.recommended_move, replacements), 360)
     brief.watchouts = [_limit_text(_clean_text_value(item, replacements), 220) for item in brief.watchouts]
+    brief.business_impact.impact_summary = _limit_text(
+        _clean_text_value(brief.business_impact.impact_summary, replacements),
+        260,
+    )
+    for action in brief.next_actions:
+        action.action = _limit_text(_clean_text_value(action.action, replacements), 220)
+        action.owner_hint = _limit_text(_clean_text_value(action.owner_hint, replacements), 160)
+        action.deadline = _limit_text(_clean_text_value(action.deadline, replacements), 120)
+        action.success_signal = _limit_text(_clean_text_value(action.success_signal, replacements), 220)
+    brief.draft_message.recipient_hint = _limit_text(
+        _clean_text_value(brief.draft_message.recipient_hint, replacements),
+        160,
+    )
+    brief.draft_message.subject = _limit_text(
+        _clean_text_value(brief.draft_message.subject, replacements),
+        160,
+    )
+    brief.draft_message.body = _limit_text(_clean_text_value(brief.draft_message.body, replacements), 560)
+    brief.follow_up_check.check_after = _limit_text(
+        _clean_text_value(brief.follow_up_check.check_after, replacements),
+        120,
+    )
+    brief.follow_up_check.success_condition = _limit_text(
+        _clean_text_value(brief.follow_up_check.success_condition, replacements),
+        220,
+    )
+    brief.follow_up_check.escalation_condition = _limit_text(
+        _clean_text_value(brief.follow_up_check.escalation_condition, replacements),
+        220,
+    )
     for option in brief.decision_options:
         option.option = _limit_text(_clean_text_value(option.option, replacements), 160)
         option.when_to_choose = _limit_text(_clean_text_value(option.when_to_choose, replacements), 220)

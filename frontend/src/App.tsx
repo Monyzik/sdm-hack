@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Gauge,
   LayoutDashboard,
+  MessageCircle,
   Moon,
   RefreshCw,
   Sun,
@@ -14,9 +15,9 @@ import { useEffect, useState } from "react";
 
 import { ApiError } from "./api/client";
 import { Card, ErrorState, LoadingState } from "./components/ui";
-import { AttentionInbox } from "./features/portfolio/AttentionInbox";
+import { ProjectChatPage } from "./features/chat/ProjectChatPage";
+import { PortfolioCommandCenter } from "./features/portfolio/PortfolioCommandCenter";
 import { PortfolioSidebar } from "./features/portfolio/PortfolioSidebar";
-import { PortfolioStats } from "./features/portfolio/PortfolioStats";
 import { ProjectView } from "./features/project/ProjectView";
 import { usePortfolio } from "./hooks/usePortfolio";
 import { usePortfolioAttention } from "./hooks/usePortfolioAttention";
@@ -32,7 +33,7 @@ function describeError(error: unknown): string {
   return "Не удалось загрузить данные.";
 }
 
-type AppPage = "overview" | "analysis";
+type AppPage = "overview" | "analysis" | "chat";
 
 const appPages = [
   {
@@ -46,6 +47,12 @@ const appPages = [
     label: "Анализ",
     description: "Выбранный проект",
     icon: BarChart3,
+  },
+  {
+    id: "chat" as const,
+    label: "Чат",
+    description: "Вопросы по проекту",
+    icon: MessageCircle,
   },
 ];
 
@@ -67,8 +74,16 @@ export default function App() {
   );
 
   const portfolioQuery = usePortfolio(AS_OF_DATE);
-  const attentionQuery = usePortfolioAttention(AS_OF_DATE, 7);
-  const projectQuery = useProjectSummary(selectedProjectId, AS_OF_DATE);
+  const attentionQuery = usePortfolioAttention(
+    AS_OF_DATE,
+    7,
+    activePage === "overview",
+  );
+  const projectQuery = useProjectSummary(
+    selectedProjectId,
+    AS_OF_DATE,
+    activePage === "analysis",
+  );
   const previewProject = portfolioQuery.data?.projects.find(
     (project) => project.project_id === previewProjectId,
   );
@@ -102,8 +117,8 @@ export default function App() {
       <div
         className={`grid min-h-screen grid-cols-1 ${
           isNavCollapsed
-            ? "lg:grid-cols-[84px_minmax(0,1fr)]"
-            : "lg:grid-cols-[320px_minmax(0,1fr)]"
+            ? "lg:grid-cols-[72px_minmax(0,1fr)]"
+            : "lg:grid-cols-[280px_minmax(0,1fr)]"
         }`}
       >
         <nav className="relative border-b border-slate-200 bg-white/90 px-4 py-3 shadow-sm shadow-slate-200/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 dark:shadow-black/20 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
@@ -118,14 +133,22 @@ export default function App() {
                   type="button"
                   title="Показать navbar"
                   onClick={() => setIsNavCollapsed(false)}
-                  className="hidden size-14 shrink-0 place-items-center rounded-xl border border-slate-300 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 lg:grid"
+                  className="hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:text-slate-100 lg:grid"
                 >
-                  <ChevronRight aria-hidden className="size-4" />
+                  <ChevronRight
+                    aria-hidden
+                    strokeWidth={2.25}
+                    className="size-5"
+                  />
                   <span className="sr-only">Показать navbar</span>
                 </button>
               ) : (
-                <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-100 text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-100">
-                  <LayoutDashboard aria-hidden className="size-5" />
+                <div className="grid size-8 shrink-0 place-items-center text-slate-800 dark:text-slate-100">
+                  <LayoutDashboard
+                    aria-hidden
+                    strokeWidth={2.25}
+                    className="size-6"
+                  />
                 </div>
               )}
               <div className={`min-w-0 ${isNavCollapsed ? "lg:hidden" : ""}`}>
@@ -142,11 +165,15 @@ export default function App() {
               type="button"
               title="Скрыть navbar"
               onClick={() => setIsNavCollapsed((value) => !value)}
-              className={`hidden size-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 lg:inline-grid ${
+              className={`hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:text-slate-100 lg:inline-flex ${
                 isNavCollapsed ? "lg:hidden" : ""
               }`}
             >
-              <ChevronLeft aria-hidden className="size-4" />
+              <ChevronLeft
+                aria-hidden
+                strokeWidth={2.25}
+                className="size-5"
+              />
               <span className="sr-only">Скрыть navbar</span>
             </button>
 
@@ -159,22 +186,23 @@ export default function App() {
                     : "Включить тёмную тему"
                 }
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="inline-grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="inline-grid size-9 place-items-center text-slate-600 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-300"
               >
                 {theme === "dark" ? (
-                  <Sun aria-hidden className="size-4" />
+                  <Sun aria-hidden strokeWidth={2.25} className="size-4" />
                 ) : (
-                  <Moon aria-hidden className="size-4" />
+                  <Moon aria-hidden strokeWidth={2.25} className="size-4" />
                 )}
                 <span className="sr-only">Переключить тему</span>
               </button>
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="inline-grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="inline-grid size-9 place-items-center text-slate-700 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-300"
               >
                 <RefreshCw
                   aria-hidden
+                  strokeWidth={2.25}
                   className={`size-4 ${portfolioQuery.isFetching ? "animate-spin" : ""}`}
                 />
                 <span className="sr-only">Обновить</span>
@@ -195,13 +223,19 @@ export default function App() {
                     aria-current={isActive ? "page" : undefined}
                     title={page.label}
                     onClick={() => setActivePage(page.id)}
-                    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
+                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
                       isActive
-                        ? "border-slate-300 bg-slate-200 text-slate-950 dark:border-slate-700 dark:!bg-slate-900 dark:text-slate-50"
-                        : "border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900"
-                    } ${isNavCollapsed ? "lg:grid lg:size-14 lg:place-items-center lg:p-0" : ""}`}
+                        ? "bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-slate-50"
+                        : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900/60"
+                    } ${isNavCollapsed ? "lg:grid lg:size-12 lg:place-items-center lg:justify-items-center lg:p-0" : ""}`}
                   >
-                    <Icon aria-hidden className="size-4 shrink-0" />
+                    <Icon
+                      aria-hidden
+                      strokeWidth={2.25}
+                      className={`${
+                        isNavCollapsed ? "lg:size-6" : "size-5"
+                      } shrink-0`}
+                    />
                     <span className={isNavCollapsed ? "lg:sr-only" : ""}>
                       <span className="block text-sm font-semibold">
                         {page.label}
@@ -220,13 +254,16 @@ export default function App() {
             <button
               type="button"
               onClick={handleRefresh}
-              className="inline-flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              className={`inline-flex w-full items-center ${
+                isNavCollapsed ? "lg:justify-center lg:px-0 lg:py-2" : "justify-between"
+              } px-3 py-2.5 text-sm font-medium text-slate-700 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100`}
             >
               <span className={isNavCollapsed ? "lg:sr-only" : ""}>
                 Обновить
               </span>
               <RefreshCw
                 aria-hidden
+                strokeWidth={2.25}
                 className={`size-4 ${portfolioQuery.isFetching ? "animate-spin" : ""}`}
               />
             </button>
@@ -240,13 +277,12 @@ export default function App() {
               className="flex flex-col gap-3 border-b border-slate-200 pb-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between"
             >
               <div>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  AI Project Control Tower
-                </p>
                 <h1 className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
                   {activePage === "overview"
                     ? "Обзор портфеля проектов"
-                    : "Анализ проекта"}
+                    : activePage === "analysis"
+                      ? "Анализ проекта"
+                      : "Чат по проекту"}
                 </h1>
               </div>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -258,12 +294,12 @@ export default function App() {
                       : "Включить тёмную тему"
                   }
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                  className="inline-grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                  className="inline-grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                 >
                   {theme === "dark" ? (
-                    <Sun aria-hidden className="size-4" />
+                    <Sun aria-hidden className="size-3.5" />
                   ) : (
-                    <Moon aria-hidden className="size-4" />
+                    <Moon aria-hidden className="size-3.5" />
                   )}
                   <span className="sr-only">Переключить тему</span>
                 </button>
@@ -305,44 +341,25 @@ export default function App() {
                     onRetry={() => portfolioQuery.refetch()}
                   />
                 ) : (
-                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-                    <div className="flex flex-col gap-4">
-                      <PortfolioStats portfolio={portfolioQuery.data} />
-                      {attentionQuery.data ? (
-                        <AttentionInbox
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+                    <div className="min-w-0">
+                      {attentionQuery.isPending ? (
+                        <LoadingState label="Загрузка портфеля…" />
+                      ) : attentionQuery.isError ? (
+                        <ErrorState
+                          message={describeError(attentionQuery.error)}
+                          onRetry={() => attentionQuery.refetch()}
+                        />
+                      ) : (
+                        <PortfolioCommandCenter
+                          portfolio={portfolioQuery.data}
                           attention={attentionQuery.data}
                           onSelectProject={(projectId) => {
                             setSelectedProjectId(projectId);
                             setActivePage("analysis");
                           }}
                         />
-                      ) : attentionQuery.isPending ? (
-                        <Card>
-                          <LoadingState label="Загрузка изменений…" />
-                        </Card>
-                      ) : attentionQuery.isError ? (
-                        <ErrorState
-                          message={describeError(attentionQuery.error)}
-                          onRetry={() => attentionQuery.refetch()}
-                        />
-                      ) : null}
-                      <Card className="p-4">
-                        <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
-                          Главные сигналы портфеля
-                        </h2>
-                        <ul className="mt-3 space-y-2">
-                          {portfolioQuery.data.top_portfolio_signals.map(
-                            (signal, index) => (
-                              <li
-                                key={`${index}-${signal}`}
-                                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300"
-                              >
-                                {signal}
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                      </Card>
+                      )}
                     </div>
                     <PortfolioSidebar
                       projects={portfolioQuery.data.projects}
@@ -350,6 +367,21 @@ export default function App() {
                       onSelect={setPreviewProjectId}
                     />
                   </div>
+                )
+              ) : activePage === "chat" ? (
+                portfolioQuery.isPending ? (
+                  <LoadingState label="Загрузка проектов…" />
+                ) : portfolioQuery.isError ? (
+                  <ErrorState
+                    message={describeError(portfolioQuery.error)}
+                    onRetry={() => portfolioQuery.refetch()}
+                  />
+                ) : (
+                  <ProjectChatPage
+                    projects={portfolioQuery.data.projects}
+                    selectedProjectId={selectedProjectId}
+                    onSelectProject={setSelectedProjectId}
+                  />
                 )
               ) : projectQuery.isError ? (
                 <ErrorState

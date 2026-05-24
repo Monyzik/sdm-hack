@@ -10,12 +10,16 @@ import { queryKeys } from "./queryKeys";
  * переключениями проектов (`placeholderData`), чтобы интерфейс не «мигал»
  * пустотой при каждом клике в списке портфеля.
  */
-export function useProjectSummary(projectId: string | null, asOf: string) {
+export function useProjectSummary(
+  projectId: string | null,
+  asOf: string,
+  enabled = Boolean(projectId),
+) {
   return useQuery({
     queryKey: queryKeys.project(projectId ?? "", asOf),
     queryFn: ({ signal }) =>
       fetchProjectSummary(projectId as string, asOf, signal),
-    enabled: Boolean(projectId),
+    enabled: enabled && Boolean(projectId),
     placeholderData: (previous) => previous,
   });
 }

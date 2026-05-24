@@ -1,22 +1,22 @@
-import { CheckCircle2 } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Clock3,
+  Gauge,
+  ShieldAlert,
+} from "lucide-react";
 
 import type { ProjectSummary } from "../../api/types";
-import {
-  Card,
-  CircularGauge,
-  MetricTile,
-  RiskBadge,
-} from "../../components/ui";
+import { Card, MetricTile, RiskBadge } from "../../components/ui";
 import { healthTone } from "../../lib/risk";
 
 /**
- * Шапка карточки проекта: название, зона риска, владелец, executive summary
- * и две главные метрики (health и готовность).
+ * Шапка карточки проекта: название, зона риска, владелец и главные метрики.
  */
 export function ProjectHeader({ project }: { project: ProjectSummary }) {
   return (
-    <Card className="overflow-hidden">
-      <div className="grid gap-5 p-5 xl:grid-cols-[minmax(0,1fr)_330px] xl:items-center">
+    <Card className="p-5">
+      <div className="flex flex-col gap-5">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
@@ -25,18 +25,16 @@ export function ProjectHeader({ project }: { project: ProjectSummary }) {
             <RiskBadge level={project.risk_level} />
           </div>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Владелец: {project.owner_name} · Статус: {project.status} ·
-            Приоритет: {project.priority}
-          </p>
-          <p className="line-clamp-2 mt-3 max-w-4xl text-sm leading-6 text-slate-700 dark:text-slate-300">
-            {project.executive_summary}
+            {project.owner_name} · {project.priority}
           </p>
         </div>
-        <div className="grid grid-cols-[110px_minmax(0,1fr)] items-center gap-3">
-          <CircularGauge
+
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+          <MetricTile
+            label="Health"
             value={project.project_health_score}
-            label="health"
             tone={healthTone(project.project_health_score)}
+            icon={<Gauge className="size-4" />}
           />
           <MetricTile
             label="Готовность"
@@ -44,28 +42,24 @@ export function ProjectHeader({ project }: { project: ProjectSummary }) {
             icon={<CheckCircle2 className="size-4" />}
             hint={`${project.completed_tasks_count} из ${project.total_tasks_count} задач`}
           />
-        </div>
-      </div>
-      <div className="grid grid-cols-3 border-t border-slate-100 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-950/30">
-        <div className="px-5 py-3">
-          <p className="text-xs text-slate-500 dark:text-slate-400">Блокеры</p>
-          <p className="mt-1 text-lg font-semibold tabular-nums text-slate-950 dark:text-slate-50">
-            {project.blocked_tasks_count}
-          </p>
-        </div>
-        <div className="border-x border-slate-100 px-5 py-3 dark:border-slate-800">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Просрочки
-          </p>
-          <p className="mt-1 text-lg font-semibold tabular-nums text-slate-950 dark:text-slate-50">
-            {project.overdue_tasks_count}
-          </p>
-        </div>
-        <div className="px-5 py-3">
-          <p className="text-xs text-slate-500 dark:text-slate-400">Риски</p>
-          <p className="mt-1 text-lg font-semibold tabular-nums text-slate-950 dark:text-slate-50">
-            {project.high_risk_count}
-          </p>
+          <MetricTile
+            label="Блокеры"
+            value={project.blocked_tasks_count}
+            tone={project.blocked_tasks_count ? "danger" : "neutral"}
+            icon={<AlertTriangle className="size-4" />}
+          />
+          <MetricTile
+            label="Просрочки"
+            value={project.overdue_tasks_count}
+            tone={project.overdue_tasks_count ? "danger" : "neutral"}
+            icon={<Clock3 className="size-4" />}
+          />
+          <MetricTile
+            label="Риски"
+            value={project.high_risk_count}
+            tone={project.high_risk_count ? "warning" : "neutral"}
+            icon={<ShieldAlert className="size-4" />}
+          />
         </div>
       </div>
     </Card>

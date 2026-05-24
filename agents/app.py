@@ -8,6 +8,11 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from agents.project_brief_graph import ProjectManagerBrief, run_project_brief
+from agents.project_qa_agent import (
+    ProjectQuestionAnswer,
+    ProjectQuestionRequest,
+    run_project_question,
+)
 
 
 def get_cors_origins() -> list[str]:
@@ -54,3 +59,29 @@ def get_project_ai_brief(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Ошибка LLM-агента: {exc}") from exc
+
+
+@app.post("/api/v1/agents/projects/{project_id}/ask", response_model=ProjectQuestionAnswer)
+def ask_project_agent(
+    project_id: str,
+    payload: ProjectQuestionRequest,
+) -> ProjectQuestionAnswer:
+    backend_api_url = os.getenv("BACKEND_API_URL", "http://backend:8000")
+    try:
+        return run_project_question(
+            project_id=project_id,
+            question=payload.question,
+            as_of=payload.as_of,
+            max_depth=payload.max_depth,
+            backend_api_url=backend_api_url,
+        )
+    except HTTPError as exc:
+        raise HTTPException(status_code=exc.code, detail="Backend не вернул данные проекта") from exc
+    except URLError as exc:
+        raise HTTPException(status_code=503, detail=f"Backend недоступен: {exc.reason}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Ошибка Q&A-агента: {exc}") from exc

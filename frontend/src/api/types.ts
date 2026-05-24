@@ -253,6 +253,32 @@ export interface DecisionOption {
   tradeoff: string;
 }
 
+export interface BusinessImpact {
+  delay_days: number | null;
+  cost_of_delay: number | null;
+  budget_delta: number | null;
+  impact_summary: string;
+}
+
+export interface AgentActionItem {
+  action: string;
+  owner_hint: string;
+  deadline: string;
+  success_signal: string;
+}
+
+export interface DraftMessage {
+  recipient_hint: string;
+  subject: string;
+  body: string;
+}
+
+export interface FollowUpCheck {
+  check_after: string;
+  success_condition: string;
+  escalation_condition: string;
+}
+
 export interface ProjectManagerBrief {
   status: AgentBriefStatus;
   headline: string;
@@ -262,7 +288,18 @@ export interface ProjectManagerBrief {
   critical_path: string[];
   recommended_move: string;
   decision_options: DecisionOption[];
+  business_impact: BusinessImpact;
+  next_actions: AgentActionItem[];
+  draft_message: DraftMessage;
+  follow_up_check: FollowUpCheck;
   watchouts: string[];
   evidence_ids: string[];
   missing_data: string[];
+}
+
+export interface ProjectQuestionAnswer {
+  answer: string;
+  evidence_ids: string[];
+  used_tools: string[];
+  suggested_questions: string[];
 }
