@@ -52,7 +52,7 @@ export function PortfolioSidebar({
                       {project.project_name}
                     </span>
                     <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="truncate">{project.owner_name}</span>
+                      <span className="truncate">{project.priority}</span>
                       <span className="tabular-nums">
                         {Math.round(project.completion_percent)}%
                       </span>
@@ -89,7 +89,7 @@ export function PortfolioSidebar({
                       {project.project_name}
                     </span>
                     <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="truncate">{project.owner_name}</span>
+                      <span className="truncate">{project.priority}</span>
                       <span className="tabular-nums">
                         {Math.round(project.completion_percent)}%
                       </span>

@@ -64,7 +64,7 @@ class ProjectManagerBrief(BaseModel):
         description="Человеческая оценка состояния проекта."
     )
     headline: str = Field(description="Одна строка о главном управленческом выводе без технических id.")
-    management_question: str = Field(description="Главный вопрос, который должен решить владелец проекта или комитет.")
+    management_question: str = Field(description="Главный вопрос, который должен решить руководитель проектов или комитет.")
     diagnosis: str = Field(description="Короткая причинно-следственная диагностика, а не пересказ метрик.")
     bottleneck: str = Field(description="Одно главное узкое место, которое сильнее всего удерживает проект.")
     critical_path: list[str] = Field(

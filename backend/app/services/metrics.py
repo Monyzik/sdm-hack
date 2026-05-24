@@ -34,6 +34,7 @@ OPEN_COMMUNICATION_STATUSES = {"pending", "delayed", "escalated"}
 OPEN_DEPENDENCY_STATUSES = {"pending", "delayed", "blocked"}
 OPEN_DECISION_STATUSES = {"pending", "under_review"}
 OPEN_CHANGE_REQUEST_STATUSES = {"pending", "under_review", "proposed"}
+BUDGET_FORECAST_CHANGE_REQUEST_STATUSES = OPEN_CHANGE_REQUEST_STATUSES | {"approved"}
 RISK_OPEN_STATUSES = {"active", "escalated", "mitigating", "open"}
 PRIORITY_WEIGHT = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 CRITICALITY_WEIGHT = {"critical": 3, "high": 2, "medium": 1, "low": 0}
@@ -427,7 +428,27 @@ def calculate_budget_summary(
         return None
 
     risk_signals = calculate_high_risk_signals(context) if high_risks is None else high_risks
-    return _budget_summary(budget, risk_signals)
+    return _budget_summary(context, budget, risk_signals)
+
+
+def calculate_forecast_total_spent(context: ProjectMetricContext) -> int:
+    budget = context.source.budget
+    if budget is None:
+        return 0
+
+    base_forecast = sum(
+        max(item.planned_amount, item.actual_amount)
+        for item in context.source.budget_line_items
+    )
+    if base_forecast == 0:
+        base_forecast = max(budget.planned_budget, budget.actual_spent)
+
+    requested_budget_delta = sum(
+        request.requested_budget_delta
+        for request in context.source.change_requests
+        if request.status.casefold() in BUDGET_FORECAST_CHANGE_REQUEST_STATUSES
+    )
+    return max(budget.actual_spent, base_forecast + requested_budget_delta)
 
 
 def calculate_budget_deviation_percent(context: ProjectMetricContext) -> float:
@@ -595,8 +616,8 @@ def calculate_open_change_requests(context: ProjectMetricContext) -> list[Change
             change_type=change_request.change_type,
             requested_by=change_request.requested_by,
             status=change_request.status,
-            impact_budget=change_request.impact_budget,
-            impact_days=change_request.impact_days,
+            requested_budget_delta=change_request.requested_budget_delta,
+            requested_timeline_delta_days=change_request.requested_timeline_delta_days,
             description=change_request.description,
         )
         for change_request in context.source.change_requests
@@ -604,7 +625,11 @@ def calculate_open_change_requests(context: ProjectMetricContext) -> list[Change
     ]
     return sorted(
         signals,
-        key=lambda item: (abs(item.impact_days), abs(item.impact_budget), item.id),
+        key=lambda item: (
+            abs(item.requested_timeline_delta_days),
+            abs(item.requested_budget_delta),
+            item.id,
+        ),
         reverse=True,
     )
 
@@ -671,7 +696,7 @@ def calculate_net_change_request_impact_days(
     open_change_requests: list[ChangeRequestSignal] | None = None,
 ) -> int:
     requests = calculate_open_change_requests(context) if open_change_requests is None else open_change_requests
-    return sum(request.impact_days for request in requests)
+    return sum(request.requested_timeline_delta_days for request in requests)
 
 
 def calculate_net_change_request_impact_budget(
@@ -680,7 +705,7 @@ def calculate_net_change_request_impact_budget(
     open_change_requests: list[ChangeRequestSignal] | None = None,
 ) -> int:
     requests = calculate_open_change_requests(context) if open_change_requests is None else open_change_requests
-    return sum(request.impact_budget for request in requests)
+    return sum(request.requested_budget_delta for request in requests)
 
 
 def calculate_dependency_sla_breach_count(context: ProjectMetricContext) -> int:
@@ -1189,14 +1214,15 @@ def build_portfolio_signals(summaries: list[ProjectSummary]) -> list[str]:
     return signals or ["Критичных портфельных отклонений не найдено"]
 
 
-def _budget_summary(budget: Budget, high_risks: list[RiskSignal]) -> BudgetSummary:
+def _budget_summary(context: ProjectMetricContext, budget: Budget, high_risks: list[RiskSignal]) -> BudgetSummary:
+    forecast_total_spent = calculate_forecast_total_spent(context)
     budget_deviation_percent = _percent(
-        budget.forecast_total_spent - budget.planned_budget,
+        forecast_total_spent - budget.planned_budget,
         budget.planned_budget,
     )
     roi_percent = _percent(
-        budget.expected_economic_effect - budget.forecast_total_spent,
-        budget.forecast_total_spent,
+        budget.expected_economic_effect - forecast_total_spent,
+        forecast_total_spent,
     )
     risk_pressure = min(
         0.6,
@@ -1204,14 +1230,14 @@ def _budget_summary(budget: Budget, high_risks: list[RiskSignal]) -> BudgetSumma
     )
     risk_adjusted_effect = budget.expected_economic_effect * (1 - risk_pressure)
     risk_adjusted_roi_percent = _percent(
-        risk_adjusted_effect - budget.forecast_total_spent,
-        budget.forecast_total_spent,
+        risk_adjusted_effect - forecast_total_spent,
+        forecast_total_spent,
     )
 
     return BudgetSummary(
         planned_budget=budget.planned_budget,
         actual_spent=budget.actual_spent,
-        forecast_total_spent=budget.forecast_total_spent,
+        forecast_total_spent=forecast_total_spent,
         expected_economic_effect=budget.expected_economic_effect,
         cost_of_delay_per_day=budget.cost_of_delay_per_day,
         currency=budget.currency,
@@ -1357,23 +1383,23 @@ PROJECT_METRIC_PROTOCOL = (
     FunctionMetric(
         key="budget_deviation_percent",
         title="Отклонение бюджета",
-        source_tables=("budgets",),
+        source_tables=("budgets", "budget_line_items", "change_requests"),
         calculator=calculate_budget_deviation_percent,
-        description="Отклонение forecast_total_spent от planned_budget в процентах.",
+        description="Отклонение расчетного forecast_total_spent от planned_budget в процентах.",
         owner_action="Подготовить решение по резерву, scope cut или reforecast.",
     ),
     FunctionMetric(
         key="roi_percent",
         title="ROI проекта",
-        source_tables=("budgets",),
+        source_tables=("budgets", "budget_line_items", "change_requests"),
         calculator=calculate_roi_percent,
-        description="Ожидаемый экономический эффект относительно forecast_total_spent.",
+        description="Ожидаемый экономический эффект относительно расчетного forecast_total_spent.",
         owner_action="Проверить, сохраняет ли проект экономический смысл.",
     ),
     FunctionMetric(
         key="risk_adjusted_roi_percent",
         title="Risk-adjusted ROI",
-        source_tables=("budgets", "risks"),
+        source_tables=("budgets", "budget_line_items", "change_requests", "risks"),
         calculator=calculate_risk_adjusted_roi_percent,
         description="ROI после дисконта эффекта на давление критичных рисков.",
         owner_action="Использовать для разговора с PMO и заказчиком при высоких рисках.",
@@ -1455,7 +1481,7 @@ PROJECT_METRIC_PROTOCOL = (
         title="Net impact CR по срокам",
         source_tables=("change_requests",),
         calculator=calculate_net_change_request_impact_days,
-        description="Суммарный impact_days по открытым change requests.",
+        description="Суммарная запрошенная дельта срока по открытым change requests.",
         owner_action="Согласовать, принимается ли изменение срока или нужен scope cut.",
     ),
     FunctionMetric(
@@ -1463,7 +1489,7 @@ PROJECT_METRIC_PROTOCOL = (
         title="Net impact CR по бюджету",
         source_tables=("change_requests",),
         calculator=calculate_net_change_request_impact_budget,
-        description="Суммарный impact_budget по открытым change requests.",
+        description="Суммарная запрошенная дельта бюджета по открытым change requests.",
         owner_action="Подготовить бюджетное решение или компенсирующий scope cut.",
     ),
     FunctionMetric(

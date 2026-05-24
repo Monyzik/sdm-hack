@@ -5,7 +5,7 @@ import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDays, formatMoney } from "../../../lib/format";
 import { severityTone } from "../../../lib/risk";
 
-/** Открытые запросы на изменение со влиянием на бюджет и сроки. */
+/** Открытые запросы на изменение с запрошенными дельтами бюджета и сроков. */
 export function ChangeRequestsPanel({
   changeRequests,
 }: {
@@ -43,14 +43,14 @@ export function ChangeRequestsPanel({
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span>Инициатор: {request.requested_by}</span>
-                {request.impact_budget !== 0 ? (
+                {request.requested_budget_delta !== 0 ? (
                   <Badge tone="warning">
-                    {formatMoney(request.impact_budget)}
+                    {formatMoney(request.requested_budget_delta)}
                   </Badge>
                 ) : null}
-                {request.impact_days !== 0 ? (
+                {request.requested_timeline_delta_days !== 0 ? (
                   <Badge tone="warning">
-                    {formatDays(request.impact_days)}
+                    {formatDays(request.requested_timeline_delta_days)}
                   </Badge>
                 ) : null}
               </div>

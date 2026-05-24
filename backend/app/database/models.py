@@ -15,8 +15,7 @@ class Project(Base):
 
     id: Mapped[str] = mapped_column(String(16), primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    owner_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    lifecycle_status: Mapped[str] = mapped_column(String(32), nullable=False)
     priority: Mapped[str] = mapped_column(String(32), nullable=False)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     planned_end_date: Mapped[date] = mapped_column(Date, nullable=False)
@@ -138,7 +137,6 @@ class Budget(Base):
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), nullable=False, unique=True)
     planned_budget: Mapped[int] = mapped_column(BigInteger, nullable=False)
     actual_spent: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    forecast_total_spent: Mapped[int] = mapped_column(BigInteger, nullable=False)
     expected_economic_effect: Mapped[int] = mapped_column(BigInteger, nullable=False)
     cost_of_delay_per_day: Mapped[int] = mapped_column(BigInteger, nullable=False)
     currency: Mapped[str] = mapped_column(String(8), nullable=False)
@@ -157,7 +155,6 @@ class BudgetLineItem(Base):
     item_name: Mapped[str] = mapped_column(String(255), nullable=False)
     planned_amount: Mapped[int] = mapped_column(BigInteger, nullable=False)
     actual_amount: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    forecast_amount: Mapped[int] = mapped_column(BigInteger, nullable=False)
     owner_team: Mapped[str] = mapped_column(String(128), nullable=False)
 
     project: Mapped[Project] = relationship(back_populates="budget_line_items")
@@ -289,9 +286,8 @@ class ChangeRequest(Base):
     requested_by: Mapped[str] = mapped_column(String(128), nullable=False)
     change_type: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    impact_scope: Mapped[str] = mapped_column(String(64), nullable=False)
-    impact_budget: Mapped[int] = mapped_column(BigInteger, nullable=False)
-    impact_days: Mapped[int] = mapped_column(Integer, nullable=False)
+    requested_budget_delta: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    requested_timeline_delta_days: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[str] = mapped_column(String(64), nullable=False)
 
     project: Mapped[Project] = relationship(back_populates="change_requests")

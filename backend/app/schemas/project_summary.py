@@ -20,8 +20,7 @@ class TaskSignal(BaseModel):
 class ProjectFact(BaseModel):
     id: str
     name: str
-    owner_name: str
-    status: str
+    lifecycle_status: str
     priority: str
     start_date: date
     planned_end_date: date
@@ -207,8 +206,8 @@ class ChangeRequestSignal(BaseModel):
     change_type: str
     requested_by: str
     status: str
-    impact_budget: int
-    impact_days: int
+    requested_budget_delta: int
+    requested_timeline_delta_days: int
     description: str
 
 
@@ -227,8 +226,7 @@ class OwnerActionLoadSignal(BaseModel):
 class ProjectSummary(BaseModel):
     project_id: str
     project_name: str
-    owner_name: str
-    status: str
+    lifecycle_status: str
     priority: str
     as_of_date: date
 
@@ -303,8 +301,7 @@ class ProjectProblemContext(BaseModel):
 class PortfolioProjectSummary(BaseModel):
     project_id: str
     project_name: str
-    owner_name: str
-    status: str
+    lifecycle_status: str
     priority: str
     project_health_score: int
     risk_level: str
@@ -320,7 +317,6 @@ class PortfolioProjectSummary(BaseModel):
 class PortfolioAttentionProject(BaseModel):
     project_id: str
     project_name: str
-    owner_name: str
     risk_level: str
     project_health_score: int = Field(ge=0, le=100)
     urgent_signals_count: int

@@ -106,8 +106,8 @@ export interface ChangeRequestSignal {
   change_type: string;
   requested_by: string;
   status: string;
-  impact_budget: number;
-  impact_days: number;
+  requested_budget_delta: number;
+  requested_timeline_delta_days: number;
   description: string;
 }
 
@@ -126,8 +126,7 @@ export interface OwnerActionLoadSignal {
 export interface ProjectSummary {
   project_id: string;
   project_name: string;
-  owner_name: string;
-  status: string;
+  lifecycle_status: string;
   priority: string;
   as_of_date: string;
 
@@ -185,8 +184,7 @@ export interface ProjectSummary {
 export interface PortfolioProjectSummary {
   project_id: string;
   project_name: string;
-  owner_name: string;
-  status: string;
+  lifecycle_status: string;
   priority: string;
   project_health_score: number;
   risk_level: RiskLevel;
@@ -213,7 +211,6 @@ export interface PortfolioSummary {
 export interface PortfolioAttentionProject {
   project_id: string;
   project_name: string;
-  owner_name: string;
   risk_level: RiskLevel;
   project_health_score: number;
   urgent_signals_count: number;

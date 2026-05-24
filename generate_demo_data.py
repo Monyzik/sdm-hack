@@ -16,8 +16,7 @@ LATEST_SNAPSHOT_DATE = date(2026, 6, 19)
 PROJECT_COLUMNS = [
     "id",
     "name",
-    "owner_name",
-    "status",
+    "lifecycle_status",
     "priority",
     "start_date",
     "planned_end_date",
@@ -85,7 +84,6 @@ BUDGET_COLUMNS = [
     "project_id",
     "planned_budget",
     "actual_spent",
-    "forecast_total_spent",
     "expected_economic_effect",
     "cost_of_delay_per_day",
     "currency",
@@ -155,7 +153,6 @@ BUDGET_ITEM_COLUMNS = [
     "item_name",
     "planned_amount",
     "actual_amount",
-    "forecast_amount",
     "owner_team",
 ]
 
@@ -204,86 +201,10 @@ CHANGE_REQUEST_COLUMNS = [
     "requested_by",
     "change_type",
     "description",
-    "impact_scope",
-    "impact_budget",
-    "impact_days",
+    "requested_budget_delta",
+    "requested_timeline_delta_days",
     "status",
 ]
-
-TASK_DEPENDENCY_COLUMNS = [
-    "id",
-    "project_id",
-    "task_id",
-    "depends_on_task_id",
-    "dependency_type",
-    "is_critical_path",
-    "lag_days",
-    "reason",
-]
-
-BUDGET_ITEM_COLUMNS = [
-    "id",
-    "project_id",
-    "budget_id",
-    "category",
-    "item_name",
-    "planned_amount",
-    "actual_amount",
-    "forecast_amount",
-    "owner_team",
-]
-
-COMMUNICATION_MESSAGE_COLUMNS = [
-    "id",
-    "project_id",
-    "communication_id",
-    "message_time",
-    "sender_team",
-    "recipient_team",
-    "channel",
-    "message_type",
-    "status",
-    "summary",
-    "linked_task_id",
-    "is_escalation",
-]
-
-DEPENDENCY_COLUMNS = [
-    "id",
-    "project_id",
-    "dependency_type",
-    "depends_on",
-    "owner_team",
-    "expected_date",
-    "status",
-    "criticality",
-    "linked_task_id",
-]
-
-DECISION_COLUMNS = [
-    "id",
-    "project_id",
-    "decision_date",
-    "decision_type",
-    "description",
-    "decision_owner",
-    "status",
-    "linked_milestone_id",
-]
-
-CHANGE_REQUEST_COLUMNS = [
-    "id",
-    "project_id",
-    "request_date",
-    "requested_by",
-    "change_type",
-    "description",
-    "impact_scope",
-    "impact_budget",
-    "impact_days",
-    "status",
-]
-
 
 def iso(value: date | None) -> str:
     return value.isoformat() if value else ""
@@ -315,8 +236,7 @@ def make_projects() -> list[dict[str, Any]]:
         {
             "id": "P001",
             "name": "Скоринговый модуль МСБ",
-            "owner_name": "Елена Морозова",
-            "status": "red",
+            "lifecycle_status": "active",
             "priority": "critical",
             "start_date": iso(d(2026, 5, 4)),
             "planned_end_date": iso(d(2026, 6, 30)),
@@ -327,8 +247,7 @@ def make_projects() -> list[dict[str, Any]]:
         {
             "id": "P002",
             "name": "Антифрод real-time",
-            "owner_name": "Андрей Романов",
-            "status": "red",
+            "lifecycle_status": "active",
             "priority": "critical",
             "start_date": iso(d(2026, 4, 27)),
             "planned_end_date": iso(d(2026, 7, 10)),
@@ -339,8 +258,7 @@ def make_projects() -> list[dict[str, Any]]:
         {
             "id": "P003",
             "name": "Мобильный банк 2.0",
-            "owner_name": "Мария Громова",
-            "status": "green",
+            "lifecycle_status": "active",
             "priority": "high",
             "start_date": iso(d(2026, 5, 6)),
             "planned_end_date": iso(d(2026, 7, 3)),
@@ -351,8 +269,7 @@ def make_projects() -> list[dict[str, Any]]:
         {
             "id": "P004",
             "name": "Платёжный gateway",
-            "owner_name": "Сергей Ковалев",
-            "status": "yellow",
+            "lifecycle_status": "active",
             "priority": "high",
             "start_date": iso(d(2026, 5, 11)),
             "planned_end_date": iso(d(2026, 7, 17)),
@@ -363,8 +280,7 @@ def make_projects() -> list[dict[str, Any]]:
         {
             "id": "P005",
             "name": "CRM 360",
-            "owner_name": "Ольга Беляева",
-            "status": "green",
+            "lifecycle_status": "active",
             "priority": "medium",
             "start_date": iso(d(2026, 5, 13)),
             "planned_end_date": iso(d(2026, 7, 24)),
@@ -775,19 +691,19 @@ def make_milestones() -> list[dict[str, Any]]:
 def make_budgets() -> list[dict[str, Any]]:
     return [
         {"id": "B001", "project_id": "P001", "planned_budget": 48_000_000, "actual_spent": 41_500_000,
-         "forecast_total_spent": 62_000_000, "expected_economic_effect": 57_000_000, "cost_of_delay_per_day": 1_250_000,
+         "expected_economic_effect": 57_000_000, "cost_of_delay_per_day": 1_250_000,
          "currency": "RUB"},
         {"id": "B002", "project_id": "P002", "planned_budget": 72_000_000, "actual_spent": 64_000_000,
-         "forecast_total_spent": 88_000_000, "expected_economic_effect": 112_000_000,
+         "expected_economic_effect": 112_000_000,
          "cost_of_delay_per_day": 1_800_000, "currency": "RUB"},
         {"id": "B003", "project_id": "P003", "planned_budget": 42_000_000, "actual_spent": 29_500_000,
-         "forecast_total_spent": 40_000_000, "expected_economic_effect": 76_000_000, "cost_of_delay_per_day": 650_000,
+         "expected_economic_effect": 76_000_000, "cost_of_delay_per_day": 650_000,
          "currency": "RUB"},
         {"id": "B004", "project_id": "P004", "planned_budget": 38_000_000, "actual_spent": 31_000_000,
-         "forecast_total_spent": 43_000_000, "expected_economic_effect": 59_000_000, "cost_of_delay_per_day": 950_000,
+         "expected_economic_effect": 59_000_000, "cost_of_delay_per_day": 950_000,
          "currency": "RUB"},
         {"id": "B005", "project_id": "P005", "planned_budget": 34_000_000, "actual_spent": 22_500_000,
-         "forecast_total_spent": 33_000_000, "expected_economic_effect": 68_000_000, "cost_of_delay_per_day": 520_000,
+         "expected_economic_effect": 68_000_000, "cost_of_delay_per_day": 520_000,
          "currency": "RUB"},
     ]
 
@@ -843,7 +759,7 @@ def make_risks(tasks_by_project: dict[str, list[dict[str, Any]]]) -> list[dict[s
         ("P004", "Performance", "Gateway может не выдержать пиковые платежные окна без SRE-тюнинга.", 3, 4,
          "Владислав Крылов", "Добавить synthetic load и автоалерты по latency.", "mitigating",
          task_id(tasks_by_project, "P004", 8), d(2026, 6, 12)),
-        ("P004", "Budget", "Дополнительные vendor-сертификаты увеличивают forecast_total_spent.", 3, 3,
+        ("P004", "Budget", "Дополнительные vendor-сертификаты увеличивают ожидаемые затраты проекта.", 3, 3,
          "Сергей Ковалев", "Зафиксировать лимит закупки и убрать часть non-critical scope.", "active",
          task_id(tasks_by_project, "P004", 3), d(2026, 6, 12)),
         ("P005", "Data Quality", "Дубликаты клиентов в CRM и DWH расходятся по ключевым атрибутам.", 3, 4,
@@ -1016,30 +932,30 @@ def make_task_dependencies(tasks_by_project: dict[str, list[dict[str, Any]]]) ->
 def make_budget_line_items(budgets: list[dict[str, Any]]) -> list[dict[str, Any]]:
     budget_id = {row["project_id"]: row["id"] for row in budgets}
     specs = [
-        ("P001", "Engineering", "Model development", "Risk Models", 10_000_000, 8_500_000, 11_000_000),
-        ("P001", "Integration", "Core Platform integration", "Core Platform", 14_000_000, 12_000_000, 18_000_000),
-        ("P001", "Compliance", "Security and approvals", "Security", 16_000_000, 13_000_000, 20_000_000),
-        ("P001", "Testing", "Pilot rollout", "PMO", 8_000_000, 8_000_000, 13_000_000),
-        ("P002", "Engineering", "Streaming core", "Fraud Platform", 20_000_000, 18_000_000, 24_000_000),
-        ("P002", "Integration", "Card processing adapter", "Payments", 18_000_000, 16_000_000, 20_000_000),
-        ("P002", "Modeling", "Feature store and scoring", "Risk Models", 20_000_000, 14_000_000, 22_000_000),
-        ("P002", "Compliance", "UAT and sign-off", "Compliance", 14_000_000, 16_000_000, 22_000_000),
-        ("P003", "UX", "Mobile UX and design", "Mobile", 10_000_000, 8_000_000, 9_000_000),
-        ("P003", "Product", "Client scenarios", "Mobile", 10_000_000, 7_000_000, 8_000_000),
-        ("P003", "Analytics", "Event tracking", "CRM Analytics", 12_000_000, 9_000_000, 12_000_000),
-        ("P003", "Release", "Stabilization", "Quality", 10_000_000, 5_500_000, 11_000_000),
-        ("P004", "Engineering", "Gateway core", "Payments", 10_000_000, 9_000_000, 11_000_000),
-        ("P004", "Integration", "SBP and acquiring adapters", "Payments", 12_000_000, 8_000_000, 13_000_000),
-        ("P004", "Security", "PCI DSS workstream", "Security", 8_000_000, 7_000_000, 9_000_000),
-        ("P004", "Observability", "Load testing and monitoring", "Platform", 8_000_000, 7_000_000, 10_000_000),
-        ("P005", "Data Quality", "Golden record and dedupe", "CRM Analytics", 9_000_000, 6_000_000, 8_000_000),
-        ("P005", "Engineering", "CRM profile API", "CRM Platform", 9_000_000, 6_000_000, 8_000_000),
-        ("P005", "Governance", "Data quality controls", "Data Platform", 8_000_000, 5_000_000, 8_000_000),
-        ("P005", "Rollout", "Pilot rollout", "Sales", 8_000_000, 5_500_000, 9_000_000),
+        ("P001", "Engineering", "Model development", "Risk Models", 10_000_000, 8_500_000),
+        ("P001", "Integration", "Core Platform integration", "Core Platform", 14_000_000, 12_000_000),
+        ("P001", "Compliance", "Security and approvals", "Security", 16_000_000, 13_000_000),
+        ("P001", "Testing", "Pilot rollout", "PMO", 8_000_000, 8_000_000),
+        ("P002", "Engineering", "Streaming core", "Fraud Platform", 20_000_000, 18_000_000),
+        ("P002", "Integration", "Card processing adapter", "Payments", 18_000_000, 16_000_000),
+        ("P002", "Modeling", "Feature store and scoring", "Risk Models", 20_000_000, 14_000_000),
+        ("P002", "Compliance", "UAT and sign-off", "Compliance", 14_000_000, 16_000_000),
+        ("P003", "UX", "Mobile UX and design", "Mobile", 10_000_000, 8_000_000),
+        ("P003", "Product", "Client scenarios", "Mobile", 10_000_000, 7_000_000),
+        ("P003", "Analytics", "Event tracking", "CRM Analytics", 12_000_000, 9_000_000),
+        ("P003", "Release", "Stabilization", "Quality", 10_000_000, 5_500_000),
+        ("P004", "Engineering", "Gateway core", "Payments", 10_000_000, 9_000_000),
+        ("P004", "Integration", "SBP and acquiring adapters", "Payments", 12_000_000, 8_000_000),
+        ("P004", "Security", "PCI DSS workstream", "Security", 8_000_000, 7_000_000),
+        ("P004", "Observability", "Load testing and monitoring", "Platform", 8_000_000, 7_000_000),
+        ("P005", "Data Quality", "Golden record and dedupe", "CRM Analytics", 9_000_000, 6_000_000),
+        ("P005", "Engineering", "CRM profile API", "CRM Platform", 9_000_000, 6_000_000),
+        ("P005", "Governance", "Data quality controls", "Data Platform", 8_000_000, 5_000_000),
+        ("P005", "Rollout", "Pilot rollout", "Sales", 8_000_000, 5_500_000),
     ]
 
     rows = []
-    for idx, (project_id, category, item_name, owner_team, planned_amount, actual_amount, forecast_amount) in enumerate(specs, start=1):
+    for idx, (project_id, category, item_name, owner_team, planned_amount, actual_amount) in enumerate(specs, start=1):
         rows.append(
             {
                 "id": f"BI{idx:03d}",
@@ -1049,7 +965,6 @@ def make_budget_line_items(budgets: list[dict[str, Any]]) -> list[dict[str, Any]
                 "item_name": item_name,
                 "planned_amount": planned_amount,
                 "actual_amount": actual_amount,
-                "forecast_amount": forecast_amount,
                 "owner_team": owner_team,
             }
         )
@@ -1440,8 +1355,7 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Security",
             "compliance_scope",
             "Добавить расширенную модель угроз и дополнительные проверки маскирования данных.",
-            "medium",
-            8_000_000,
+            16_000_000,
             14,
             "under_review",
         ),
@@ -1451,7 +1365,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Core Platform",
             "integration_scope",
             "Перенести часть интеграционных сценариев кредитного конвейера в post-pilot.",
-            "high",
             -3_000_000,
             -6,
             "proposed",
@@ -1462,7 +1375,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Fraud Platform",
             "performance_tuning",
             "Добавить отдельный спринт на оптимизацию feature lookup до целевых 120 мс.",
-            "medium",
             4_000_000,
             8,
             "under_review",
@@ -1473,7 +1385,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Payments",
             "vendor_scope",
             "Закупить дополнительные vendor-сертификаты и расширить sandbox-mock для gateway.",
-            "low",
             4_000_000,
             5,
             "approved",
@@ -1484,7 +1395,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "CRM Analytics",
             "data_quality",
             "Добавить ручную проверку топ-сегментов после дедупликации golden record.",
-            "low",
             1_000_000,
             2,
             "approved",
@@ -1492,7 +1402,16 @@ def make_change_requests() -> list[dict[str, Any]]:
     ]
 
     rows = []
-    for idx, (project_id, request_date, requested_by, change_type, description, scope, budget, days, status) in enumerate(
+    for idx, (
+        project_id,
+        request_date,
+        requested_by,
+        change_type,
+        description,
+        requested_budget_delta,
+        requested_timeline_delta_days,
+        status,
+    ) in enumerate(
         specs,
         start=1,
     ):
@@ -1504,9 +1423,8 @@ def make_change_requests() -> list[dict[str, Any]]:
                 "requested_by": requested_by,
                 "change_type": change_type,
                 "description": description,
-                "impact_scope": scope,
-                "impact_budget": budget,
-                "impact_days": days,
+                "requested_budget_delta": requested_budget_delta,
+                "requested_timeline_delta_days": requested_timeline_delta_days,
                 "status": status,
             }
         )
@@ -1550,30 +1468,30 @@ def make_task_dependencies(tasks_by_project: dict[str, list[dict[str, Any]]]) ->
 def make_budget_line_items(budgets: list[dict[str, Any]]) -> list[dict[str, Any]]:
     budget_id = {row["project_id"]: row["id"] for row in budgets}
     specs = [
-        ("P001", "Engineering", "Model development", "Risk Models", 10_000_000, 8_500_000, 11_000_000),
-        ("P001", "Integration", "Core Platform integration", "Core Platform", 14_000_000, 12_000_000, 18_000_000),
-        ("P001", "Compliance", "Security and approvals", "Security", 16_000_000, 13_000_000, 20_000_000),
-        ("P001", "Testing", "Pilot rollout", "PMO", 8_000_000, 8_000_000, 13_000_000),
-        ("P002", "Engineering", "Streaming core", "Fraud Platform", 20_000_000, 18_000_000, 24_000_000),
-        ("P002", "Integration", "Card processing adapter", "Payments", 18_000_000, 16_000_000, 20_000_000),
-        ("P002", "Modeling", "Feature store and scoring", "Risk Models", 20_000_000, 14_000_000, 22_000_000),
-        ("P002", "Compliance", "UAT and sign-off", "Compliance", 14_000_000, 16_000_000, 22_000_000),
-        ("P003", "UX", "Mobile UX and design", "Mobile", 10_000_000, 8_000_000, 9_000_000),
-        ("P003", "Product", "Client scenarios", "Mobile", 10_000_000, 7_000_000, 8_000_000),
-        ("P003", "Analytics", "Event tracking", "CRM Analytics", 12_000_000, 9_000_000, 12_000_000),
-        ("P003", "Release", "Stabilization", "Quality", 10_000_000, 5_500_000, 11_000_000),
-        ("P004", "Engineering", "Gateway core", "Payments", 10_000_000, 9_000_000, 11_000_000),
-        ("P004", "Integration", "SBP and acquiring adapters", "Payments", 12_000_000, 8_000_000, 13_000_000),
-        ("P004", "Security", "PCI DSS workstream", "Security", 8_000_000, 7_000_000, 9_000_000),
-        ("P004", "Observability", "Load testing and monitoring", "Platform", 8_000_000, 7_000_000, 10_000_000),
-        ("P005", "Data Quality", "Golden record and dedupe", "CRM Analytics", 9_000_000, 6_000_000, 8_000_000),
-        ("P005", "Engineering", "CRM profile API", "CRM Platform", 9_000_000, 6_000_000, 8_000_000),
-        ("P005", "Governance", "Data quality controls", "Data Platform", 8_000_000, 5_000_000, 8_000_000),
-        ("P005", "Rollout", "Pilot rollout", "Sales", 8_000_000, 5_500_000, 9_000_000),
+        ("P001", "Engineering", "Model development", "Risk Models", 10_000_000, 8_500_000),
+        ("P001", "Integration", "Core Platform integration", "Core Platform", 14_000_000, 12_000_000),
+        ("P001", "Compliance", "Security and approvals", "Security", 16_000_000, 13_000_000),
+        ("P001", "Testing", "Pilot rollout", "PMO", 8_000_000, 8_000_000),
+        ("P002", "Engineering", "Streaming core", "Fraud Platform", 20_000_000, 18_000_000),
+        ("P002", "Integration", "Card processing adapter", "Payments", 18_000_000, 16_000_000),
+        ("P002", "Modeling", "Feature store and scoring", "Risk Models", 20_000_000, 14_000_000),
+        ("P002", "Compliance", "UAT and sign-off", "Compliance", 14_000_000, 16_000_000),
+        ("P003", "UX", "Mobile UX and design", "Mobile", 10_000_000, 8_000_000),
+        ("P003", "Product", "Client scenarios", "Mobile", 10_000_000, 7_000_000),
+        ("P003", "Analytics", "Event tracking", "CRM Analytics", 12_000_000, 9_000_000),
+        ("P003", "Release", "Stabilization", "Quality", 10_000_000, 5_500_000),
+        ("P004", "Engineering", "Gateway core", "Payments", 10_000_000, 9_000_000),
+        ("P004", "Integration", "SBP and acquiring adapters", "Payments", 12_000_000, 8_000_000),
+        ("P004", "Security", "PCI DSS workstream", "Security", 8_000_000, 7_000_000),
+        ("P004", "Observability", "Load testing and monitoring", "Platform", 8_000_000, 7_000_000),
+        ("P005", "Data Quality", "Golden record and dedupe", "CRM Analytics", 9_000_000, 6_000_000),
+        ("P005", "Engineering", "CRM profile API", "CRM Platform", 9_000_000, 6_000_000),
+        ("P005", "Governance", "Data quality controls", "Data Platform", 8_000_000, 5_000_000),
+        ("P005", "Rollout", "Pilot rollout", "Sales", 8_000_000, 5_500_000),
     ]
 
     rows = []
-    for idx, (project_id, category, item_name, owner_team, planned_amount, actual_amount, forecast_amount) in enumerate(specs, start=1):
+    for idx, (project_id, category, item_name, owner_team, planned_amount, actual_amount) in enumerate(specs, start=1):
         rows.append(
             {
                 "id": f"BI{idx:03d}",
@@ -1583,7 +1501,6 @@ def make_budget_line_items(budgets: list[dict[str, Any]]) -> list[dict[str, Any]
                 "item_name": item_name,
                 "planned_amount": planned_amount,
                 "actual_amount": actual_amount,
-                "forecast_amount": forecast_amount,
                 "owner_team": owner_team,
             }
         )
@@ -1893,8 +1810,7 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Security",
             "compliance_scope",
             "Добавить расширенную модель угроз и дополнительные проверки маскирования данных.",
-            "medium",
-            8_000_000,
+            16_000_000,
             14,
             "under_review",
         ),
@@ -1904,7 +1820,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Core Platform",
             "integration_scope",
             "Перенести часть интеграционных сценариев кредитного конвейера в post-pilot.",
-            "high",
             -3_000_000,
             -6,
             "proposed",
@@ -1915,7 +1830,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Fraud Platform",
             "performance_tuning",
             "Добавить отдельный спринт на оптимизацию feature lookup до целевых 120 мс.",
-            "medium",
             4_000_000,
             8,
             "under_review",
@@ -1926,7 +1840,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "Payments",
             "vendor_scope",
             "Закупить дополнительные vendor-сертификаты и расширить sandbox-mock для gateway.",
-            "low",
             4_000_000,
             5,
             "approved",
@@ -1937,7 +1850,6 @@ def make_change_requests() -> list[dict[str, Any]]:
             "CRM Analytics",
             "data_quality",
             "Добавить ручную проверку топ-сегментов после дедупликации golden record.",
-            "low",
             1_000_000,
             2,
             "approved",
@@ -1945,7 +1857,16 @@ def make_change_requests() -> list[dict[str, Any]]:
     ]
 
     rows = []
-    for idx, (project_id, request_date, requested_by, change_type, description, scope, budget, days, status) in enumerate(
+    for idx, (
+        project_id,
+        request_date,
+        requested_by,
+        change_type,
+        description,
+        requested_budget_delta,
+        requested_timeline_delta_days,
+        status,
+    ) in enumerate(
         specs,
         start=1,
     ):
@@ -1957,9 +1878,8 @@ def make_change_requests() -> list[dict[str, Any]]:
                 "requested_by": requested_by,
                 "change_type": change_type,
                 "description": description,
-                "impact_scope": scope,
-                "impact_budget": budget,
-                "impact_days": days,
+                "requested_budget_delta": requested_budget_delta,
+                "requested_timeline_delta_days": requested_timeline_delta_days,
                 "status": status,
             }
         )
@@ -1972,10 +1892,550 @@ def write_csv(filename: str, rows: list[dict[str, Any]], columns: list[str]) -> 
 
 
 def remove_stale_derived_files() -> None:
-    for filename in ["metrics_snapshots.csv", "project_events.csv"]:
+    for filename in [
+        "metrics_snapshots.csv",
+        "project_events.csv",
+        "agents_json/batch_output.json",
+        "agents_json/project_monitoring_output.json",
+    ]:
         path = DATA_DIR / filename
         if path.exists():
             path.unlink()
+
+
+def forecast_total_spent_from_source(
+    project_id: str,
+    budget: dict[str, Any],
+    budget_line_items: list[dict[str, Any]],
+    change_requests: list[dict[str, Any]],
+) -> int:
+    base_forecast = sum(
+        max(item["planned_amount"], item["actual_amount"])
+        for item in budget_line_items
+        if item["project_id"] == project_id
+    )
+    if base_forecast == 0:
+        base_forecast = max(budget["planned_budget"], budget["actual_spent"])
+
+    requested_budget_delta = sum(
+        request["requested_budget_delta"]
+        for request in change_requests
+        if request["project_id"] == project_id
+        and request["status"] in {"pending", "under_review", "proposed", "approved"}
+    )
+    return max(budget["actual_spent"], base_forecast + requested_budget_delta)
+
+
+def next_id(rows: list[dict[str, Any]], prefix: str) -> int:
+    return max((int(row["id"].removeprefix(prefix)) for row in rows), default=0) + 1
+
+
+def split_total(total: int, count: int, base: int) -> list[int]:
+    weights = [base + (idx % 11) * base // 7 + (idx % 5) * base // 9 for idx in range(count)]
+    weight_sum = sum(weights)
+    amounts = [total * weight // weight_sum for weight in weights]
+    remainder = total - sum(amounts)
+    amounts[-1] += remainder
+    return amounts
+
+
+def append_max2_project(
+    *,
+    projects: list[dict[str, Any]],
+    resources: list[dict[str, Any]],
+    allocations: list[dict[str, Any]],
+    tasks: list[dict[str, Any]],
+    milestones: list[dict[str, Any]],
+    budgets: list[dict[str, Any]],
+    risks: list[dict[str, Any]],
+    communications: list[dict[str, Any]],
+    task_dependencies: list[dict[str, Any]],
+    budget_line_items: list[dict[str, Any]],
+    communication_messages: list[dict[str, Any]],
+    task_history: list[dict[str, Any]],
+    task_comments: list[dict[str, Any]],
+    dependencies: list[dict[str, Any]],
+    decisions: list[dict[str, Any]],
+    change_requests: list[dict[str, Any]],
+) -> None:
+    project_id = "P006"
+    if any(project["id"] == project_id for project in projects):
+        return
+
+    projects.append(
+        {
+            "id": project_id,
+            "name": "MAX2.0",
+            "lifecycle_status": "active",
+            "priority": "critical",
+            "start_date": iso(d(2026, 5, 25)),
+            "planned_end_date": iso(d(2027, 12, 31)),
+            "business_goal": "Построить единую банковскую платформу MAX2.0 для клиентских, операционных, риск- и платежных контуров.",
+            "expected_result": "Единая платформа с микросервисным ядром, интеграционным слоем, витринами данных, AI-модулями, мониторингом, миграцией legacy-процессов и промышленным контуром эксплуатации.",
+            "business_value": "Сокращение времени запуска банковских продуктов, снижение операционных затрат и консолидация критичных сервисов на единой платформе.",
+        }
+    )
+
+    roles = [
+        ("Project Manager", "MAX PMO", 40, 5200, "senior"),
+        ("Business Analyst", "MAX Analysis", 40, 3900, "middle+"),
+        ("Solution Architect", "MAX Architecture", 32, 6100, "principal"),
+        ("Backend Developer", "MAX Core", 40, 5000, "senior"),
+        ("Frontend Developer", "MAX Front", 40, 4300, "middle+"),
+        ("Data Engineer", "MAX Data", 40, 4800, "senior"),
+        ("ML Engineer", "MAX AI", 40, 5200, "senior"),
+        ("QA Automation Engineer", "MAX Quality", 40, 3900, "middle+"),
+        ("DevOps Engineer", "MAX Platform", 40, 5000, "senior"),
+        ("Security Engineer", "MAX Security", 32, 5600, "senior"),
+        ("Integration Engineer", "MAX Integration", 40, 4700, "senior"),
+        ("SRE", "MAX Reliability", 40, 5100, "senior"),
+        ("Compliance Officer", "MAX Compliance", 32, 4300, "senior"),
+        ("UX Researcher", "MAX CX", 32, 3600, "middle"),
+    ]
+    surnames = [
+        "Аверин",
+        "Басова",
+        "Воронцов",
+        "Галкин",
+        "Демина",
+        "Еремин",
+        "Жукова",
+        "Зорин",
+        "Исаев",
+        "Климова",
+        "Ларионов",
+        "Медведева",
+        "Назаров",
+        "Орлова",
+        "Петров",
+        "Рябова",
+        "Сафонов",
+        "Тихонова",
+        "Устинов",
+        "Филатова",
+    ]
+    first_names = [
+        "Артем",
+        "Валерия",
+        "Глеб",
+        "Диана",
+        "Егор",
+        "Инна",
+        "Лев",
+        "Милана",
+        "Петр",
+        "Яна",
+    ]
+
+    resource_start = next_id(resources, "R")
+    max_resource_ids: list[str] = []
+    for offset in range(90):
+        role, team, capacity, rate, seniority = roles[offset % len(roles)]
+        resource_id = f"R{resource_start + offset:03d}"
+        max_resource_ids.append(resource_id)
+        resources.append(
+            {
+                "id": resource_id,
+                "full_name": f"{first_names[offset % len(first_names)]} {surnames[offset % len(surnames)]}",
+                "role": role,
+                "team": team,
+                "available_hours_per_week": capacity,
+                "hour_rate": rate + (offset % 7) * 150,
+                "seniority": seniority,
+            }
+        )
+
+    allocation_start = next_id(allocations, "RA")
+    for offset, resource_id in enumerate(max_resource_ids):
+        resource = resources[resource_start - 1 + offset]
+        capacity = resource["available_hours_per_week"]
+        planned = min(capacity, 24 + (offset % 5) * 4)
+        actual = min(int(capacity * 1.45), planned + 4 + (offset % 6) * 3)
+        allocations.append(
+            {
+                "id": f"RA{allocation_start + offset:03d}",
+                "resource_id": resource_id,
+                "project_id": project_id,
+                "planned_hours_per_week": planned,
+                "actual_hours_per_week": actual,
+            }
+        )
+
+    task_start = next_id(tasks, "T")
+    task_subjects = [
+        "контур идентификации клиента",
+        "платежный orchestration layer",
+        "единый профиль клиента",
+        "витрину клиентских событий",
+        "онлайн-антифрод",
+        "кредитный decisioning",
+        "корпоративный API gateway",
+        "модуль лимитов и тарифов",
+        "операционный мониторинг",
+        "сервис уведомлений",
+        "data quality pipeline",
+        "миграцию legacy-процессов",
+        "контур аудита действий",
+        "ролевую модель доступа",
+        "AI-помощника оператора",
+        "модуль согласований",
+        "каталог банковских продуктов",
+        "шину интеграций",
+        "observability платформы",
+        "контур disaster recovery",
+    ]
+    domains = ["розницы", "МСБ", "корпоративного блока", "рисков", "платежей", "контакт-центра", "операционного офиса"]
+    max_tasks: list[dict[str, Any]] = []
+    for number in range(1, 1201):
+        assignee_id = max_resource_ids[number % len(max_resource_ids)]
+        assignee = next(resource for resource in resources if resource["id"] == assignee_id)
+        is_blocked = number <= 180
+        is_overdue_open = 180 < number <= 500
+        is_done = 500 < number <= 1000
+
+        if is_blocked:
+            status = "Blocked"
+            planned_due = LATEST_SNAPSHOT_DATE - timedelta(days=1 + number % 45)
+            actual_end = None
+            blocker_reason = [
+                "Не согласован целевой API contract со смежной системой",
+                "Ожидается Security approve для продуктивного доступа",
+                "Не подтверждено окно миграции legacy-данных",
+                "Нужен владелец бизнес-правила для спорного сценария",
+                "Инфраструктурный лимит не позволяет поднять тестовый стенд",
+            ][number % 5]
+            priority = "critical" if number <= 90 else "high"
+            spent_hours = 24 + number % 150
+        elif is_overdue_open:
+            status = ["In Progress", "Review", "In Progress", "Review"][number % 4]
+            planned_due = LATEST_SNAPSHOT_DATE - timedelta(days=1 + number % 70)
+            actual_end = None
+            blocker_reason = ""
+            priority = ["critical", "high", "high", "medium"][number % 4]
+            spent_hours = 12 + number % 130
+        elif is_done:
+            status = "Done"
+            planned_due = d(2026, 5, 30) + timedelta(days=number % 230)
+            actual_end = planned_due + timedelta(days=(number % 17) - 4)
+            if actual_end > LATEST_SNAPSHOT_DATE:
+                actual_end = LATEST_SNAPSHOT_DATE - timedelta(days=number % 4)
+            blocker_reason = ""
+            priority = ["high", "medium", "medium", "low"][number % 4]
+            spent_hours = 8 + number % 100
+        else:
+            status = ["To Do", "In Progress", "To Do"][number % 3]
+            planned_due = LATEST_SNAPSHOT_DATE + timedelta(days=1 + number % 180)
+            actual_end = None
+            blocker_reason = ""
+            priority = ["high", "medium", "low", "medium"][number % 4]
+            spent_hours = number % 50
+
+        task = {
+            "id": f"T{task_start + number - 1:03d}",
+            "project_id": project_id,
+            "external_id": f"MAX20-{number:04d}",
+            "title": f"{TASK_ACTIONS[number % len(TASK_ACTIONS)]} {task_subjects[number % len(task_subjects)]} для {domains[number % len(domains)]}",
+            "assignee_id": assignee_id,
+            "assignee_name": assignee["full_name"],
+            "status": status,
+            "priority": priority,
+            "planned_due_date": iso(planned_due),
+            "actual_end_date": iso(actual_end),
+            "estimated_hours": max(8, spent_hours + ((number % 41) - 12)),
+            "spent_hours": spent_hours,
+            "is_blocked": is_blocked,
+            "blocker_reason": blocker_reason,
+        }
+        tasks.append(task)
+        max_tasks.append(task)
+
+    milestone_start = next_id(milestones, "M")
+    for offset in range(72):
+        planned_start = d(2026, 5, 25) + timedelta(days=offset * 11)
+        planned_end = planned_start + timedelta(days=10 + offset % 9)
+        if offset < 18:
+            actual_start = planned_start + timedelta(days=offset % 3)
+            actual_end = planned_end + timedelta(days=(offset % 5) - 1)
+            status = "Done"
+        elif offset < 34:
+            actual_start = planned_start + timedelta(days=offset % 4)
+            actual_end = None
+            status = "Delayed" if offset % 2 else "At Risk"
+        elif offset < 46:
+            actual_start = planned_start if planned_start <= LATEST_SNAPSHOT_DATE else None
+            actual_end = None
+            status = "In Progress"
+        else:
+            actual_start = None
+            actual_end = None
+            status = "Planned"
+        milestones.append(
+            {
+                "id": f"M{milestone_start + offset:03d}",
+                "project_id": project_id,
+                "name": f"MAX2.0 поток {offset // 6 + 1}: веха {offset % 6 + 1}",
+                "planned_start_date": iso(planned_start),
+                "planned_end_date": iso(planned_end),
+                "actual_start_date": iso(actual_start),
+                "actual_end_date": iso(actual_end),
+                "status": status,
+                "responsible_team": roles[offset % len(roles)][1],
+            }
+        )
+
+    budget_id = f"B{next_id(budgets, 'B'):03d}"
+    planned_budget = 2_400_000_000
+    actual_spent = 1_370_000_000
+    budgets.append(
+        {
+            "id": budget_id,
+            "project_id": project_id,
+            "planned_budget": planned_budget,
+            "actual_spent": actual_spent,
+            "expected_economic_effect": 5_600_000_000,
+            "cost_of_delay_per_day": 25_000_000,
+            "currency": "RUB",
+        }
+    )
+
+    budget_item_start = next_id(budget_line_items, "BI")
+    planned_amounts = split_total(planned_budget, 80, 17_000_000)
+    actual_amounts = split_total(actual_spent, 80, 10_000_000)
+    budget_categories = [
+        "Core Platform",
+        "Integration",
+        "Data",
+        "AI",
+        "Security",
+        "Compliance",
+        "Testing",
+        "Migration",
+        "Observability",
+        "Rollout",
+    ]
+    for offset, (planned_amount, actual_amount) in enumerate(zip(planned_amounts, actual_amounts), start=0):
+        budget_line_items.append(
+            {
+                "id": f"BI{budget_item_start + offset:03d}",
+                "project_id": project_id,
+                "budget_id": budget_id,
+                "category": budget_categories[offset % len(budget_categories)],
+                "item_name": f"MAX2.0 статья {offset + 1:02d}",
+                "planned_amount": planned_amount,
+                "actual_amount": actual_amount,
+                "owner_team": roles[offset % len(roles)][1],
+            }
+        )
+
+    risk_start = next_id(risks, "RK")
+    risk_types = ["Security", "Integration", "Data Quality", "Migration", "Performance", "Budget", "Vendor", "Compliance"]
+    risk_statuses = ["active", "mitigating", "active", "escalated"]
+    for offset in range(180):
+        linked_task = max_tasks[(offset * 7) % len(max_tasks)]
+        risks.append(
+            {
+                "id": f"RK{risk_start + offset:03d}",
+                "project_id": project_id,
+                "risk_type": risk_types[offset % len(risk_types)],
+                "description": f"MAX2.0 риск {offset + 1}: возможное влияние на поток {offset % 24 + 1} из-за зависимости или качества данных.",
+                "probability": 2 + offset % 4,
+                "impact": 3 + offset % 3,
+                "owner_name": resources[resource_start - 1 + offset % len(max_resource_ids)]["full_name"],
+                "mitigation_plan": "Назначить владельца, подтвердить дату снятия риска и подготовить fallback-план.",
+                "status": risk_statuses[offset % len(risk_statuses)],
+                "linked_task_id": linked_task["id"],
+            }
+        )
+
+    communication_start = next_id(communications, "C")
+    message_start = next_id(communication_messages, "CM")
+    communication_statuses = ["pending", "delayed", "responded", "escalated"]
+    for offset in range(360):
+        task = max_tasks[(offset * 5) % len(max_tasks)]
+        from_team = roles[offset % len(roles)][1]
+        to_team = roles[(offset + 3) % len(roles)][1]
+        last_date = LATEST_SNAPSHOT_DATE - timedelta(days=offset % 21)
+        expected_date = LATEST_SNAPSHOT_DATE - timedelta(days=(offset % 17) - 5)
+        status = communication_statuses[offset % len(communication_statuses)]
+        comm_id = f"C{communication_start + offset:03d}"
+        communications.append(
+            {
+                "id": comm_id,
+                "project_id": project_id,
+                "from_team": from_team,
+                "to_team": to_team,
+                "topic": f"MAX2.0 согласование потока {offset % 30 + 1}",
+                "channel": ["Teams", "Email", "Jira", "Confluence"][offset % 4],
+                "last_message_date": iso(last_date),
+                "expected_response_date": iso(expected_date),
+                "status": status,
+                "importance": ["critical", "high", "medium", "low"][offset % 4],
+                "linked_task_id": task["id"],
+            }
+        )
+        communication_messages.append(
+            {
+                "id": f"CM{message_start + offset * 2:03d}",
+                "project_id": project_id,
+                "communication_id": comm_id,
+                "message_time": iso_dt(dt(last_date.year, last_date.month, last_date.day, 10, offset % 60)),
+                "sender_team": from_team,
+                "recipient_team": to_team,
+                "channel": ["Teams", "Email", "Jira", "Confluence"][offset % 4],
+                "message_type": "request",
+                "status": "sent",
+                "summary": f"Первичный запрос MAX2.0 по согласованию {offset % 30 + 1}.",
+                "linked_task_id": task["id"],
+                "is_escalation": False,
+            }
+        )
+        communication_messages.append(
+            {
+                "id": f"CM{message_start + offset * 2 + 1:03d}",
+                "project_id": project_id,
+                "communication_id": comm_id,
+                "message_time": iso_dt(dt(expected_date.year, expected_date.month, expected_date.day, 16, offset % 60)),
+                "sender_team": "PMO" if status == "escalated" else to_team,
+                "recipient_team": to_team if status == "escalated" else from_team,
+                "channel": ["Teams", "Email", "Jira", "Confluence"][offset % 4],
+                "message_type": "escalation" if status == "escalated" else "response",
+                "status": "escalated" if status == "escalated" else "waiting",
+                "summary": f"Ответ или эскалация MAX2.0 по согласованию {offset % 30 + 1}.",
+                "linked_task_id": task["id"],
+                "is_escalation": status == "escalated",
+            }
+        )
+
+    task_dependency_start = next_id(task_dependencies, "TD")
+    for offset in range(1000):
+        task = max_tasks[offset % len(max_tasks)]
+        upstream = max_tasks[(offset * 3 + 17) % len(max_tasks)]
+        if upstream["id"] == task["id"]:
+            upstream = max_tasks[(offset + 1) % len(max_tasks)]
+        task_dependencies.append(
+            {
+                "id": f"TD{task_dependency_start + offset:03d}",
+                "project_id": project_id,
+                "task_id": task["id"],
+                "depends_on_task_id": upstream["id"],
+                "dependency_type": ["blocks", "requires", "related"][offset % 3],
+                "is_critical_path": offset % 5 == 0,
+                "lag_days": offset % 6,
+                "reason": f"MAX2.0 зависимость между потоками {offset % 40 + 1}.",
+            }
+        )
+
+    history_start = next_id(task_history, "TH")
+    for offset in range(2600):
+        task = max_tasks[offset % len(max_tasks)]
+        changed_at = dt(2026, 6, 1 + offset % 18, 9 + offset % 9, offset % 60)
+        field = ["status", "planned_due_date", "estimated_hours", "spent_hours", "assignee_id"][offset % 5]
+        if field == "status":
+            old_value = "To Do"
+            new_value = task["status"]
+        elif field == "planned_due_date":
+            old_value = iso(parse_date(task["planned_due_date"]) - timedelta(days=5))
+            new_value = task["planned_due_date"]
+        elif field == "estimated_hours":
+            old_value = str(max(8, task["estimated_hours"] - 8))
+            new_value = str(task["estimated_hours"])
+        elif field == "spent_hours":
+            old_value = str(max(0, task["spent_hours"] - 6))
+            new_value = str(task["spent_hours"])
+        else:
+            old_value = max_resource_ids[(offset + 1) % len(max_resource_ids)]
+            new_value = task["assignee_id"]
+        task_history.append(
+            {
+                "id": f"TH{history_start + offset:03d}",
+                "project_id": project_id,
+                "task_id": task["id"],
+                "changed_at": iso_dt(changed_at),
+                "field_changed": field,
+                "old_value": old_value,
+                "new_value": new_value,
+                "changed_by": max_resource_ids[offset % len(max_resource_ids)],
+                "source_system": "tasktracker",
+            }
+        )
+
+    comment_start = next_id(task_comments, "TC")
+    comment_templates = [
+        "Нужен владелец решения по межсистемному контракту.",
+        "Подтверждаем проблему на интеграционном стенде, нужен повторный прогон.",
+        "Риски по миграции данных остаются открытыми до сверки контрольной выборки.",
+        "Команда просит зафиксировать приоритет потока на ближайший sync.",
+        "Согласование зависло у внешней команды, готовим эскалацию.",
+    ]
+    for offset in range(1800):
+        task = max_tasks[(offset * 2) % len(max_tasks)]
+        author_id = max_resource_ids[offset % len(max_resource_ids)]
+        author = next(resource for resource in resources if resource["id"] == author_id)
+        created_at = dt(2026, 6, 1 + offset % 18, 8 + offset % 10, offset % 60)
+        task_comments.append(
+            {
+                "id": f"TC{comment_start + offset:03d}",
+                "project_id": project_id,
+                "task_id": task["id"],
+                "author_id": author_id,
+                "author_name": author["full_name"],
+                "created_at": iso_dt(created_at),
+                "channel": ["Jira", "Teams", "Email", "Confluence"][offset % 4],
+                "text": f"MAX2.0: {comment_templates[offset % len(comment_templates)]}",
+                "mentions_count": offset % 4,
+                "source_system": "tasktracker",
+            }
+        )
+
+    dependency_start = next_id(dependencies, "D")
+    for offset in range(150):
+        task = max_tasks[(offset * 11) % len(max_tasks)]
+        dependencies.append(
+            {
+                "id": f"D{dependency_start + offset:03d}",
+                "project_id": project_id,
+                "dependency_type": ["internal_system", "approval", "vendor", "release_window", "data_owner"][offset % 5],
+                "depends_on": f"MAX2.0 внешний контур {offset % 45 + 1}",
+                "owner_team": roles[(offset + 4) % len(roles)][1],
+                "expected_date": iso(LATEST_SNAPSHOT_DATE - timedelta(days=(offset % 22) - 4)),
+                "status": ["pending", "delayed", "blocked", "responded"][offset % 4],
+                "criticality": ["critical", "high", "medium", "low"][offset % 4],
+                "linked_task_id": task["id"],
+            }
+        )
+
+    decision_start = next_id(decisions, "DEC")
+    max_milestones = [milestone for milestone in milestones if milestone["project_id"] == project_id]
+    for offset in range(120):
+        milestone = max_milestones[offset % len(max_milestones)]
+        decisions.append(
+            {
+                "id": f"DEC{decision_start + offset:03d}",
+                "project_id": project_id,
+                "decision_date": iso(d(2026, 6, 1) + timedelta(days=offset % 40)),
+                "decision_type": ["scope", "architecture", "budget", "security", "migration", "release"][offset % 6],
+                "description": f"MAX2.0 управленческое решение {offset + 1} по потоку {offset % 30 + 1}.",
+                "decision_owner": ["Максим Туревич", "Steering Committee", "PMO", "Архитектурный комитет"][offset % 4],
+                "status": ["pending", "under_review", "approved", "pending"][offset % 4],
+                "linked_milestone_id": milestone["id"],
+            }
+        )
+
+    change_request_start = next_id(change_requests, "CR")
+    for offset in range(90):
+        change_requests.append(
+            {
+                "id": f"CR{change_request_start + offset:03d}",
+                "project_id": project_id,
+                "request_date": iso(d(2026, 6, 1) + timedelta(days=offset % 45)),
+                "requested_by": roles[offset % len(roles)][1],
+                "change_type": ["integration_scope", "security_scope", "migration_scope", "performance_tuning", "release_scope"][offset % 5],
+                "description": f"MAX2.0 запрос на изменение {offset + 1}: уточнение объема работ по крупному потоку.",
+                "requested_budget_delta": [-20_000_000, 15_000_000, 35_000_000, 0, 50_000_000][offset % 5],
+                "requested_timeline_delta_days": [-5, 3, 8, 0, 12][offset % 5],
+                "status": ["pending", "under_review", "proposed", "approved", "rejected"][offset % 5],
+            }
+        )
 
 
 def validate_dataset(
@@ -1996,8 +2456,15 @@ def validate_dataset(
     risks: list[dict[str, Any]],
     communications: list[dict[str, Any]],
 ) -> None:
-    ensure(100 <= len(tasks) <= 150, f"Expected 100-150 tasks, got {len(tasks)}")
-    ensure(sum(1 for project in projects if project["status"] == "red") >= 2, "Expected at least two red projects")
+    ensure(len(tasks) >= 100, f"Expected at least 100 tasks, got {len(tasks)}")
+    ensure(
+        sum(1 for task in tasks if task["project_id"] == "P006") >= 1_000,
+        "Expected MAX2.0 to be a large project with at least 1000 tasks",
+    )
+    ensure(
+        all(project["lifecycle_status"] in {"active", "paused", "completed", "cancelled"} for project in projects),
+        "Projects must keep only lifecycle source status, not calculated risk color",
+    )
     ensure(any(task["is_blocked"] for task in tasks), "Expected at least one blocked task")
 
     has_overdue_open_task = False
@@ -2039,11 +2506,10 @@ def validate_dataset(
     ensure(not invalid_dependencies, f"Dependencies with invalid task ids: {invalid_dependencies}")
     ensure(not self_dependencies, f"Dependencies cannot point to the same task: {self_dependencies}")
 
-    budget_totals: dict[str, dict[str, int]] = defaultdict(lambda: {"planned": 0, "actual": 0, "forecast": 0})
+    budget_totals: dict[str, dict[str, int]] = defaultdict(lambda: {"planned": 0, "actual": 0})
     for item in budget_line_items:
         budget_totals[item["project_id"]]["planned"] += item["planned_amount"]
         budget_totals[item["project_id"]]["actual"] += item["actual_amount"]
-        budget_totals[item["project_id"]]["forecast"] += item["forecast_amount"]
     for budget in budgets:
         project_id = budget["project_id"]
         totals = budget_totals[budget["project_id"]]
@@ -2054,10 +2520,6 @@ def validate_dataset(
         ensure(
             totals["actual"] == budget["actual_spent"],
             f"Budget actual mismatch for {project_id}: {totals['actual']} != {budget['actual_spent']}",
-        )
-        ensure(
-            totals["forecast"] == budget["forecast_total_spent"],
-            f"Budget forecast mismatch for {project_id}: {totals['forecast']} != {budget['forecast_total_spent']}",
         )
 
     valid_communication_ids = {communication["id"] for communication in communications}
@@ -2105,7 +2567,22 @@ def validate_dataset(
     negative_roi_projects = [
         budget
         for budget in budgets
-        if (budget["expected_economic_effect"] - budget["forecast_total_spent"]) / budget["forecast_total_spent"] < 0
+        if (
+            budget["expected_economic_effect"]
+            - forecast_total_spent_from_source(
+                budget["project_id"],
+                budget,
+                budget_line_items,
+                change_requests,
+            )
+        )
+        / forecast_total_spent_from_source(
+            budget["project_id"],
+            budget,
+            budget_line_items,
+            change_requests,
+        )
+        < 0
     ]
     ensure(bool(negative_roi_projects), "Expected at least one project with negative ROI")
     ensure(
@@ -2159,11 +2636,11 @@ def validate_dataset(
     ensure(
         any(
             request["project_id"] == "P001"
-            and request["impact_budget"] > 0
-            and request["impact_days"] > 0
+            and request["requested_budget_delta"] > 0
+            and request["requested_timeline_delta_days"] > 0
             for request in change_requests
         ),
-        "Expected a positive budget and timeline impact change request for P001",
+        "Expected a positive requested budget and timeline change request for P001",
     )
     ensure(
         all(request["project_id"] in valid_project_ids for request in change_requests),
@@ -2189,6 +2666,25 @@ def main() -> None:
     dependencies = make_dependencies(tasks_by_project)
     decisions = make_decisions(milestones)
     change_requests = make_change_requests()
+
+    append_max2_project(
+        projects=projects,
+        resources=resources,
+        allocations=allocations,
+        tasks=tasks,
+        milestones=milestones,
+        budgets=budgets,
+        risks=risks,
+        communications=communications,
+        task_dependencies=task_dependencies,
+        budget_line_items=budget_line_items,
+        communication_messages=communication_messages,
+        task_history=task_history,
+        task_comments=task_comments,
+        dependencies=dependencies,
+        decisions=decisions,
+        change_requests=change_requests,
+    )
 
     validate_dataset(
         projects,

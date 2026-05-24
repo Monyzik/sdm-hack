@@ -421,7 +421,7 @@ export default function App() {
                   {previewProject.project_name}
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  {previewProject.owner_name} · {previewProject.priority}
+                  {previewProject.priority}
                 </p>
               </div>
               <button

@@ -216,6 +216,7 @@ CSV в `data/` являются demo source layer. Производные сущ
 - risk level;
 - overdue count;
 - delay days;
+- forecast total spent;
 - budget deviation;
 - risk score;
 - resource overload;
@@ -244,7 +245,7 @@ CSV в `data/` являются demo source layer. Производные сущ
 - `dependencies.py`: зависимости FastAPI;
 - `main.py`: точка входа backend.
 
-Summary считает completion, blocked и overdue задачи, high risks, бюджетное отклонение, ROI, risk-adjusted ROI, коммуникационные задержки, перегруз ресурсов, рискованные зависимости, pending decisions, change requests, health score и risk level.
+Summary считает completion, blocked и overdue задачи, high risks, расчетный forecast бюджета, бюджетное отклонение, ROI, risk-adjusted ROI, коммуникационные задержки, перегруз ресурсов, рискованные зависимости, pending decisions, change requests, health score и risk level.
 
 Главный сценарий для руководителя проекта лежит в портфельном inbox:
 

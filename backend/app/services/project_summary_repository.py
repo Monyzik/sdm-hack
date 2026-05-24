@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.database.models import (
     Budget,
+    BudgetLineItem,
     ChangeRequest,
     Communication,
     CommunicationMessage,
@@ -32,6 +33,7 @@ class ProjectSummarySource:
     task_comments: list[TaskComment]
     milestones: list[Milestone]
     budget: Budget | None
+    budget_line_items: list[BudgetLineItem]
     risks: list[Risk]
     communications: list[Communication]
     communication_messages: list[CommunicationMessage]
@@ -77,6 +79,11 @@ class ProjectSummaryRepository:
             .order_by(Milestone.planned_start_date, Milestone.id)
         )
         budget = self._session.scalar(select(Budget).where(Budget.project_id == project_id))
+        budget_line_items = self._scalars(
+            select(BudgetLineItem)
+            .where(BudgetLineItem.project_id == project_id)
+            .order_by(BudgetLineItem.category, BudgetLineItem.id)
+        )
         risks = self._scalars(
             select(Risk).where(Risk.project_id == project_id).order_by(Risk.probability.desc(), Risk.impact.desc(), Risk.id)
         )
@@ -135,6 +142,7 @@ class ProjectSummaryRepository:
             task_comments=task_comments,
             milestones=milestones,
             budget=budget,
+            budget_line_items=budget_line_items,
             risks=risks,
             communications=communications,
             communication_messages=communication_messages,

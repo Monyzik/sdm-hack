@@ -59,8 +59,7 @@ def project_context_from_source(source: ProjectSummarySource) -> dict[str, Any]:
         "project": {
             "id": source.project.id,
             "name": source.project.name,
-            "owner_name": source.project.owner_name,
-            "status": source.project.status,
+            "lifecycle_status": source.project.lifecycle_status,
             "priority": source.project.priority,
             "start_date": source.project.start_date,
             "planned_end_date": source.project.planned_end_date,
@@ -149,9 +148,8 @@ def project_context_from_source(source: ProjectSummarySource) -> dict[str, Any]:
                 "requested_by": change_request.requested_by,
                 "change_type": change_request.change_type,
                 "description": change_request.description,
-                "impact_scope": change_request.impact_scope,
-                "impact_budget": change_request.impact_budget,
-                "impact_days": change_request.impact_days,
+                "requested_budget_delta": change_request.requested_budget_delta,
+                "requested_timeline_delta_days": change_request.requested_timeline_delta_days,
                 "status": change_request.status,
             }
             for change_request in source.change_requests
@@ -161,7 +159,6 @@ def project_context_from_source(source: ProjectSummarySource) -> dict[str, Any]:
         else {
             "planned_budget": budget.planned_budget,
             "actual_spent": budget.actual_spent,
-            "forecast_total_spent": budget.forecast_total_spent,
             "expected_economic_effect": budget.expected_economic_effect,
             "cost_of_delay_per_day": budget.cost_of_delay_per_day,
             "currency": budget.currency,
