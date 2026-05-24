@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 html {
-  background: #f6f7f9;
+  background: #f4f6f8;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   color: #18212f;
-  background: #f6f7f9;
+  background: #f4f6f8;
 }
 
 button,
@@ -18,4 +18,21 @@ input,
 select,
 textarea {
   letter-spacing: 0;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.dark body,
+.dark html {
+  color: #e5e7eb;
+  background: #080c14;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }

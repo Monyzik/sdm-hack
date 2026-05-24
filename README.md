@@ -14,7 +14,7 @@ MVP для контроля портфеля банковских проекто
 - `scripts/`: утилиты для генерации и загрузки данных.
 - `docker-compose.yml`: общий compose-файл.
 
-В compose подключены PostgreSQL, backend API и frontend. Схема БД создается из SQLAlchemy-моделей в `backend/app/database/`. CSV загружаются через `scripts/load_demo_data_to_db.py`.
+В compose подключены PostgreSQL, backend API, agents API и frontend. Схема БД создается из SQLAlchemy-моделей в `backend/app/database/`. CSV загружаются через `scripts/load_demo_data_to_db.py`.
 
 ## Запуск платформы
 
@@ -48,10 +48,10 @@ python -m backend.app.database.init_db --drop-existing
 python scripts/load_demo_data_to_db.py
 ```
 
-6. Поднять backend API и frontend:
+6. Поднять backend API, agents API и frontend:
 
 ```bash
-docker compose up -d backend frontend
+docker compose up -d backend agents frontend
 ```
 
 7. Проверить статус:
@@ -78,20 +78,38 @@ http://localhost:5180
 curl "http://localhost:8000/api/v1/summaries/portfolio?as_of=2026-06-19"
 ```
 
-11. Получить summary по одному проекту:
+11. Получить портфельный inbox изменений:
+
+```bash
+curl "http://localhost:8000/api/v1/summaries/portfolio/attention?as_of=2026-06-19&lookback_days=7"
+```
+
+12. Получить summary по одному проекту:
 
 ```bash
 curl "http://localhost:8000/api/v1/summaries/projects/P001?as_of=2026-06-19"
 ```
 
-12. Протестировать LLM-агента для brief:
+13. Получить fact context для LLM:
+
+```bash
+curl "http://localhost:8000/api/v1/summaries/projects/P001/problem-context?as_of=2026-06-19&max_depth=2"
+```
+
+14. Протестировать LLM-агента для brief:
 
 ```bash
 python -m agents.llm
 ```
 
+15. Получить AI brief через agents API:
 
-13. Остановить инфраструктуру:
+```bash
+curl "http://localhost:8010/api/v1/agents/projects/P001/brief?as_of=2026-06-19&max_depth=2"
+```
+
+16. Остановить инфраструктуру:
+
 ```bash
 docker compose down
 ```
@@ -149,9 +167,14 @@ BACKEND_PORT=8000
 BACKEND_CORS_ORIGINS=http://localhost:5180,http://127.0.0.1:5180
 FRONTEND_PORT=5180
 VITE_API_URL=http://localhost:8000
+VITE_AGENTS_API_URL=http://localhost:8010
+AGENTS_PORT=8010
+BACKEND_API_URL=http://backend:8000
+AGENTS_CORS_ORIGINS=http://localhost:5180,http://127.0.0.1:5180
+LOCAL_API_URL=http://localhost:8000
 YANDEX_CLOUD_FOLDER=
 YANDEX_CLOUD_API_KEY=
-YANDEX_CLOUD_MODEL=
+YANDEX_CLOUD_MODEL=qwen3.6-35b-a3b/latest
 ```
 
 Локальные файлы PostgreSQL хранятся в `infra/postgres/data` и не коммитятся.
@@ -194,6 +217,30 @@ CSV в `data/` являются demo source layer. Производные сущ
 
 Summary считает completion, blocked и overdue задачи, high risks, бюджетное отклонение, ROI, risk-adjusted ROI, коммуникационные задержки, перегруз ресурсов, рискованные зависимости, pending decisions, change requests, health score и risk level.
 
+Главный сценарий для руководителя проекта лежит в портфельном inbox:
+
+```text
+GET /api/v1/summaries/portfolio/attention
+```
+
+Он показывает, что изменилось за период по всем проектам: новые блокировки, сдвиги сроков, эскалации, открытые change requests, просроченные коммуникации и зависшие решения. Это основной слой для проблемы "сложно смотреть за изменениями нескольких проектов".
+
+Для LLM используется отдельный fact endpoint:
+
+```text
+GET /api/v1/summaries/projects/{project_id}/problem-context
+```
+
+Он не возвращает готовый executive summary или ключевые выводы. В ответе только факты: проблемные задачи, граф зависимостей вокруг них, связанные риски, коммуникации, решения, бюджет и ресурсы. Выводы и рекомендации формирует агент.
+
+Agents API отдает результат агента для frontend:
+
+```text
+GET /api/v1/agents/projects/{project_id}/brief
+```
+
+Endpoint забирает `problem-context` из backend, вызывает LLM через Yandex provider, валидирует ответ через Pydantic и возвращает строгий JSON. Для работы нужны `YANDEX_CLOUD_FOLDER`, `YANDEX_CLOUD_API_KEY` и `YANDEX_CLOUD_MODEL` в `.env`. `YANDEX_CLOUD_MODEL` можно задать коротко, например `qwen3.6-35b-a3b/latest`, или полным URI `gpt://folder_id/qwen3.6-35b-a3b/latest`.
+
 ## LangGraph monitoring
 
 Основной workflow цифрового руководителя лежит в `agents/project_control_graph.py`. Отдельный граф мониторинга лежит в `agents/project_monitor_graph.py`.
@@ -220,7 +267,7 @@ python -m agents.project_monitor_graph P001
 python -m agents.project_monitor_graph P001 --as-of 2026-06-15
 ```
 
-LLM в этот граф пока не встроена намеренно: сначала метрики и алерты считаются обычным кодом, а следующим шагом отдельный LangGraph-узел будет генерировать рекомендации, объяснять причины и готовить human-in-the-loop действия.
+Базовые метрики и алерты считаются обычным кодом. LLM-узлы получают уже посчитанный контекст и формируют управленческую сводку, вопросы, рекомендации и draft уведомления.
 
 ## Frontend
 

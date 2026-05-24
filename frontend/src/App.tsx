@@ -1,476 +1,471 @@
+import { useQueryClient } from "@tanstack/react-query";
 import {
-  AlertTriangle,
-  ArrowDownUp,
-  Banknote,
-  CalendarClock,
-  CheckCircle2,
-  CircleAlert,
-  Clock3,
-  Loader2,
-  MessageSquareWarning,
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  Gauge,
+  LayoutDashboard,
+  Moon,
   RefreshCw,
-  ShieldAlert,
-  UsersRound,
+  Sun,
+  X,
 } from "lucide-react";
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-type RiskLevel = "green" | "yellow" | "red";
+import { ApiError } from "./api/client";
+import { Card, ErrorState, LoadingState } from "./components/ui";
+import { AttentionInbox } from "./features/portfolio/AttentionInbox";
+import { PortfolioSidebar } from "./features/portfolio/PortfolioSidebar";
+import { PortfolioStats } from "./features/portfolio/PortfolioStats";
+import { ProjectView } from "./features/project/ProjectView";
+import { usePortfolio } from "./hooks/usePortfolio";
+import { usePortfolioAttention } from "./hooks/usePortfolioAttention";
+import { useProjectSummary } from "./hooks/useProjectSummary";
+import { AS_OF_DATE } from "./lib/constants";
 
-type BudgetSummary = {
-  planned_budget: number;
-  actual_spent: number;
-  forecast_total_spent: number;
-  expected_economic_effect: number;
-  cost_of_delay_per_day: number;
-  currency: string;
-  budget_deviation_percent: number;
-  roi_percent: number;
-  risk_adjusted_roi_percent: number;
-};
+/** Превращает любую ошибку запроса в человекочитаемое сообщение. */
+function describeError(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 404) return "Проект не найден.";
+    return error.message;
+  }
+  return "Не удалось загрузить данные.";
+}
 
-type TaskSignal = {
-  id: string;
-  title: string;
-  status: string;
-  priority: string;
-  planned_due_date: string;
-  overdue_days: number;
-  assignee_name: string;
-  blocker_reason: string | null;
-};
+type AppPage = "overview" | "analysis";
 
-type RiskSignal = {
-  id: string;
-  risk_type: string;
-  description: string;
-  score: number;
-  status: string;
-  owner_name: string;
-};
-
-type CommunicationSignal = {
-  id: string;
-  from_team: string;
-  to_team: string;
-  topic: string;
-  status: string;
-  importance: string;
-  delay_days: number;
-};
-
-type ResourceSignal = {
-  resource_id: string;
-  full_name: string;
-  role: string;
-  team: string;
-  total_allocation_percent: number;
-  overload_percent: number;
-};
-
-type PortfolioProject = {
-  project_id: string;
-  project_name: string;
-  owner_name: string;
-  status: string;
-  priority: string;
-  project_health_score: number;
-  risk_level: RiskLevel;
-  completion_percent: number;
-  overdue_tasks_count: number;
-  blocked_tasks_count: number;
-  high_risk_count: number;
-  budget_deviation_percent: number | null;
-  resource_overload_percent: number;
-  top_signals: string[];
-};
-
-type PortfolioSummary = {
-  as_of_date: string;
-  projects_count: number;
-  red_projects_count: number;
-  yellow_projects_count: number;
-  green_projects_count: number;
-  portfolio_health_score: number;
-  top_portfolio_signals: string[];
-  projects: PortfolioProject[];
-};
-
-type ProjectSummary = {
-  project_id: string;
-  project_name: string;
-  owner_name: string;
-  status: string;
-  priority: string;
-  as_of_date: string;
-  completion_percent: number;
-  overdue_tasks_count: number;
-  blocked_tasks_count: number;
-  high_risk_count: number;
-  dependency_risk_count: number;
-  pending_decision_count: number;
-  open_change_request_count: number;
-  budget: BudgetSummary | null;
-  resource_overload_percent: number;
-  max_communication_delay_days: number;
-  project_health_score: number;
-  risk_level: RiskLevel;
-  executive_summary: string;
-  key_signals: string[];
-  blocked_tasks: TaskSignal[];
-  overdue_tasks: TaskSignal[];
-  top_risks: RiskSignal[];
-  delayed_communications: CommunicationSignal[];
-  overloaded_resources: ResourceSignal[];
-};
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const AS_OF = "2026-06-19";
+const appPages = [
+  {
+    id: "overview" as const,
+    label: "Обзор",
+    description: "Сводка портфеля",
+    icon: Gauge,
+  },
+  {
+    id: "analysis" as const,
+    label: "Анализ",
+    description: "Выбранный проект",
+    icon: BarChart3,
+  },
+];
 
 export default function App() {
-  const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState("P001");
-  const [project, setProject] = useState<ProjectSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  async function loadPortfolio() {
-    const response = await fetch(`${API_URL}/api/v1/summaries/portfolio?as_of=${AS_OF}`);
-    if (!response.ok) {
-      throw new Error(`Portfolio request failed: ${response.status}`);
-    }
-    const data = (await response.json()) as PortfolioSummary;
-    setPortfolio(data);
-    if (!data.projects.find((item) => item.project_id === selectedProjectId)) {
-      setSelectedProjectId(data.projects[0]?.project_id ?? "P001");
-    }
-  }
-
-  async function loadProject(projectId: string) {
-    const response = await fetch(`${API_URL}/api/v1/summaries/projects/${projectId}?as_of=${AS_OF}`);
-    if (!response.ok) {
-      throw new Error(`Project request failed: ${response.status}`);
-    }
-    setProject((await response.json()) as ProjectSummary);
-  }
-
-  async function refresh() {
-    setError(null);
-    setLoading(true);
-    try {
-      await loadPortfolio();
-      await loadProject(selectedProjectId);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось загрузить данные");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    loadProject(selectedProjectId)
-      .catch((err) => setError(err instanceof Error ? err.message : "Не удалось загрузить проект"))
-      .finally(() => setLoading(false));
-  }, [selectedProjectId]);
-
-  const selectedPortfolioProject = useMemo(
-    () => portfolio?.projects.find((item) => item.project_id === selectedProjectId) ?? null,
-    [portfolio, selectedProjectId]
+  const queryClient = useQueryClient();
+  const [isNavCollapsed, setIsNavCollapsed] = useState(false);
+  const [activePage, setActivePage] = useState<AppPage>("overview");
+  const [previewProjectId, setPreviewProjectId] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "light";
+    const stored = window.localStorage.getItem("theme");
+    if (stored === "dark" || stored === "light") return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null,
   );
 
+  const portfolioQuery = usePortfolio(AS_OF_DATE);
+  const attentionQuery = usePortfolioAttention(AS_OF_DATE, 7);
+  const projectQuery = useProjectSummary(selectedProjectId, AS_OF_DATE);
+  const previewProject = portfolioQuery.data?.projects.find(
+    (project) => project.project_id === previewProjectId,
+  );
+
+  // Как только портфель загружен, выбираем первый проект, если выбора ещё нет
+  // или текущий проект исчез из списка.
+  useEffect(() => {
+    const projects = portfolioQuery.data?.projects;
+    if (!projects?.length) return;
+    const exists = projects.some((p) => p.project_id === selectedProjectId);
+    if (!exists) {
+      setSelectedProjectId(projects[0].project_id);
+    }
+  }, [portfolioQuery.data, selectedProjectId]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  function handleRefresh() {
+    queryClient.invalidateQueries();
+  }
+
+  function handleProjectSelect(projectId: string) {
+    setSelectedProjectId(projectId);
+  }
+
   return (
-    <main className="min-h-screen bg-[#f6f7f9]">
-      <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-5 py-5">
-        <header className="flex flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="text-sm font-medium text-slate-500">AI Project Control Tower</div>
-            <h1 className="text-2xl font-semibold text-slate-950">Контроль портфеля проектов</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600">
-              Дата среза: <span className="font-medium text-slate-900">{AS_OF}</span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#080c14] dark:text-slate-100">
+      <div
+        className={`grid min-h-screen grid-cols-1 ${
+          isNavCollapsed
+            ? "lg:grid-cols-[84px_minmax(0,1fr)]"
+            : "lg:grid-cols-[320px_minmax(0,1fr)]"
+        }`}
+      >
+        <nav className="relative border-b border-slate-200 bg-white/90 px-4 py-3 shadow-sm shadow-slate-200/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90 dark:shadow-black/20 lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
+          <div
+            className={`flex items-center justify-between gap-3 ${
+              isNavCollapsed ? "lg:flex-col lg:justify-start" : ""
+            }`}
+          >
+            <div className="flex min-w-0 items-center gap-3 px-1">
+              {isNavCollapsed ? (
+                <button
+                  type="button"
+                  title="Показать navbar"
+                  onClick={() => setIsNavCollapsed(false)}
+                  className="hidden size-14 shrink-0 place-items-center rounded-xl border border-slate-300 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100 lg:grid"
+                >
+                  <ChevronRight aria-hidden className="size-4" />
+                  <span className="sr-only">Показать navbar</span>
+                </button>
+              ) : (
+                <div className="grid size-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-100 text-slate-800 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-100">
+                  <LayoutDashboard aria-hidden className="size-5" />
+                </div>
+              )}
+              <div className={`min-w-0 ${isNavCollapsed ? "lg:hidden" : ""}`}>
+                <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+                  Control Tower
+                </p>
+                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                  AI Portfolio
+                </p>
+              </div>
             </div>
-            <button className="btn btn-sm btn-neutral rounded-md" onClick={refresh}>
-              <RefreshCw size={16} />
-              Обновить
+
+            <button
+              type="button"
+              title="Скрыть navbar"
+              onClick={() => setIsNavCollapsed((value) => !value)}
+              className={`hidden size-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 lg:inline-grid ${
+                isNavCollapsed ? "lg:hidden" : ""
+              }`}
+            >
+              <ChevronLeft aria-hidden className="size-4" />
+              <span className="sr-only">Скрыть navbar</span>
+            </button>
+
+            <div className="flex items-center gap-2 lg:hidden">
+              <button
+                type="button"
+                title={
+                  theme === "dark"
+                    ? "Включить светлую тему"
+                    : "Включить тёмную тему"
+                }
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="inline-grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                {theme === "dark" ? (
+                  <Sun aria-hidden className="size-4" />
+                ) : (
+                  <Moon aria-hidden className="size-4" />
+                )}
+                <span className="sr-only">Переключить тему</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="inline-grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                <RefreshCw
+                  aria-hidden
+                  className={`size-4 ${portfolioQuery.isFetching ? "animate-spin" : ""}`}
+                />
+                <span className="sr-only">Обновить</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 flex-1 space-y-4">
+            <div className="space-y-2">
+              {appPages.map((page) => {
+                const Icon = page.icon;
+                const isActive = page.id === activePage;
+
+                return (
+                  <button
+                    key={page.id}
+                    type="button"
+                    aria-current={isActive ? "page" : undefined}
+                    title={page.label}
+                    onClick={() => setActivePage(page.id)}
+                    className={`flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
+                      isActive
+                        ? "border-slate-300 bg-slate-200 text-slate-950 dark:border-slate-700 dark:!bg-slate-900 dark:text-slate-50"
+                        : "border-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900"
+                    } ${isNavCollapsed ? "lg:grid lg:size-14 lg:place-items-center lg:p-0" : ""}`}
+                  >
+                    <Icon aria-hidden className="size-4 shrink-0" />
+                    <span className={isNavCollapsed ? "lg:sr-only" : ""}>
+                      <span className="block text-sm font-semibold">
+                        {page.label}
+                      </span>
+                      <span className="block text-xs text-slate-500 dark:text-slate-400">
+                        {page.description}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-4 hidden space-y-2 lg:block">
+            <button
+              type="button"
+              onClick={handleRefresh}
+              className="inline-flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <span className={isNavCollapsed ? "lg:sr-only" : ""}>
+                Обновить
+              </span>
+              <RefreshCw
+                aria-hidden
+                className={`size-4 ${portfolioQuery.isFetching ? "animate-spin" : ""}`}
+              />
             </button>
           </div>
-        </header>
+        </nav>
 
-        {error && (
-          <div className="alert rounded-md border border-red-200 bg-red-50 text-red-900">
-            <CircleAlert size={18} />
-            <span>{error}</span>
+        <div className="min-w-0">
+          <div className="mx-auto flex max-w-[1480px] flex-col gap-4 px-4 py-4 sm:px-6">
+            <header
+              id="overview"
+              className="flex flex-col gap-3 border-b border-slate-200 pb-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between"
+            >
+              <div>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                  AI Project Control Tower
+                </p>
+                <h1 className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
+                  {activePage === "overview"
+                    ? "Обзор портфеля проектов"
+                    : "Анализ проекта"}
+                </h1>
+              </div>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                <button
+                  type="button"
+                  title={
+                    theme === "dark"
+                      ? "Включить светлую тему"
+                      : "Включить тёмную тему"
+                  }
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="inline-grid size-10 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  {theme === "dark" ? (
+                    <Sun aria-hidden className="size-4" />
+                  ) : (
+                    <Moon aria-hidden className="size-4" />
+                  )}
+                  <span className="sr-only">Переключить тему</span>
+                </button>
+                {activePage === "analysis" ? (
+                  <>
+                    <label className="sr-only" htmlFor="project-select">
+                      Выбрать проект
+                    </label>
+                    <select
+                      id="project-select"
+                      value={selectedProjectId ?? ""}
+                      onChange={(event) =>
+                        handleProjectSelect(event.target.value)
+                      }
+                      disabled={!portfolioQuery.data?.projects.length}
+                      className="h-10 min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm outline-none transition hover:bg-slate-50 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus:border-slate-600 dark:focus:ring-slate-800 sm:min-w-72"
+                    >
+                      {portfolioQuery.data?.projects.map((project) => (
+                        <option
+                          key={project.project_id}
+                          value={project.project_id}
+                        >
+                          {project.project_name}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                ) : null}
+              </div>
+            </header>
+
+            <main id="metrics" className="min-w-0">
+              {activePage === "overview" ? (
+                portfolioQuery.isPending ? (
+                  <LoadingState label="Загрузка портфеля…" />
+                ) : portfolioQuery.isError ? (
+                  <ErrorState
+                    message={describeError(portfolioQuery.error)}
+                    onRetry={() => portfolioQuery.refetch()}
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+                    <div className="flex flex-col gap-4">
+                      <PortfolioStats portfolio={portfolioQuery.data} />
+                      {attentionQuery.data ? (
+                        <AttentionInbox
+                          attention={attentionQuery.data}
+                          onSelectProject={(projectId) => {
+                            setSelectedProjectId(projectId);
+                            setActivePage("analysis");
+                          }}
+                        />
+                      ) : attentionQuery.isPending ? (
+                        <Card>
+                          <LoadingState label="Загрузка изменений…" />
+                        </Card>
+                      ) : attentionQuery.isError ? (
+                        <ErrorState
+                          message={describeError(attentionQuery.error)}
+                          onRetry={() => attentionQuery.refetch()}
+                        />
+                      ) : null}
+                      <Card className="p-4">
+                        <h2 className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+                          Главные сигналы портфеля
+                        </h2>
+                        <ul className="mt-3 space-y-2">
+                          {portfolioQuery.data.top_portfolio_signals.map(
+                            (signal, index) => (
+                              <li
+                                key={`${index}-${signal}`}
+                                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300"
+                              >
+                                {signal}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </Card>
+                    </div>
+                    <PortfolioSidebar
+                      projects={portfolioQuery.data.projects}
+                      selectedProjectId={selectedProjectId}
+                      onSelect={setPreviewProjectId}
+                    />
+                  </div>
+                )
+              ) : projectQuery.isError ? (
+                <ErrorState
+                  message={describeError(projectQuery.error)}
+                  onRetry={() => projectQuery.refetch()}
+                />
+              ) : projectQuery.data ? (
+                <ProjectView project={projectQuery.data} />
+              ) : (
+                <LoadingState label="Загрузка проекта…" />
+              )}
+            </main>
           </div>
-        )}
-
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]">
-          <aside className="flex flex-col gap-4">
-            {portfolio && (
-              <div className="grid grid-cols-2 gap-3">
-                <MetricTile label="Проекты" value={portfolio.projects_count} icon={<CheckCircle2 size={18} />} />
-                <MetricTile label="Health" value={portfolio.portfolio_health_score} icon={<ShieldAlert size={18} />} />
-                <MetricTile label="Красные" value={portfolio.red_projects_count} tone="red" icon={<AlertTriangle size={18} />} />
-                <MetricTile label="Зелёные" value={portfolio.green_projects_count} tone="green" icon={<CheckCircle2 size={18} />} />
-              </div>
-            )}
-
-            <div className="rounded-md border border-slate-200 bg-white">
-              <div className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900">
-                Портфель
-              </div>
-              <div className="divide-y divide-slate-100">
-                {portfolio?.projects.map((item) => (
-                  <button
-                    key={item.project_id}
-                    className={`flex w-full flex-col gap-2 px-4 py-3 text-left transition ${
-                      item.project_id === selectedProjectId ? "bg-slate-100" : "hover:bg-slate-50"
-                    }`}
-                    onClick={() => setSelectedProjectId(item.project_id)}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-semibold text-slate-950">{item.project_name}</span>
-                      <RiskBadge level={item.risk_level} />
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-slate-500">
-                      <span>{item.owner_name}</span>
-                      <span>{item.project_health_score}/100</span>
-                    </div>
-                    <progress className="progress progress-neutral h-1.5" value={item.completion_percent} max="100" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </aside>
-
-          <section className="min-w-0">
-            {loading && !project ? (
-              <div className="flex h-96 items-center justify-center rounded-md border border-slate-200 bg-white">
-                <Loader2 className="animate-spin text-slate-500" size={28} />
-              </div>
-            ) : project ? (
-              <ProjectView project={project} portfolioProject={selectedPortfolioProject} />
-            ) : null}
-          </section>
-        </section>
+        </div>
       </div>
-    </main>
-  );
-}
-
-function ProjectView({
-  project,
-  portfolioProject,
-}: {
-  project: ProjectSummary;
-  portfolioProject: PortfolioProject | null;
-}) {
-  return (
-    <div className="flex flex-col gap-4">
-      <section className="rounded-md border border-slate-200 bg-white p-5">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="max-w-4xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-semibold text-slate-950">{project.project_name}</h2>
-              <RiskBadge level={project.risk_level} />
-            </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{project.executive_summary}</p>
-          </div>
-          <div className="grid min-w-[280px] grid-cols-2 gap-2">
-            <MetricTile label="Health" value={`${project.project_health_score}/100`} tone={toneByRisk(project.risk_level)} icon={<ShieldAlert size={18} />} />
-            <MetricTile label="Готовность" value={`${project.completion_percent}%`} icon={<CheckCircle2 size={18} />} />
-          </div>
-        </div>
-      </section>
-
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <MetricTile label="Просрочено" value={project.overdue_tasks_count} tone="red" icon={<Clock3 size={18} />} />
-        <MetricTile label="Блокеры" value={project.blocked_tasks_count} tone="red" icon={<AlertTriangle size={18} />} />
-        <MetricTile label="High risks" value={project.high_risk_count} tone="amber" icon={<ShieldAlert size={18} />} />
-        <MetricTile label="Перегруз" value={`${project.resource_overload_percent}%`} tone="amber" icon={<UsersRound size={18} />} />
-      </section>
-
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_360px]">
-        <div className="flex flex-col gap-4">
-          <Panel title="Ключевые сигналы" icon={<ArrowDownUp size={18} />}>
-            <ul className="space-y-2">
-              {project.key_signals.slice(0, 6).map((signal) => (
-                <li key={signal} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                  {signal}
-                </li>
-              ))}
-            </ul>
-          </Panel>
-
-          <Panel title="Блокеры и просрочки" icon={<CalendarClock size={18} />}>
-            <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-              {project.blocked_tasks.slice(0, 4).map((task) => (
-                <TaskCard key={task.id} task={task} />
-              ))}
-            </div>
-          </Panel>
-
-          <Panel title="Коммуникации" icon={<MessageSquareWarning size={18} />}>
-            <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
-              {project.delayed_communications.slice(0, 4).map((item) => (
-                <div key={item.id} className="rounded-md border border-slate-200 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-medium text-slate-900">{item.from_team} → {item.to_team}</div>
-                    <span className="badge badge-warning rounded-md">{item.delay_days} дн.</span>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-600">{item.topic}</p>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          <Panel title="Бюджет" icon={<Banknote size={18} />}>
-            {project.budget && (
-              <div className="space-y-3">
-                <BudgetRow label="План" value={formatMoney(project.budget.planned_budget)} />
-                <BudgetRow label="Прогноз" value={formatMoney(project.budget.forecast_total_spent)} />
-                <BudgetRow label="Отклонение" value={`${project.budget.budget_deviation_percent}%`} tone="red" />
-                <BudgetRow label="ROI" value={`${project.budget.roi_percent}%`} tone={project.budget.roi_percent < 0 ? "red" : "green"} />
-                <BudgetRow label="Risk adjusted ROI" value={`${project.budget.risk_adjusted_roi_percent}%`} tone={project.budget.risk_adjusted_roi_percent < 0 ? "red" : "green"} />
+      {previewProject ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="project-preview-title"
+          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewProjectId(null)}
+        >
+          <Card
+            className="w-full max-w-xl p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
+                  Проект
+                </p>
+                <h2
+                  id="project-preview-title"
+                  className="mt-1 text-xl font-semibold text-slate-950 dark:text-slate-50"
+                >
+                  {previewProject.project_name}
+                </h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {previewProject.owner_name} · {previewProject.priority}
+                </p>
               </div>
-            )}
-          </Panel>
-
-          <Panel title="Риски" icon={<ShieldAlert size={18} />}>
-            <div className="space-y-3">
-              {project.top_risks.slice(0, 4).map((risk) => (
-                <div key={risk.id} className="rounded-md border border-slate-200 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-900">{risk.risk_type}</span>
-                    <span className="badge badge-error rounded-md">score {risk.score}</span>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-600">{risk.description}</p>
-                  <div className="mt-2 text-xs text-slate-500">{risk.owner_name}</div>
-                </div>
-              ))}
+              <button
+                type="button"
+                onClick={() => setPreviewProjectId(null)}
+                className="inline-grid size-9 place-items-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                <X aria-hidden className="size-4" />
+                <span className="sr-only">Закрыть</span>
+              </button>
             </div>
-          </Panel>
 
-          <Panel title="Ресурсы" icon={<UsersRound size={18} />}>
-            <div className="space-y-3">
-              {project.overloaded_resources.slice(0, 4).map((resource) => (
-                <div key={resource.resource_id} className="rounded-md border border-slate-200 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-900">{resource.full_name}</span>
-                    <span className="badge badge-warning rounded-md">{resource.total_allocation_percent}%</span>
-                  </div>
-                  <div className="mt-1 text-sm text-slate-600">{resource.role}, {resource.team}</div>
-                </div>
-              ))}
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Health
+                </p>
+                <p className="mt-1 text-xl font-semibold tabular-nums">
+                  {previewProject.project_health_score}
+                </p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Готовность
+                </p>
+                <p className="mt-1 text-xl font-semibold tabular-nums">
+                  {Math.round(previewProject.completion_percent)}%
+                </p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Блокеры
+                </p>
+                <p className="mt-1 text-xl font-semibold tabular-nums">
+                  {previewProject.blocked_tasks_count}
+                </p>
+              </div>
+              <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Просрочки
+                </p>
+                <p className="mt-1 text-xl font-semibold tabular-nums">
+                  {previewProject.overdue_tasks_count}
+                </p>
+              </div>
             </div>
-          </Panel>
 
-          {portfolioProject && (
-            <Panel title="Сигналы портфеля" icon={<CircleAlert size={18} />}>
-              <ul className="space-y-2">
-                {portfolioProject.top_signals.map((signal) => (
-                  <li key={signal} className="text-sm text-slate-600">{signal}</li>
+            {previewProject.top_signals.length ? (
+              <ul className="mt-4 space-y-2">
+                {previewProject.top_signals.slice(0, 3).map((signal, index) => (
+                  <li
+                    key={`${index}-${signal}`}
+                    className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700 dark:bg-slate-950/50 dark:text-slate-300"
+                  >
+                    {signal}
+                  </li>
                 ))}
               </ul>
-            </Panel>
-          )}
+            ) : null}
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedProjectId(previewProject.project_id);
+                  setPreviewProjectId(null);
+                  setActivePage("analysis");
+                }}
+                className="rounded-lg border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-700"
+              >
+                Подробнее
+              </button>
+            </div>
+          </Card>
         </div>
-      </section>
+      ) : null}
     </div>
   );
-}
-
-function MetricTile({
-  label,
-  value,
-  icon,
-  tone = "slate",
-}: {
-  label: string;
-  value: string | number;
-  icon: ReactNode;
-  tone?: "slate" | "red" | "amber" | "green";
-}) {
-  const toneClass = {
-    slate: "border-slate-200 bg-white text-slate-900",
-    red: "border-red-200 bg-red-50 text-red-900",
-    amber: "border-amber-200 bg-amber-50 text-amber-900",
-    green: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  }[tone];
-
-  return (
-    <div className={`rounded-md border p-3 ${toneClass}`}>
-      <div className="flex items-center justify-between gap-3 text-xs font-medium uppercase text-slate-500">
-        <span>{label}</span>
-        {icon}
-      </div>
-      <div className="mt-2 text-2xl font-semibold">{value}</div>
-    </div>
-  );
-}
-
-function Panel({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
-  return (
-    <section className="rounded-md border border-slate-200 bg-white">
-      <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-900">
-        {icon}
-        {title}
-      </div>
-      <div className="p-4">{children}</div>
-    </section>
-  );
-}
-
-function TaskCard({ task }: { task: TaskSignal }) {
-  return (
-    <div className="rounded-md border border-slate-200 p-3">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm font-semibold text-slate-900">{task.title}</div>
-          <div className="mt-1 text-xs text-slate-500">{task.assignee_name}</div>
-        </div>
-        <span className="badge badge-error rounded-md whitespace-nowrap">{task.overdue_days} дн.</span>
-      </div>
-      {task.blocker_reason && <p className="mt-2 text-sm text-slate-600">{task.blocker_reason}</p>}
-    </div>
-  );
-}
-
-function RiskBadge({ level }: { level: RiskLevel }) {
-  const label = level === "red" ? "красная" : level === "yellow" ? "жёлтая" : "зелёная";
-  const className = level === "red" ? "badge-error" : level === "yellow" ? "badge-warning" : "badge-success";
-  return <span className={`badge ${className} rounded-md whitespace-nowrap`}>{label}</span>;
-}
-
-function BudgetRow({ label, value, tone = "slate" }: { label: string; value: string; tone?: "slate" | "red" | "green" }) {
-  const color = tone === "red" ? "text-red-700" : tone === "green" ? "text-emerald-700" : "text-slate-900";
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className={`text-sm font-semibold ${color}`}>{value}</span>
-    </div>
-  );
-}
-
-function toneByRisk(level: RiskLevel) {
-  if (level === "red") {
-    return "red";
-  }
-  if (level === "yellow") {
-    return "amber";
-  }
-  return "green";
-}
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat("ru-RU", {
-    maximumFractionDigits: 0,
-  }).format(value);
 }

@@ -7,10 +7,12 @@ services:
     restart: unless-stopped
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+      VITE_AGENTS_API_URL: ${VITE_AGENTS_API_URL:-http://localhost:8010}
     ports:
       - "${FRONTEND_PORT:-5180}:5180"
     depends_on:
       - backend
+      - agents
     networks:
       - sdm_hack
 
@@ -28,6 +30,25 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - sdm_hack
+
+  agents:
+    build:
+      context: .
+      dockerfile: agents/Dockerfile
+    container_name: sdm_hack_agents
+    restart: unless-stopped
+    environment:
+      BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8000}
+      AGENTS_CORS_ORIGINS: ${AGENTS_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
+      YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-}
+      YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}
+      YANDEX_CLOUD_MODEL: ${YANDEX_CLOUD_MODEL:-}
+    ports:
+      - "${AGENTS_PORT:-8010}:8010"
+    depends_on:
+      - backend
     networks:
       - sdm_hack
 

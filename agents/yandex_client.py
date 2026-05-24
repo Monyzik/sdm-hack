@@ -14,6 +14,16 @@ YANDEX_CLOUD_API_KEY = os.getenv("YANDEX_CLOUD_API_KEY")
 YANDEX_CLOUD_MODEL = os.getenv("YANDEX_CLOUD_MODEL")
 
 
+def get_yandex_model_uri() -> str:
+    if not YANDEX_CLOUD_MODEL:
+        raise ValueError("Не задан YANDEX_CLOUD_MODEL в окружении.")
+    if YANDEX_CLOUD_MODEL.startswith("gpt://"):
+        return YANDEX_CLOUD_MODEL
+    if not YANDEX_CLOUD_FOLDER:
+        raise ValueError("Не задан YANDEX_CLOUD_FOLDER в окружении.")
+    return f"gpt://{YANDEX_CLOUD_FOLDER}/{YANDEX_CLOUD_MODEL}"
+
+
 @lru_cache(maxsize=1)
 def get_yandex_client() -> openai.OpenAI:
     if not YANDEX_CLOUD_API_KEY:

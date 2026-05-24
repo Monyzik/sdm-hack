@@ -9,7 +9,7 @@ from typing import Any, List, Optional
 from docx import Document
 from pydantic import BaseModel, ConfigDict, Field
 
-from agents.yandex_client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, get_yandex_client
+from agents.yandex_client import get_yandex_client, get_yandex_model_uri
 
 
 class Goal(BaseModel):
@@ -80,12 +80,7 @@ class ProjectParser:
         max_document_chars: int = 15000,
         temperature: float = 0.1,
     ) -> None:
-        if not YANDEX_CLOUD_FOLDER or not YANDEX_CLOUD_MODEL:
-            raise ValueError(
-                "Не заданы YANDEX_CLOUD_FOLDER или YANDEX_CLOUD_MODEL в окружении."
-            )
-
-        self.model = f"gpt://{YANDEX_CLOUD_FOLDER}/{YANDEX_CLOUD_MODEL}"
+        self.model = get_yandex_model_uri()
         self.client = get_yandex_client()
         self.max_document_chars = max_document_chars
         self.temperature = temperature

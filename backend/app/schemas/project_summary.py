@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,122 @@ class TaskSignal(BaseModel):
     overdue_days: int
     assignee_name: str
     blocker_reason: str | None = None
+
+
+class ProjectFact(BaseModel):
+    id: str
+    name: str
+    owner_name: str
+    status: str
+    priority: str
+    start_date: date
+    planned_end_date: date
+    business_goal: str
+    expected_result: str
+    business_value: str
+
+
+class ProjectMetricsFact(BaseModel):
+    completion_percent: float
+    total_tasks_count: int
+    completed_tasks_count: int
+    overdue_tasks_count: int
+    delayed_milestones_count: int
+    blocked_tasks_count: int
+    high_risk_count: int
+    dependency_risk_count: int
+    pending_decision_count: int
+    open_change_request_count: int
+    dependency_sla_breach_count: int
+    budget_deviation_percent: float | None
+    milestone_slip_days: int
+    critical_path_delay_days: int
+    blocked_age_days: int
+    decision_age_days: int
+    net_change_request_impact_days: int
+    net_change_request_impact_budget: int
+    scope_churn_rate: float
+    burn_rate_percent: float
+    schedule_variance_percent: float
+    stale_tasks_count: int
+    max_status_age_days: int
+    estimate_overrun_percent: float
+    workload_imbalance_index: float
+    key_person_dependency_percent: float
+    critical_task_silence_days: int
+    communication_silence_days: int
+    data_freshness_days: int
+    cost_of_delay_exposure: int
+    risk_trend: str
+    resource_overload_percent: float
+    max_communication_delay_days: int
+    project_health_score: int = Field(ge=0, le=100)
+    risk_level: str
+
+
+class ProblemTaskFact(BaseModel):
+    id: str
+    external_id: str
+    title: str
+    assignee_id: str
+    assignee_name: str
+    status: str
+    priority: str
+    planned_due_date: date
+    actual_end_date: date | None
+    estimated_hours: int
+    spent_hours: int
+    is_blocked: bool
+    blocker_reason: str | None
+    overdue_days: int
+    problem_flags: list[str]
+
+
+class TaskDependencyEdgeFact(BaseModel):
+    id: str
+    root_task_id: str
+    direction: str
+    depth: int
+    task_id: str
+    task_title: str
+    depends_on_task_id: str
+    depends_on_task_title: str
+    dependency_type: str
+    is_critical_path: bool
+    lag_days: int
+    reason: str
+
+
+class TaskHistoryFact(BaseModel):
+    id: str
+    task_id: str
+    changed_at: datetime
+    field_changed: str
+    old_value: str
+    new_value: str
+    changed_by: str
+    source_system: str
+
+
+class TaskCommentFact(BaseModel):
+    id: str
+    task_id: str
+    author_id: str
+    author_name: str
+    created_at: datetime
+    channel: str
+    text: str
+    mentions_count: int
+    source_system: str
+
+
+class MilestoneSignal(BaseModel):
+    id: str
+    name: str
+    status: str
+    planned_end_date: date
+    delay_days: int
+    responsible_team: str
 
 
 class BudgetSummary(BaseModel):
@@ -96,6 +212,18 @@ class ChangeRequestSignal(BaseModel):
     description: str
 
 
+class OwnerActionLoadSignal(BaseModel):
+    owner_name: str
+    owner_type: str
+    action_count: int
+    blocked_tasks_count: int = 0
+    overdue_tasks_count: int = 0
+    dependency_count: int = 0
+    decision_count: int = 0
+    change_request_count: int = 0
+    communication_count: int = 0
+
+
 class ProjectSummary(BaseModel):
     project_id: str
     project_name: str
@@ -108,13 +236,34 @@ class ProjectSummary(BaseModel):
     total_tasks_count: int
     completed_tasks_count: int
     overdue_tasks_count: int
+    delayed_milestones_count: int
     blocked_tasks_count: int
     high_risk_count: int
     dependency_risk_count: int
     pending_decision_count: int
     open_change_request_count: int
+    dependency_sla_breach_count: int
 
     budget: BudgetSummary | None
+    milestone_slip_days: int
+    critical_path_delay_days: int
+    blocked_age_days: int
+    decision_age_days: int
+    net_change_request_impact_days: int
+    net_change_request_impact_budget: int
+    scope_churn_rate: float
+    burn_rate_percent: float
+    schedule_variance_percent: float
+    stale_tasks_count: int
+    max_status_age_days: int
+    estimate_overrun_percent: float
+    workload_imbalance_index: float
+    key_person_dependency_percent: float
+    critical_task_silence_days: int
+    communication_silence_days: int
+    data_freshness_days: int
+    cost_of_delay_exposure: int
+    risk_trend: str
     resource_overload_percent: float
     max_communication_delay_days: int
     project_health_score: int = Field(ge=0, le=100)
@@ -124,12 +273,31 @@ class ProjectSummary(BaseModel):
     key_signals: list[str]
     blocked_tasks: list[TaskSignal]
     overdue_tasks: list[TaskSignal]
+    delayed_milestones: list[MilestoneSignal]
     top_risks: list[RiskSignal]
     delayed_communications: list[CommunicationSignal]
     overloaded_resources: list[ResourceLoadSignal]
     risky_dependencies: list[DependencySignal]
     pending_decisions: list[DecisionSignal]
     open_change_requests: list[ChangeRequestSignal]
+    owner_action_load: list[OwnerActionLoadSignal]
+
+
+class ProjectProblemContext(BaseModel):
+    project: ProjectFact
+    as_of_date: date
+    metrics: ProjectMetricsFact
+    budget: BudgetSummary | None
+    problem_tasks: list[ProblemTaskFact]
+    task_dependency_edges: list[TaskDependencyEdgeFact]
+    linked_risks: list[RiskSignal]
+    linked_communications: list[CommunicationSignal]
+    linked_project_dependencies: list[DependencySignal]
+    pending_decisions: list[DecisionSignal]
+    open_change_requests: list[ChangeRequestSignal]
+    overloaded_resources: list[ResourceLoadSignal]
+    recent_task_history: list[TaskHistoryFact]
+    recent_task_comments: list[TaskCommentFact]
 
 
 class PortfolioProjectSummary(BaseModel):
@@ -149,6 +317,39 @@ class PortfolioProjectSummary(BaseModel):
     top_signals: list[str]
 
 
+class PortfolioAttentionProject(BaseModel):
+    project_id: str
+    project_name: str
+    owner_name: str
+    risk_level: str
+    project_health_score: int = Field(ge=0, le=100)
+    urgent_signals_count: int
+    top_reason: str
+    next_action: str
+
+
+class PortfolioAttentionSignal(BaseModel):
+    id: str
+    project_id: str
+    project_name: str
+    occurred_at: datetime
+    signal_type: str
+    severity: str
+    title: str
+    description: str
+    recommended_action: str
+    evidence_ids: list[str]
+
+
+class PortfolioAttentionSummary(BaseModel):
+    as_of_date: date
+    lookback_days: int
+    total_signals_count: int
+    critical_signals_count: int
+    projects_to_watch: list[PortfolioAttentionProject]
+    signals: list[PortfolioAttentionSignal]
+
+
 class PortfolioSummary(BaseModel):
     as_of_date: date
     projects_count: int
@@ -158,4 +359,3 @@ class PortfolioSummary(BaseModel):
     portfolio_health_score: int
     top_portfolio_signals: list[str]
     projects: list[PortfolioProjectSummary]
-

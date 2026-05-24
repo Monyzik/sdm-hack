@@ -7,7 +7,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
-from agents.yandex_client import YANDEX_CLOUD_FOLDER, YANDEX_CLOUD_MODEL, get_yandex_client
+from agents.yandex_client import get_yandex_client, get_yandex_model_uri
 
 
 NotificationSeverity = Literal["info", "warning", "critical"]
@@ -37,12 +37,7 @@ class ProjectInternalNotificationAgent:
         temperature: float = 0.2,
         max_context_chars: int = 12000,
     ) -> None:
-        if not YANDEX_CLOUD_FOLDER or not YANDEX_CLOUD_MODEL:
-            raise ValueError(
-                "Не заданы YANDEX_CLOUD_FOLDER или YANDEX_CLOUD_MODEL в окружении."
-            )
-
-        self.model = f"gpt://{YANDEX_CLOUD_FOLDER}/{YANDEX_CLOUD_MODEL}"
+        self.model = get_yandex_model_uri()
         self.client = get_yandex_client()
         self.temperature = temperature
         self.max_context_chars = max_context_chars
@@ -105,7 +100,7 @@ class ProjectInternalNotificationAgent:
 4. should_create=false ставь, если проект green, критичных алертов нет и нет действий, требующих внимания.
 5. target_role обычно teamlead. Если escalation_needed=true, можно выбрать project_manager или portfolio_manager.
 6. recipient_hint бери из project.owner_name, если это похоже на владельца проекта.
-7. title должен быть коротким, body — конкретным и пригодным для push внутри продукта.
+7. title должен быть коротким, body должен быть конкретным и пригодным для push внутри продукта.
 8. action_items должны быть краткими действиями из analysis.recommended_actions.
 9. requires_acknowledgement=true ставь для critical severity и эскалаций.
 10. deduplication_key сделай стабильным: project_id + главная метрика или health_status.
