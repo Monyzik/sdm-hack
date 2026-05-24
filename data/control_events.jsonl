@@ -1,0 +1,5 @@
+{"event_type":"docx_changed","file_path":"data/project_documents/project_summary_001.docx"}
+{"event_type":"task_changed","project_id":"P001"}
+{"event_type":"risk_changed","project_id":"P002"}
+{"event_type":"budget_changed","project_id":"P003"}
+{"event_type":"manual_monitoring_requested","project_id":"P004"}

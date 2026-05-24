@@ -120,7 +120,14 @@ Root `main.py` имитирует поток событий по DOCX-файла
 
 Если для файла уже есть JSON в `data/per_file_json`, событие считается `docx_changed`. Если JSON еще нет, событие считается `docx_added`. Затем событие передается в LangGraph workflow `agents/project_control_graph.py`.
 
-Workflow выполняет шаги:
+`ProjectControlGraph` начинается с узла `route_event`. Он выбирает ветку обработки:
+
+- `docx_added` / `docx_changed` -> `parse_docx` -> `update_project` -> `monitor_project`;
+- `task_changed`, `risk_changed`, `budget_changed`, `dependency_changed`, `communication_changed`, `manual_monitoring_requested` -> сразу `monitor_project`.
+
+Для DOCX-событий нужен `file_path`, для событий мониторинга нужен `project_id`.
+
+Основные шаги DOCX-ветки:
 
 1. `parse_docx`: запускает DOCX parsing agent и извлекает проектную JSON-схему.
 2. `update_project`: обновляет выбранные поля проекта в таблице `projects`.
@@ -149,6 +156,28 @@ python main.py
 - `data/per_file_json/`: JSON после парсинга каждого DOCX;
 - `data/agents_json/batch_output.json`: общий результат пайплайна;
 - `data/agents_json/project_monitoring_output.json`: результат мониторинга.
+
+### Симуляция событий
+
+Для локальной симуляции события можно описать в `data/control_events.jsonl`.
+Каждая строка — отдельный JSON-объект:
+
+```json
+{"event_type":"docx_changed","file_path":"data/project_documents/project_summary_001.docx"}
+{"event_type":"task_changed","project_id":"P001"}
+{"event_type":"risk_changed","project_id":"P002"}
+```
+
+Запуск симуляции:
+
+```bash
+python scripts/simulate_control_events.py
+```
+
+Скрипт читает события из `data/control_events.jsonl`, отправляет каждое событие в
+`ProjectControlGraph` и сохраняет результат в
+`data/agents_json/control_event_simulation_output.json`.
+Относительные `file_path` в JSONL считаются относительно корня проекта.
 
 ## PostgreSQL
 

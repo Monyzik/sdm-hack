@@ -16,11 +16,30 @@ from backend.app.database.session import create_engine_from_env, create_session_
 
 
 DocxEventType = Literal["docx_added", "docx_changed"]
+MonitoringEventType = Literal[
+    "task_changed",
+    "risk_changed",
+    "budget_changed",
+    "dependency_changed",
+    "communication_changed",
+    "manual_monitoring_requested",
+]
+ProjectEventType = DocxEventType | MonitoringEventType
+
+DOCX_EVENTS = {"docx_added", "docx_changed"}
+MONITORING_EVENTS = {
+    "task_changed",
+    "risk_changed",
+    "budget_changed",
+    "dependency_changed",
+    "communication_changed",
+    "manual_monitoring_requested",
+}
 
 
 class ProjectControlData(BaseModel):
-    event_type: DocxEventType
-    file_path: str
+    event_type: ProjectEventType
+    file_path: str | None = None
     project_id: str | None = None
     parsed_project: dict[str, Any] | None = None
     monitoring: dict[str, Any] | None = None
@@ -32,10 +51,37 @@ def state_value(state: ProjectControlData | dict[str, Any], key: str, default: A
     return state.get(key, default)
 
 
-def parse_docx_node(parser: ProjectParser) -> Any:
+def route_event(state: ProjectControlData | dict[str, Any]) -> str:
+    event_type = state_value(state, "event_type")
+
+    if event_type in DOCX_EVENTS:
+        if not state_value(state, "file_path"):
+            raise ValueError("Для DOCX-события нужен file_path")
+        return "docx"
+
+    if event_type in MONITORING_EVENTS:
+        if not state_value(state, "project_id"):
+            raise ValueError("Для события мониторинга нужен project_id")
+        return "monitor"
+
+    raise ValueError(f"Неизвестный тип события: {event_type}")
+
+
+def parse_docx_node(parser: ProjectParser | None = None) -> Any:
+    parser_instance = parser
+
     def parse_docx(state: ProjectControlData | dict[str, Any]) -> dict[str, Any]:
-        file_path = Path(state_value(state, "file_path"))
-        project_data = parser.parse(file_path)
+        nonlocal parser_instance
+
+        raw_file_path = state_value(state, "file_path")
+        if not raw_file_path:
+            raise ValueError("Нет file_path для парсинга DOCX")
+
+        if parser_instance is None:
+            parser_instance = ProjectParser()
+
+        file_path = Path(raw_file_path)
+        project_data = parser_instance.parse(file_path)
 
         return {
             "parsed_project": project_data.model_dump(mode="json"),
@@ -50,7 +96,11 @@ def update_project_node(session_factory: sessionmaker) -> Any:
         if parsed_project is None:
             raise ValueError("Нет результата парсинга DOCX для записи в projects")
 
-        file_path = Path(state_value(state, "file_path"))
+        raw_file_path = state_value(state, "file_path")
+        if not raw_file_path:
+            raise ValueError("Нет file_path для записи DOCX-схемы в projects")
+
+        file_path = Path(raw_file_path)
         project_data = ProjectData.model_validate(parsed_project)
 
         with session_factory() as session:
@@ -104,10 +154,9 @@ def build_project_control_graph(
     if session_factory is None:
         engine = create_engine_from_env()
         session_factory = create_session_factory(engine)
-    if parser is None:
-        parser = ProjectParser()
 
     graph = StateGraph(ProjectControlData)
+    graph.add_node("route_event", lambda state: {})
     graph.add_node("parse_docx", parse_docx_node(parser))
     graph.add_node("update_project", update_project_node(session_factory))
     graph.add_node(
@@ -115,7 +164,15 @@ def build_project_control_graph(
         monitor_project_node(session_factory, analyst, notification_agent),
     )
 
-    graph.add_edge(START, "parse_docx")
+    graph.add_edge(START, "route_event")
+    graph.add_conditional_edges(
+        "route_event",
+        route_event,
+        {
+            "docx": "parse_docx",
+            "monitor": "monitor_project",
+        },
+    )
     graph.add_edge("parse_docx", "update_project")
     graph.add_edge("update_project", "monitor_project")
     graph.add_edge("monitor_project", END)
@@ -124,8 +181,9 @@ def build_project_control_graph(
 
 
 def run_project_control_event(
-    file_path: str | Path,
-    event_type: DocxEventType = "docx_changed",
+    file_path: str | Path | None = None,
+    event_type: ProjectEventType = "docx_changed",
+    project_id: str | None = None,
     session_factory: sessionmaker | None = None,
     analyst: ProjectAnalystAgent | None = None,
     notification_agent: ProjectInternalNotificationAgent | None = None,
@@ -137,6 +195,7 @@ def run_project_control_event(
     )
     initial_state = ProjectControlData(
         event_type=event_type,
-        file_path=str(Path(file_path)),
+        file_path=None if file_path is None else str(Path(file_path)),
+        project_id=project_id,
     )
     return graph.invoke(initial_state.model_dump())
