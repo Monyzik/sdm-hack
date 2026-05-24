@@ -46,8 +46,7 @@ class ProjectSummaryService:
         return ProjectSummary(
             project_id=source.project.id,
             project_name=source.project.name,
-            owner_name=source.project.owner_name,
-            status=source.project.status,
+            lifecycle_status=source.project.lifecycle_status,
             priority=source.project.priority,
             as_of_date=metrics.as_of_date,
             completion_percent=metrics.completion_percent,
@@ -174,8 +173,7 @@ class ProjectSummaryService:
             project=ProjectFact(
                 id=source.project.id,
                 name=source.project.name,
-                owner_name=source.project.owner_name,
-                status=source.project.status,
+                lifecycle_status=source.project.lifecycle_status,
                 priority=source.project.priority,
                 start_date=source.project.start_date,
                 planned_end_date=source.project.planned_end_date,
@@ -243,8 +241,7 @@ class ProjectSummaryService:
             PortfolioProjectSummary(
                 project_id=summary.project_id,
                 project_name=summary.project_name,
-                owner_name=summary.owner_name,
-                status=summary.status,
+                lifecycle_status=summary.lifecycle_status,
                 priority=summary.priority,
                 project_health_score=summary.project_health_score,
                 risk_level=summary.risk_level,
@@ -386,7 +383,12 @@ class ProjectSummaryService:
                     continue
                 if item.status.casefold() not in OPEN_CHANGE_REQUEST_STATUSES:
                     continue
-                severity = "critical" if abs(item.impact_budget) >= 4_000_000 or abs(item.impact_days) >= 7 else "warning"
+                severity = (
+                    "critical"
+                    if abs(item.requested_budget_delta) >= 4_000_000
+                    or abs(item.requested_timeline_delta_days) >= 7
+                    else "warning"
+                )
                 add_signal(
                     signal_id=f"attention-{item.id}",
                     occurred_at=_date_to_datetime(item.request_date),
@@ -428,7 +430,7 @@ class ProjectSummaryService:
                     severity="warning",
                     title="Зависло управленческое решение",
                     description=item.description,
-                    recommended_action="Вынести решение владельцу проекта.",
+                    recommended_action="Вынести решение руководителю проектов.",
                     evidence_ids=[item.id],
                 )
 
@@ -449,7 +451,6 @@ class ProjectSummaryService:
                 PortfolioAttentionProject(
                     project_id=summary.project_id,
                     project_name=summary.project_name,
-                    owner_name=summary.owner_name,
                     risk_level=summary.risk_level,
                     project_health_score=summary.project_health_score,
                     urgent_signals_count=len(project_signals),

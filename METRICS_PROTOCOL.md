@@ -16,7 +16,7 @@
 
 1. Все метрики считаются на дату среза `as_of`.
 2. Source layer: `projects`, `tasks`, `task_history`, `task_comments`, `milestones`, `budgets`, `risks`, `communications`, `resource_allocations`, `dependencies`, `decisions`, `change_requests`.
-3. Derived layer: health score, risk level, overdue count, budget deviation, ROI, overload, delay, pending decisions и другие агрегаты.
+3. Derived layer: health score, risk level, forecast total spent, overdue count, budget deviation, ROI, overload, delay, pending decisions и другие агрегаты.
 4. Для каждой красной или желтой метрики нужен не только числовой показатель, но и объяснение: объект, владелец, причина, связанная задача/веха.
 5. Для РП главный выход системы: executive summary, key signals, список решений, список эскалаций.
 
@@ -40,8 +40,8 @@
 | `delayed_milestones_count` | открытые вехи с `planned_end_date < as_of` | Показывает срыв ключевых этапов, который важнее отдельных просроченных задач. |
 | `blocked_tasks_count` | задачи с `is_blocked=true` или статусом `Blocked` | Показывает, где команда не может двигаться без внешнего действия. |
 | `high_risk_count` | открытые риски с `probability * impact >= 15` | Фокусирует РП на рисках, которые уже требуют mitigation или эскалации. |
-| `budget_deviation_percent` | `(forecast_total_spent - planned_budget) / planned_budget * 100` | Показывает ожидаемый перерасход до того, как он полностью попал в факт. |
-| `roi_percent` | `(expected_economic_effect - forecast_total_spent) / forecast_total_spent * 100` | Показывает, сохраняет ли проект экономический смысл. |
+| `budget_deviation_percent` | `(calculated_forecast_total_spent - planned_budget) / planned_budget * 100`; forecast считается из план/факт-статей бюджета и CR, а не хранится в CSV | Показывает ожидаемый перерасход до того, как он полностью попал в факт. |
+| `roi_percent` | `(expected_economic_effect - calculated_forecast_total_spent) / calculated_forecast_total_spent * 100` | Показывает, сохраняет ли проект экономический смысл. |
 | `risk_adjusted_roi_percent` | ROI после дисконта эффекта на давление high-risk рисков | Помогает не переоценивать эффект проекта при большом risk exposure. |
 | `resource_overload_percent` | максимальный перегруз ресурса сверх доступной емкости | Показывает, кто является узким местом и где нужен перераспределенный capacity. |
 | `max_communication_delay_days` | максимальная просрочка ответа по открытым коммуникациям; pending с будущей датой ответа не считается задержкой | Показывает, какие согласования или ответы тормозят проект. |
@@ -76,8 +76,8 @@
 | `critical_path_delay_days` | `task_dependencies`, `tasks` | Показывает, какая задержка на critical path реально двигает срок проекта. |
 | `blocked_age_days` | `task_history`, `tasks` | Отличает новый блокер от старого блокера, который уже требует эскалации. |
 | `decision_age_days` | `decisions` | Показывает, сколько дней висит самое старое управленческое решение. |
-| `net_change_request_impact_days` | `change_requests` | Суммирует влияние открытых CR на срок. |
-| `net_change_request_impact_budget` | `change_requests` | Суммирует влияние открытых CR на бюджет. |
+| `net_change_request_impact_days` | `change_requests.requested_timeline_delta_days` | Суммирует запрошенную дельту срока по открытым CR. |
+| `net_change_request_impact_budget` | `change_requests.requested_budget_delta` | Суммирует запрошенную дельту бюджета по открытым CR. |
 | `dependency_sla_breach_count` | `dependencies` | Показывает открытые зависимости, где expected date уже нарушена. |
 | `scope_churn_rate` | `change_requests`, `task_history`, `tasks` | Показывает нестабильность scope через CR и изменения сроков/оценок задач. |
 | `burn_rate_percent` | `budgets` | Показывает долю потраченного бюджета от плана. |

@@ -99,7 +99,7 @@ class ProjectInternalNotificationAgent:
 3. should_create=true ставь, если есть critical alerts, analysis.health_status red/yellow, escalation_needed=true или есть конкретные действия для тимлида.
 4. should_create=false ставь, если проект green, критичных алертов нет и нет действий, требующих внимания.
 5. target_role обычно teamlead. Если escalation_needed=true, можно выбрать project_manager или portfolio_manager.
-6. recipient_hint бери из project.owner_name, если это похоже на владельца проекта.
+6. recipient_hint бери из владельца конкретного действия, блокера, решения или зависимости; если его нет, указывай руководителя проектов.
 7. title должен быть коротким, body должен быть конкретным и пригодным для push внутри продукта.
 8. action_items должны быть краткими действиями из analysis.recommended_actions.
 9. requires_acknowledgement=true ставь для critical severity и эскалаций.

@@ -40,7 +40,7 @@ function BudgetTile({ label, value, hint, tone = "neutral" }: BudgetTileProps) {
   );
 }
 
-/** Сводка по бюджету: план, прогноз, отклонение и оба варианта ROI. */
+/** Сводка по бюджету: входной план/факт и расчетные forecast/ROI. */
 export function BudgetPanel({ budget }: { budget: BudgetSummary | null }) {
   return (
     <Panel title="Бюджет" icon={<Banknote className="size-4" />}>
@@ -60,7 +60,7 @@ export function BudgetPanel({ budget }: { budget: BudgetSummary | null }) {
           <BudgetTile
             label="Прогноз"
             value={formatMoney(budget.forecast_total_spent, budget.currency)}
-            hint="Ожидаемые затраты"
+            hint="Расчетные ожидаемые затраты"
             tone={
               budget.forecast_total_spent > budget.planned_budget
                 ? "warning"
@@ -92,7 +92,7 @@ export function BudgetPanel({ budget }: { budget: BudgetSummary | null }) {
           <BudgetTile
             label="Отклонение"
             value={formatPercent(budget.budget_deviation_percent, true)}
-            hint="Forecast минус plan"
+            hint="Расчетный forecast минус plan"
             tone={budget.budget_deviation_percent > 0 ? "danger" : "success"}
           />
           <BudgetTile

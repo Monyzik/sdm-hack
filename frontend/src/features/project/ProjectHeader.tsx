@@ -11,7 +11,7 @@ import { Card, MetricTile, RiskBadge } from "../../components/ui";
 import { healthTone } from "../../lib/risk";
 
 /**
- * Шапка карточки проекта: название, зона риска, владелец и главные метрики.
+ * Шапка карточки проекта: название, зона риска, приоритет и главные метрики.
  */
 export function ProjectHeader({ project }: { project: ProjectSummary }) {
   return (
@@ -25,7 +25,7 @@ export function ProjectHeader({ project }: { project: ProjectSummary }) {
             <RiskBadge level={project.risk_level} />
           </div>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {project.owner_name} · {project.priority}
+            {project.priority}
           </p>
         </div>
 

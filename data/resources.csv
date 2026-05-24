@@ -23,3 +23,93 @@ R021,Полина Соколова,Data Analyst,CRM Analytics,40,3400,middle
 R022,Евгений Фомин,Integration Engineer,Payments,40,4300,senior
 R023,Лариса Сергеева,Compliance Officer,Compliance,32,3900,senior
 R024,Владислав Крылов,SRE,Platform,40,4500,middle+
+R025,Артем Аверин,Project Manager,MAX PMO,40,5200,senior
+R026,Валерия Басова,Business Analyst,MAX Analysis,40,4050,middle+
+R027,Глеб Воронцов,Solution Architect,MAX Architecture,32,6400,principal
+R028,Диана Галкин,Backend Developer,MAX Core,40,5450,senior
+R029,Егор Демина,Frontend Developer,MAX Front,40,4900,middle+
+R030,Инна Еремин,Data Engineer,MAX Data,40,5550,senior
+R031,Лев Жукова,ML Engineer,MAX AI,40,6100,senior
+R032,Милана Зорин,QA Automation Engineer,MAX Quality,40,3900,middle+
+R033,Петр Исаев,DevOps Engineer,MAX Platform,40,5150,senior
+R034,Яна Климова,Security Engineer,MAX Security,32,5900,senior
+R035,Артем Ларионов,Integration Engineer,MAX Integration,40,5150,senior
+R036,Валерия Медведева,SRE,MAX Reliability,40,5700,senior
+R037,Глеб Назаров,Compliance Officer,MAX Compliance,32,5050,senior
+R038,Диана Орлова,UX Researcher,MAX CX,32,4500,middle
+R039,Егор Петров,Project Manager,MAX PMO,40,5200,senior
+R040,Инна Рябова,Business Analyst,MAX Analysis,40,4050,middle+
+R041,Лев Сафонов,Solution Architect,MAX Architecture,32,6400,principal
+R042,Милана Тихонова,Backend Developer,MAX Core,40,5450,senior
+R043,Петр Устинов,Frontend Developer,MAX Front,40,4900,middle+
+R044,Яна Филатова,Data Engineer,MAX Data,40,5550,senior
+R045,Артем Аверин,ML Engineer,MAX AI,40,6100,senior
+R046,Валерия Басова,QA Automation Engineer,MAX Quality,40,3900,middle+
+R047,Глеб Воронцов,DevOps Engineer,MAX Platform,40,5150,senior
+R048,Диана Галкин,Security Engineer,MAX Security,32,5900,senior
+R049,Егор Демина,Integration Engineer,MAX Integration,40,5150,senior
+R050,Инна Еремин,SRE,MAX Reliability,40,5700,senior
+R051,Лев Жукова,Compliance Officer,MAX Compliance,32,5050,senior
+R052,Милана Зорин,UX Researcher,MAX CX,32,4500,middle
+R053,Петр Исаев,Project Manager,MAX PMO,40,5200,senior
+R054,Яна Климова,Business Analyst,MAX Analysis,40,4050,middle+
+R055,Артем Ларионов,Solution Architect,MAX Architecture,32,6400,principal
+R056,Валерия Медведева,Backend Developer,MAX Core,40,5450,senior
+R057,Глеб Назаров,Frontend Developer,MAX Front,40,4900,middle+
+R058,Диана Орлова,Data Engineer,MAX Data,40,5550,senior
+R059,Егор Петров,ML Engineer,MAX AI,40,6100,senior
+R060,Инна Рябова,QA Automation Engineer,MAX Quality,40,3900,middle+
+R061,Лев Сафонов,DevOps Engineer,MAX Platform,40,5150,senior
+R062,Милана Тихонова,Security Engineer,MAX Security,32,5900,senior
+R063,Петр Устинов,Integration Engineer,MAX Integration,40,5150,senior
+R064,Яна Филатова,SRE,MAX Reliability,40,5700,senior
+R065,Артем Аверин,Compliance Officer,MAX Compliance,32,5050,senior
+R066,Валерия Басова,UX Researcher,MAX CX,32,4500,middle
+R067,Глеб Воронцов,Project Manager,MAX PMO,40,5200,senior
+R068,Диана Галкин,Business Analyst,MAX Analysis,40,4050,middle+
+R069,Егор Демина,Solution Architect,MAX Architecture,32,6400,principal
+R070,Инна Еремин,Backend Developer,MAX Core,40,5450,senior
+R071,Лев Жукова,Frontend Developer,MAX Front,40,4900,middle+
+R072,Милана Зорин,Data Engineer,MAX Data,40,5550,senior
+R073,Петр Исаев,ML Engineer,MAX AI,40,6100,senior
+R074,Яна Климова,QA Automation Engineer,MAX Quality,40,3900,middle+
+R075,Артем Ларионов,DevOps Engineer,MAX Platform,40,5150,senior
+R076,Валерия Медведева,Security Engineer,MAX Security,32,5900,senior
+R077,Глеб Назаров,Integration Engineer,MAX Integration,40,5150,senior
+R078,Диана Орлова,SRE,MAX Reliability,40,5700,senior
+R079,Егор Петров,Compliance Officer,MAX Compliance,32,5050,senior
+R080,Инна Рябова,UX Researcher,MAX CX,32,4500,middle
+R081,Лев Сафонов,Project Manager,MAX PMO,40,5200,senior
+R082,Милана Тихонова,Business Analyst,MAX Analysis,40,4050,middle+
+R083,Петр Устинов,Solution Architect,MAX Architecture,32,6400,principal
+R084,Яна Филатова,Backend Developer,MAX Core,40,5450,senior
+R085,Артем Аверин,Frontend Developer,MAX Front,40,4900,middle+
+R086,Валерия Басова,Data Engineer,MAX Data,40,5550,senior
+R087,Глеб Воронцов,ML Engineer,MAX AI,40,6100,senior
+R088,Диана Галкин,QA Automation Engineer,MAX Quality,40,3900,middle+
+R089,Егор Демина,DevOps Engineer,MAX Platform,40,5150,senior
+R090,Инна Еремин,Security Engineer,MAX Security,32,5900,senior
+R091,Лев Жукова,Integration Engineer,MAX Integration,40,5150,senior
+R092,Милана Зорин,SRE,MAX Reliability,40,5700,senior
+R093,Петр Исаев,Compliance Officer,MAX Compliance,32,5050,senior
+R094,Яна Климова,UX Researcher,MAX CX,32,4500,middle
+R095,Артем Ларионов,Project Manager,MAX PMO,40,5200,senior
+R096,Валерия Медведева,Business Analyst,MAX Analysis,40,4050,middle+
+R097,Глеб Назаров,Solution Architect,MAX Architecture,32,6400,principal
+R098,Диана Орлова,Backend Developer,MAX Core,40,5450,senior
+R099,Егор Петров,Frontend Developer,MAX Front,40,4900,middle+
+R100,Инна Рябова,Data Engineer,MAX Data,40,5550,senior
+R101,Лев Сафонов,ML Engineer,MAX AI,40,6100,senior
+R102,Милана Тихонова,QA Automation Engineer,MAX Quality,40,3900,middle+
+R103,Петр Устинов,DevOps Engineer,MAX Platform,40,5150,senior
+R104,Яна Филатова,Security Engineer,MAX Security,32,5900,senior
+R105,Артем Аверин,Integration Engineer,MAX Integration,40,5150,senior
+R106,Валерия Басова,SRE,MAX Reliability,40,5700,senior
+R107,Глеб Воронцов,Compliance Officer,MAX Compliance,32,5050,senior
+R108,Диана Галкин,UX Researcher,MAX CX,32,4500,middle
+R109,Егор Демина,Project Manager,MAX PMO,40,5200,senior
+R110,Инна Еремин,Business Analyst,MAX Analysis,40,4050,middle+
+R111,Лев Жукова,Solution Architect,MAX Architecture,32,6400,principal
+R112,Милана Зорин,Backend Developer,MAX Core,40,5450,senior
+R113,Петр Исаев,Frontend Developer,MAX Front,40,4900,middle+
+R114,Яна Климова,Data Engineer,MAX Data,40,5550,senior
