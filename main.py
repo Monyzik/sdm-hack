@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import date
 from pathlib import Path
 
@@ -17,6 +18,7 @@ DOCX_DIR = Path("data/project_documents")
 OUTPUT_FILE = Path("data/agents_json/batch_output.json")
 PER_FILE_OUTPUT_DIR = Path("data/per_file_json")
 MONITORING_OUTPUT_FILE = Path("data/agents_json/project_monitoring_output.json")
+DEFAULT_AS_OF = "2026-06-19"
 
 
 def get_docx_files(folder: Path) -> list[Path]:
@@ -55,12 +57,13 @@ def main() -> None:
     files = get_docx_files(DOCX_DIR)
     event_results = []
     monitoring_results = []
+    as_of = date.fromisoformat(os.getenv("AS_OF_DATE", DEFAULT_AS_OF))
     engine = create_engine_from_env()
     Base.metadata.create_all(engine)
     session_factory = create_session_factory(engine)
     graph = build_project_control_graph(session_factory=session_factory)
 
-    print("Обработка DOCX-событий через LangGraph")
+    print(f"Обработка DOCX-событий через LangGraph, дата среза: {as_of.isoformat()}")
     for index, file_path in enumerate(files, start=1):
         event_type = detect_docx_event(file_path)
         print(f"[{index}/{len(files)}] {event_type}: {file_path.name}")
@@ -70,6 +73,7 @@ def main() -> None:
                 ProjectControlData(
                     event_type=event_type,
                     file_path=str(file_path),
+                    as_of=as_of,
                 ).model_dump()
             )
             parsed_project = result.get("parsed_project")

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel
 
@@ -9,6 +9,9 @@ class NotificationItem(BaseModel):
     id: str
     project_id: str
     project_name: str | None
+    as_of_date: date | None
+    trigger_event_type: str | None
+    trigger_event_label: str | None
     created_at: datetime
     updated_at: datetime
     source: str

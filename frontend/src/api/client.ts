@@ -107,6 +107,7 @@ export function fetchProjectSummary(
 export function fetchNotifications(
   options: {
     projectId?: string;
+    asOfDate?: string;
     unreadOnly?: boolean;
     limit?: number;
   } = {},
@@ -115,6 +116,9 @@ export function fetchNotifications(
   const query = new URLSearchParams();
   if (options.projectId) {
     query.set("project_id", options.projectId);
+  }
+  if (options.asOfDate) {
+    query.set("as_of_date", options.asOfDate);
   }
   if (options.unreadOnly) {
     query.set("unread_only", "true");

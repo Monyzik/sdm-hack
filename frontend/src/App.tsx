@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
   Bell,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Gauge,
@@ -68,6 +69,7 @@ export default function App() {
   const queryClient = useQueryClient();
   const [isNavCollapsed, setIsNavCollapsed] = useState(false);
   const [activePage, setActivePage] = useState<AppPage>("overview");
+  const [asOfDate, setAsOfDate] = useState(AS_OF_DATE);
   const [previewProjectId, setPreviewProjectId] = useState<string | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "light";
@@ -81,15 +83,15 @@ export default function App() {
     null,
   );
 
-  const portfolioQuery = usePortfolio(AS_OF_DATE);
+  const portfolioQuery = usePortfolio(asOfDate);
   const attentionQuery = usePortfolioAttention(
-    AS_OF_DATE,
+    asOfDate,
     7,
     activePage === "overview",
   );
   const projectQuery = useProjectSummary(
     selectedProjectId,
-    AS_OF_DATE,
+    asOfDate,
     activePage === "analysis",
   );
   const previewProject = portfolioQuery.data?.projects.find(
@@ -296,6 +298,21 @@ export default function App() {
                 </h1>
               </div>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+                <label className="sr-only" htmlFor="as-of-date">
+                  Дата среза
+                </label>
+                <div className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                  <CalendarDays aria-hidden className="size-3.5" />
+                  <input
+                    id="as-of-date"
+                    type="date"
+                    value={asOfDate}
+                    onChange={(event) =>
+                      setAsOfDate(event.target.value || AS_OF_DATE)
+                    }
+                    className="min-w-0 bg-transparent text-sm font-medium text-slate-800 outline-none dark:text-slate-100"
+                  />
+                </div>
                 <button
                   type="button"
                   title={
@@ -390,6 +407,7 @@ export default function App() {
                   <ProjectChatPage
                     projects={portfolioQuery.data.projects}
                     selectedProjectId={selectedProjectId}
+                    asOfDate={asOfDate}
                     onSelectProject={setSelectedProjectId}
                   />
                 )
@@ -405,6 +423,7 @@ export default function App() {
                   <NotificationsPage
                     projects={portfolioQuery.data.projects}
                     selectedProjectId={selectedProjectId}
+                    asOfDate={asOfDate}
                     onSelectProject={setSelectedProjectId}
                   />
                 )
@@ -414,7 +433,7 @@ export default function App() {
                   onRetry={() => projectQuery.refetch()}
                 />
               ) : projectQuery.data ? (
-                <ProjectView project={projectQuery.data} />
+                <ProjectView project={projectQuery.data} asOfDate={asOfDate} />
               ) : (
                 <LoadingState label="Загрузка проекта…" />
               )}

@@ -30,6 +30,7 @@ import type { Tone } from "../../lib/risk";
 interface NotificationsPageProps {
   projects: PortfolioProjectSummary[];
   selectedProjectId: string | null;
+  asOfDate: string;
   onSelectProject: (projectId: string) => void;
 }
 
@@ -50,6 +51,7 @@ const severityLabel: Record<NotificationSeverity, string> = {
 export function NotificationsPage({
   projects,
   selectedProjectId,
+  asOfDate,
   onSelectProject,
 }: NotificationsPageProps) {
   const [projectFilter, setProjectFilter] = useState<ProjectFilter>(
@@ -57,7 +59,7 @@ export function NotificationsPage({
   );
   const [unreadOnly, setUnreadOnly] = useState(false);
   const projectId = projectFilter === "all" ? null : projectFilter;
-  const notificationsQuery = useNotifications(projectId, unreadOnly);
+  const notificationsQuery = useNotifications(asOfDate, projectId, unreadOnly);
   const markReadMutation = useMarkNotificationRead();
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export function NotificationsPage({
               Центр уведомлений
             </div>
             <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-              Внутренние уведомления, которые monitoring graph сохранил в базе.
+              Внутренние уведомления monitoring graph на выбранную дату среза.
             </p>
           </div>
 
@@ -319,6 +321,16 @@ function NotificationRow({
             <div className="text-xs text-slate-500 dark:text-slate-400">
               {formatNotificationDate(notification.created_at)}
             </div>
+            {notification.as_of_date ? (
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Срез: {formatDate(notification.as_of_date)}
+              </div>
+            ) : null}
+            {notification.trigger_event_label ? (
+              <div className="rounded-lg bg-slate-50 px-2 py-1.5 text-xs leading-5 text-slate-600 dark:bg-slate-950/50 dark:text-slate-300">
+                После события: {notification.trigger_event_label}
+              </div>
+            ) : null}
             {notification.recipient_hint ? (
               <div className="text-xs text-slate-500 dark:text-slate-400">
                 {notification.recipient_hint}

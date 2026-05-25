@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -26,6 +26,9 @@ def upsert_notification_from_draft(
         severity = _string_value(draft.get("severity"))
         title = _string_value(draft.get("title"))
         deduplication_key = f"{project_id}:{severity}:{title}"
+    as_of_date = _optional_string_value(draft.get("as_of_date"))
+    if as_of_date and not deduplication_key.endswith(f":{as_of_date}"):
+        deduplication_key = f"{deduplication_key}:{as_of_date}"
 
     notification = session.scalar(
         select(Notification).where(
@@ -69,6 +72,7 @@ def list_notifications(
     *,
     project_id: str | None = None,
     severity: str | None = None,
+    as_of_date: date | None = None,
     unread_only: bool = False,
     limit: int = 100,
 ) -> list[Notification]:
@@ -77,14 +81,22 @@ def list_notifications(
         severity=severity,
         unread_only=unread_only,
     )
+    statement_limit = limit if as_of_date is None else max(limit, 5000)
     statement = (
         select(Notification)
         .options(joinedload(Notification.project))
         .where(*conditions)
         .order_by(Notification.created_at.desc())
-        .limit(limit)
+        .limit(statement_limit)
     )
-    return list(session.scalars(statement))
+    notifications = list(session.scalars(statement))
+    if as_of_date is not None:
+        notifications = [
+            notification
+            for notification in notifications
+            if notification.payload.get("as_of_date") == as_of_date.isoformat()
+        ]
+    return notifications[:limit]
 
 
 def mark_notification_read(session: Session, notification_id: str) -> Notification | None:
@@ -111,8 +123,21 @@ def count_notifications(
     *,
     project_id: str | None = None,
     severity: str | None = None,
+    as_of_date: date | None = None,
     unread_only: bool = False,
 ) -> int:
+    if as_of_date is not None:
+        return len(
+            list_notifications(
+                session,
+                project_id=project_id,
+                severity=severity,
+                as_of_date=as_of_date,
+                unread_only=unread_only,
+                limit=5000,
+            )
+        )
+
     conditions = _notification_conditions(
         project_id=project_id,
         severity=severity,

@@ -23,6 +23,7 @@ from backend.app.services.project_summary_repository import (
 class ProjectMonitorData(BaseModel):
     project_id: str
     as_of: date | None = None
+    trigger_event: dict[str, Any] | None = None
     project: dict[str, Any] = Field(default_factory=dict)
     tasks: list[dict[str, Any]] = Field(default_factory=list)
     milestones: list[dict[str, Any]] = Field(default_factory=list)
@@ -432,13 +433,22 @@ def analyze_project_node(agent: ProjectAnalystAgent) -> Any:
 
 def draft_notification_node(agent: ProjectInternalNotificationAgent) -> Any:
     def draft_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+        metrics = state_value(state, "metrics", {})
         notification_draft = agent.draft(
             project=state_value(state, "project", {}),
-            metrics=state_value(state, "metrics", {}),
+            metrics=metrics,
             alerts=state_value(state, "alerts", []),
             analysis=state_value(state, "analysis", {}),
         )
-        return {"notification_draft": notification_draft.model_dump(mode="json")}
+        draft = notification_draft.model_dump(mode="json")
+        if metrics.get("as_of_date"):
+            draft["as_of_date"] = str(metrics["as_of_date"])
+        trigger_event = state_value(state, "trigger_event")
+        if trigger_event:
+            draft["trigger_event"] = trigger_event
+            draft["trigger_event_type"] = trigger_event.get("type")
+            draft["trigger_event_label"] = trigger_event.get("label")
+        return {"notification_draft": draft}
 
     return draft_notification
 
@@ -498,7 +508,8 @@ def build_project_monitor_graph(
 
 def run_project_monitor(
     project_id: str,
-    as_of: date | None = None,
+    as_of: date | str | None = None,
+    trigger_event: dict[str, Any] | None = None,
     session_factory: sessionmaker | None = None,
     analyst: ProjectAnalystAgent | None = None,
     notification_agent: ProjectInternalNotificationAgent | None = None,
@@ -511,6 +522,8 @@ def run_project_monitor(
     initial_state = ProjectMonitorData(project_id=project_id)
     if as_of:
         initial_state.as_of = as_of
+    if trigger_event:
+        initial_state.trigger_event = trigger_event
     return graph.invoke(initial_state.model_dump())
 
 

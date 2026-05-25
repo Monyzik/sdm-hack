@@ -17,6 +17,9 @@ NotificationTargetRole = Literal["teamlead", "project_manager", "portfolio_manag
 class InternalNotificationDraft(BaseModel):
     should_create: bool = Field(description="Нужно ли создавать уведомление в сервисе")
     project_id: str = Field(description="Идентификатор проекта")
+    as_of_date: str | None = Field(None, description="Дата среза метрик в формате YYYY-MM-DD")
+    trigger_event_type: str | None = Field(None, description="Тип события, после которого создано уведомление")
+    trigger_event_label: str | None = Field(None, description="Человекочитаемое описание события")
     target_role: NotificationTargetRole = Field(description="Роль получателя уведомления")
     recipient_hint: str | None = Field(None, description="Подсказка по получателю из данных проекта")
     severity: NotificationSeverity = Field(description="Важность внутреннего уведомления")
@@ -104,7 +107,8 @@ class ProjectInternalNotificationAgent:
 8. action_items должны быть краткими действиями из analysis.recommended_actions.
 9. requires_acknowledgement=true ставь для critical severity и эскалаций.
 10. deduplication_key сделай стабильным: project_id + главная метрика или health_status.
-11. Используй только факты из входных данных, не выдумывай людей, даты и причины.
+11. Если metrics.as_of_date есть во входных данных, верни его в as_of_date.
+12. Используй только факты из входных данных, не выдумывай людей, даты и причины.
 """
 
         response = self.client.chat.completions.create(

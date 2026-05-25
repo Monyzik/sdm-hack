@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +18,7 @@ from backend.app.database.session import create_engine_from_env, create_session_
 
 EVENTS_FILE = PROJECT_ROOT / "data/control_events.jsonl"
 OUTPUT_FILE = PROJECT_ROOT / "data/agents_json/control_event_simulation_output.json"
+SIMULATION_START_DATE = date(2026, 6, 19)
 
 
 def load_events(path: Path) -> list[dict[str, Any]]:
@@ -36,7 +37,32 @@ def load_events(path: Path) -> list[dict[str, Any]]:
         if not isinstance(event, dict):
             raise ValueError(f"Событие на строке {line_number} должно быть JSON-объектом")
         events.append(normalize_event_paths(event))
-    return events
+    return assign_unique_as_of_dates(events)
+
+
+def assign_unique_as_of_dates(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    dated_events: list[dict[str, Any]] = []
+    used_dates: set[str] = set()
+    offset = 0
+
+    for event in events:
+        normalized = dict(event)
+        as_of = normalized.get("as_of")
+        if isinstance(as_of, str) and as_of and as_of not in used_dates:
+            used_dates.add(as_of)
+            dated_events.append(normalized)
+            continue
+
+        while True:
+            next_as_of = (SIMULATION_START_DATE + timedelta(days=offset)).isoformat()
+            offset += 1
+            if next_as_of not in used_dates:
+                normalized["as_of"] = next_as_of
+                used_dates.add(next_as_of)
+                dated_events.append(normalized)
+                break
+
+    return dated_events
 
 
 def normalize_event_paths(event: dict[str, Any]) -> dict[str, Any]:

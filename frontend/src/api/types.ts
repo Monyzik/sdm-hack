@@ -248,6 +248,9 @@ export interface InternalNotification {
   id: string;
   project_id: string;
   project_name: string | null;
+  as_of_date: string | null;
+  trigger_event_type: string | null;
+  trigger_event_label: string | null;
   created_at: string;
   updated_at: string;
   source: string;

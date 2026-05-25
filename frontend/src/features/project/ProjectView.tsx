@@ -1,9 +1,9 @@
 import { AlertTriangle, Clock3 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { ApiError } from "../../api/client";
 import type { ProjectSummary } from "../../api/types";
 import { useProjectBrief } from "../../hooks/useProjectBrief";
-import { AS_OF_DATE } from "../../lib/constants";
 import { ProjectHeader } from "./ProjectHeader";
 import { AgentBriefPanel } from "./panels/AgentBriefPanel";
 import { BudgetPanel } from "./panels/BudgetPanel";
@@ -20,20 +20,36 @@ import { TasksPanel } from "./panels/TasksPanel";
  * Детальное представление проекта. Здесь только композиция: каждый блок —
  * самостоятельный компонент-панель, отвечающий за свой кусок данных.
  */
-export function ProjectView({ project }: { project: ProjectSummary }) {
+export function ProjectView({
+  project,
+  asOfDate,
+}: {
+  project: ProjectSummary;
+  asOfDate: string;
+}) {
   const [activeTab, setActiveTab] = useState<
     "summary" | "work" | "coordination"
   >("summary");
   const [isBriefRequested, setIsBriefRequested] = useState(false);
   const briefQuery = useProjectBrief(
     project.project_id,
-    AS_OF_DATE,
+    asOfDate,
     activeTab === "summary" && isBriefRequested,
   );
 
   useEffect(() => {
     setIsBriefRequested(false);
-  }, [project.project_id]);
+  }, [asOfDate, project.project_id]);
+
+  const briefErrorMessage = useMemo(() => {
+    if (!isBriefRequested || !briefQuery.isError) {
+      return null;
+    }
+    if (briefQuery.error instanceof ApiError && briefQuery.error.message) {
+      return briefQuery.error.message;
+    }
+    return "Агент сейчас недоступен или вернул некорректный ответ";
+  }, [briefQuery.error, briefQuery.isError, isBriefRequested]);
 
   const tabs = useMemo(
     () => [
@@ -94,11 +110,7 @@ export function ProjectView({ project }: { project: ProjectSummary }) {
           <AgentBriefPanel
             brief={isBriefRequested ? briefQuery.data : undefined}
             isLoading={briefQuery.isFetching}
-            errorMessage={
-              isBriefRequested && briefQuery.isError
-                ? "Агент сейчас недоступен или вернул некорректный ответ"
-                : null
-            }
+            errorMessage={briefErrorMessage}
             hasRequested={isBriefRequested}
             onRequest={() => {
               if (isBriefRequested) {

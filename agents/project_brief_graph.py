@@ -19,6 +19,10 @@ except ModuleNotFoundError:
 
 
 TECHNICAL_ID_RE = re.compile(r"\b(?:T|TD|RK|C|D|DEC|CR|R|Р)\d{3}\b")
+LLM_PROBLEM_TASK_LIMIT = 35
+LLM_DEPENDENCY_EDGE_LIMIT = 60
+LLM_LINKED_FACT_LIMIT = 12
+LLM_RECENT_EVENT_LIMIT = 8
 
 
 class BusinessImpact(BaseModel):
@@ -199,7 +203,14 @@ class ProjectBriefAgent:
                 ) from exc
 
     def _ask_llm(self, problem_context: dict[str, Any], bad_response: str | None = None) -> ProjectManagerBrief:
-        prompt = build_user_prompt(problem_context, bad_response)
+        llm_context = compact_problem_context_for_llm(problem_context)
+        prompt = build_user_prompt(llm_context, bad_response)
+        try:
+            return self._ask_llm_with_responses_parse(prompt)
+        except Exception:
+            return self._ask_llm_with_chat_completion(prompt)
+
+    def _ask_llm_with_responses_parse(self, prompt: str) -> ProjectManagerBrief:
         response = self.client.responses.parse(
             model=self.model,
             instructions=SYSTEM_PROMPT,
@@ -210,6 +221,30 @@ class ProjectBriefAgent:
         if response.output_parsed is None:
             raise ValueError("LLM вернула пустой parsed response")
         return response.output_parsed
+
+    def _ask_llm_with_chat_completion(self, prompt: str) -> ProjectManagerBrief:
+        schema = json.dumps(ProjectManagerBrief.model_json_schema(), ensure_ascii=False, indent=2)
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        f"{SYSTEM_PROMPT}\n\n"
+                        "Отвечай только валидным JSON без markdown. "
+                        "JSON должен соответствовать схеме ProjectManagerBrief."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": f"{prompt}\n\nJSON Schema ProjectManagerBrief:\n{schema}",
+                },
+            ],
+            temperature=self.temperature,
+            response_format={"type": "json_object"},
+        )
+        response_text = response.choices[0].message.content or "{}"
+        return ProjectManagerBrief.model_validate(_parse_json(response_text))
 
 
 def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None = None) -> str:
@@ -225,6 +260,8 @@ def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None 
     return (
         retry_note
         + "Сформируй управленческую рекомендацию по JSON problem context.\n"
+        + "Контекст может быть компактной выборкой: counts в metrics являются полными и авторитетными, "
+        + "а problem_tasks и task_dependency_edges содержат только самые важные примеры для evidence_ids.\n"
         + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей, развилку решения, "
         + "business impact, поручение, черновик сообщения и follow-up проверку.\n"
         + "Ответ будет распарсен в строгую Pydantic-схему ProjectManagerBrief.\n\n"
@@ -233,12 +270,133 @@ def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None 
     )
 
 
+def compact_problem_context_for_llm(problem_context: dict[str, Any]) -> dict[str, Any]:
+    problem_tasks = _list_value(problem_context.get("problem_tasks"))
+    dependency_edges = _list_value(problem_context.get("task_dependency_edges"))
+    linked_risks = _list_value(problem_context.get("linked_risks"))
+    linked_communications = _list_value(problem_context.get("linked_communications"))
+    linked_project_dependencies = _list_value(problem_context.get("linked_project_dependencies"))
+    pending_decisions = _list_value(problem_context.get("pending_decisions"))
+    open_change_requests = _list_value(problem_context.get("open_change_requests"))
+    overloaded_resources = _list_value(problem_context.get("overloaded_resources"))
+    recent_task_history = _list_value(problem_context.get("recent_task_history"))
+    recent_task_comments = _list_value(problem_context.get("recent_task_comments"))
+
+    return {
+        "project": problem_context.get("project"),
+        "as_of_date": problem_context.get("as_of_date"),
+        "metrics": problem_context.get("metrics"),
+        "budget": problem_context.get("budget"),
+        "context_note": (
+            "Списки ниже ограничены для LLM. Полные количества находятся в metrics; "
+            "используй списки как evidence/sample, а не как полный объем проблем."
+        ),
+        "aggregates": _build_problem_aggregates(problem_tasks, dependency_edges),
+        "omitted_counts": {
+            "problem_tasks": max(0, len(problem_tasks) - LLM_PROBLEM_TASK_LIMIT),
+            "task_dependency_edges": max(0, len(dependency_edges) - LLM_DEPENDENCY_EDGE_LIMIT),
+            "linked_risks": max(0, len(linked_risks) - LLM_LINKED_FACT_LIMIT),
+            "linked_communications": max(0, len(linked_communications) - LLM_LINKED_FACT_LIMIT),
+            "linked_project_dependencies": max(0, len(linked_project_dependencies) - LLM_LINKED_FACT_LIMIT),
+            "pending_decisions": max(0, len(pending_decisions) - LLM_LINKED_FACT_LIMIT),
+            "open_change_requests": max(0, len(open_change_requests) - LLM_LINKED_FACT_LIMIT),
+            "overloaded_resources": max(0, len(overloaded_resources) - LLM_LINKED_FACT_LIMIT),
+            "recent_task_history": max(0, len(recent_task_history) - LLM_RECENT_EVENT_LIMIT),
+            "recent_task_comments": max(0, len(recent_task_comments) - LLM_RECENT_EVENT_LIMIT),
+        },
+        "problem_tasks": problem_tasks[:LLM_PROBLEM_TASK_LIMIT],
+        "task_dependency_edges": dependency_edges[:LLM_DEPENDENCY_EDGE_LIMIT],
+        "linked_risks": linked_risks[:LLM_LINKED_FACT_LIMIT],
+        "linked_communications": linked_communications[:LLM_LINKED_FACT_LIMIT],
+        "linked_project_dependencies": linked_project_dependencies[:LLM_LINKED_FACT_LIMIT],
+        "pending_decisions": pending_decisions[:LLM_LINKED_FACT_LIMIT],
+        "open_change_requests": open_change_requests[:LLM_LINKED_FACT_LIMIT],
+        "overloaded_resources": overloaded_resources[:LLM_LINKED_FACT_LIMIT],
+        "recent_task_history": recent_task_history[:LLM_RECENT_EVENT_LIMIT],
+        "recent_task_comments": recent_task_comments[:LLM_RECENT_EVENT_LIMIT],
+    }
+
+
+def _build_problem_aggregates(
+    problem_tasks: list[dict[str, Any]],
+    dependency_edges: list[dict[str, Any]],
+) -> dict[str, Any]:
+    overdue_days = [
+        _int_value(task.get("overdue_days"))
+        for task in problem_tasks
+        if _int_value(task.get("overdue_days")) > 0
+    ]
+    planned_due_dates = [
+        str(task.get("planned_due_date"))
+        for task in problem_tasks
+        if task.get("planned_due_date")
+    ]
+    return {
+        "problem_tasks_total_in_context": len(problem_tasks),
+        "problem_flags": _top_flag_counts(problem_tasks),
+        "tasks_by_status": _top_counts(problem_tasks, "status"),
+        "tasks_by_priority": _top_counts(problem_tasks, "priority"),
+        "tasks_by_assignee": _top_counts(problem_tasks, "assignee_name"),
+        "max_overdue_days_in_context": max(overdue_days, default=0),
+        "earliest_planned_due_date_in_context": min(planned_due_dates, default=None),
+        "dependency_edges_total_in_context": len(dependency_edges),
+        "critical_dependency_edges_in_context": sum(
+            1 for edge in dependency_edges if bool(edge.get("is_critical_path"))
+        ),
+        "dependency_edges_by_direction": _top_counts(dependency_edges, "direction"),
+    }
+
+
+def _list_value(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [item for item in value if isinstance(item, dict)]
+
+
+def _int_value(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _top_counts(items: list[dict[str, Any]], key: str, limit: int = 10) -> list[dict[str, Any]]:
+    counts: dict[str, int] = {}
+    for item in items:
+        raw_value = item.get(key)
+        label = str(raw_value).strip() if raw_value is not None else ""
+        if not label:
+            label = "unknown"
+        counts[label] = counts.get(label, 0) + 1
+    return [
+        {"value": value, "count": count}
+        for value, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:limit]
+    ]
+
+
+def _top_flag_counts(problem_tasks: list[dict[str, Any]], limit: int = 10) -> list[dict[str, Any]]:
+    counts: dict[str, int] = {}
+    for task in problem_tasks:
+        flags = task.get("problem_flags")
+        if not isinstance(flags, list):
+            continue
+        for flag in flags:
+            label = str(flag).strip()
+            if label:
+                counts[label] = counts.get(label, 0) + 1
+    return [
+        {"value": value, "count": count}
+        for value, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:limit]
+    ]
+
+
 def fetch_problem_context_node(backend_api_url: str) -> Any:
     def fetch_problem_context(state: ProjectBriefData | dict[str, Any]) -> dict[str, Any]:
         as_of = state_value(state, "as_of")
+        as_of_value = as_of.isoformat() if isinstance(as_of, date) else str(as_of or "2026-06-19")
         problem_context = fetch_project_problem_context(
             project_id=state_value(state, "project_id"),
-            as_of=as_of.isoformat() if isinstance(as_of, date) else "2026-06-19",
+            as_of=as_of_value,
             max_depth=state_value(state, "max_depth", 2),
             api_base_url=backend_api_url,
         )

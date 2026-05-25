@@ -126,6 +126,7 @@ Root `main.py` имитирует поток событий по DOCX-файла
 - `task_changed`, `risk_changed`, `budget_changed`, `dependency_changed`, `communication_changed`, `manual_monitoring_requested` -> сразу `monitor_project`.
 
 Для DOCX-событий нужен `file_path`, для событий мониторинга нужен `project_id`.
+Любое событие может дополнительно передать `as_of` в формате `YYYY-MM-DD`; эта дата попадет в `ProjectMonitorGraph` и будет использована для расчета метрик и уведомлений.
 
 Основные шаги DOCX-ветки:
 
@@ -151,6 +152,12 @@ Root `main.py` имитирует поток событий по DOCX-файла
 python main.py
 ```
 
+По умолчанию `main.py` запускает мониторинг на дату `2026-06-19`. Дату batch-среза можно поменять без аргументов командной строки:
+
+```bash
+AS_OF_DATE=2026-12-17 python main.py
+```
+
 Результаты сохраняются в:
 
 - `data/per_file_json/`: JSON после парсинга каждого DOCX;
@@ -163,9 +170,9 @@ python main.py
 Каждая строка — отдельный JSON-объект:
 
 ```json
-{"event_type":"docx_changed","file_path":"data/project_documents/project_summary_001.docx"}
-{"event_type":"task_changed","project_id":"P001"}
-{"event_type":"risk_changed","project_id":"P002"}
+{"event_type":"docx_changed","file_path":"data/project_documents/project_summary_001.docx","as_of":"2026-06-19"}
+{"event_type":"task_changed","project_id":"P001","as_of":"2026-06-20"}
+{"event_type":"risk_changed","project_id":"P002","as_of":"2026-06-21"}
 ```
 
 Запуск симуляции:
@@ -178,6 +185,7 @@ python scripts/simulate_control_events.py
 `ProjectControlGraph` и сохраняет результат в
 `data/agents_json/control_event_simulation_output.json`.
 Относительные `file_path` в JSONL считаются относительно корня проекта.
+Если в событии нет `as_of` или дата повторяется, симулятор автоматически назначит следующую свободную дату начиная с `2026-06-19`. Так уведомления в simulation output выглядят как поток за разные дни.
 
 ## PostgreSQL
 
@@ -260,10 +268,11 @@ GET /api/v1/summaries/portfolio/attention
 ```text
 GET /api/v1/notifications
 GET /api/v1/notifications?project_id=P001&unread_only=true
+GET /api/v1/notifications?project_id=P001&as_of_date=2026-06-19
 PATCH /api/v1/notifications/{notification_id}/read
 ```
 
-Уведомления лежат в таблице `notifications`. Monitoring graph сохраняет их после `ProjectInternalNotificationAgent`, если `notification_draft.should_create=true`.
+Уведомления лежат в таблице `notifications`. Monitoring graph сохраняет их после `ProjectInternalNotificationAgent`, если `notification_draft.should_create=true`, и кладет дату среза и событие-триггер в payload уведомления. Frontend передает текущую дату в `as_of_date`, чтобы не смешивать уведомления разных срезов, и показывает в карточке, после какого события появилось уведомление.
 
 Если база уже была поднята до появления этой таблицы, создай недостающие ORM-таблицы без удаления данных:
 
@@ -285,7 +294,7 @@ Agents API отдает результат агента для frontend:
 GET /api/v1/agents/projects/{project_id}/brief
 ```
 
-Endpoint забирает `problem-context` из backend, вызывает LLM через Yandex provider, валидирует ответ через Pydantic и возвращает строгий JSON. Для работы нужны `YANDEX_CLOUD_FOLDER`, `YANDEX_CLOUD_API_KEY` и `YANDEX_CLOUD_MODEL` в `.env`. `YANDEX_CLOUD_MODEL` можно задать коротко, например `qwen3.6-35b-a3b/latest`, или полным URI `gpt://folder_id/qwen3.6-35b-a3b/latest`.
+Endpoint забирает `problem-context` из backend, сжимает его до компактного LLM-контекста с полными счетчиками в `metrics` и ограниченной evidence-выборкой, вызывает LLM через Yandex provider, валидирует ответ через Pydantic и возвращает строгий JSON. Для работы нужны `YANDEX_CLOUD_FOLDER`, `YANDEX_CLOUD_API_KEY` и `YANDEX_CLOUD_MODEL` в `.env`. `YANDEX_CLOUD_MODEL` можно задать коротко, например `qwen3.6-35b-a3b/latest`, или полным URI `gpt://folder_id/qwen3.6-35b-a3b/latest`.
 
 ## LangGraph monitoring
 
@@ -325,4 +334,5 @@ python -m agents.project_monitor_graph P001 --as-of 2026-06-15
 - проектный dashboard по endpoint `/api/v1/summaries/*`;
 - вкладка уведомлений по endpoint `/api/v1/notifications`;
 - выбор проекта из портфеля;
+- выбор даты среза: frontend передает выбранную дату как `as_of` в summary endpoints, Q&A agent и brief agent;
 - вывод health score, зоны риска, бюджета, блокеров, рисков, коммуникаций и перегрузки ресурсов.

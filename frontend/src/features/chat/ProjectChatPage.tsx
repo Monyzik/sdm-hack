@@ -4,7 +4,6 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { PortfolioProjectSummary, ProjectQuestionAnswer } from "../../api/types";
 import { Badge } from "../../components/ui";
 import { useProjectQuestion } from "../../hooks/useProjectQuestion";
-import { AS_OF_DATE } from "../../lib/constants";
 import { MarkdownContent } from "./MarkdownContent";
 
 type ChatMessage =
@@ -24,12 +23,14 @@ type ChatMessage =
 interface ProjectChatPageProps {
   projects: PortfolioProjectSummary[];
   selectedProjectId: string | null;
+  asOfDate: string;
   onSelectProject: (projectId: string) => void;
 }
 
 export function ProjectChatPage({
   projects,
   selectedProjectId,
+  asOfDate,
   onSelectProject,
 }: ProjectChatPageProps) {
   const [draft, setDraft] = useState("");
@@ -45,7 +46,7 @@ export function ProjectChatPage({
     (project) => project.project_id === selectedProjectId,
   );
   const selectedProjectName = selectedProject?.project_name;
-  const questionMutation = useProjectQuestion(selectedProjectId, AS_OF_DATE);
+  const questionMutation = useProjectQuestion(selectedProjectId, asOfDate);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const canSubmit = draft.trim().length > 0 && Boolean(selectedProjectId);
 
@@ -59,11 +60,11 @@ export function ProjectChatPage({
         id: `welcome-${selectedProjectId ?? "none"}`,
         role: "assistant",
         content: selectedProjectName
-          ? `Выбран проект «${selectedProjectName}». Задайте вопрос по статусу, срокам, рискам, бюджету или блокерам.`
+          ? `Выбран проект «${selectedProjectName}». Дата среза: ${asOfDate}. Задайте вопрос по статусу, срокам, рискам, бюджету или блокерам.`
           : "Выберите проект, чтобы задать вопрос.",
       },
     ]);
-  }, [selectedProjectId, selectedProjectName]);
+  }, [asOfDate, selectedProjectId, selectedProjectName]);
 
   const compactProjectOptions = useMemo(
     () =>
