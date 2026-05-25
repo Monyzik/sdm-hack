@@ -242,6 +242,34 @@ export interface PortfolioAttentionSummary {
   signals: PortfolioAttentionSignal[];
 }
 
+export type NotificationSeverity = "info" | "warning" | "critical";
+
+export interface InternalNotification {
+  id: string;
+  project_id: string;
+  project_name: string | null;
+  created_at: string;
+  updated_at: string;
+  source: string;
+  target_role: string;
+  recipient_hint: string | null;
+  severity: NotificationSeverity;
+  title: string;
+  body: string;
+  reason: string;
+  action_items: string[];
+  requires_acknowledgement: boolean;
+  deduplication_key: string;
+  is_read: boolean;
+  read_at: string | null;
+}
+
+export interface NotificationList {
+  total: number;
+  unread_count: number;
+  items: InternalNotification[];
+}
+
 export type AgentBriefStatus = "в норме" | "под наблюдением" | "критично";
 
 export interface DecisionOption {

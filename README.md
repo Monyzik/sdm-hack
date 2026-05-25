@@ -255,6 +255,22 @@ GET /api/v1/summaries/portfolio/attention
 
 Он показывает, что изменилось за период по всем проектам: новые блокировки, сдвиги сроков, эскалации, открытые change requests, просроченные коммуникации и зависшие решения. Это основной слой для проблемы "сложно смотреть за изменениями нескольких проектов".
 
+Внутренние уведомления, которые создает monitoring pipeline, доступны через endpoint:
+
+```text
+GET /api/v1/notifications
+GET /api/v1/notifications?project_id=P001&unread_only=true
+PATCH /api/v1/notifications/{notification_id}/read
+```
+
+Уведомления лежат в таблице `notifications`. Monitoring graph сохраняет их после `ProjectInternalNotificationAgent`, если `notification_draft.should_create=true`.
+
+Если база уже была поднята до появления этой таблицы, создай недостающие ORM-таблицы без удаления данных:
+
+```bash
+python -m backend.app.database.init_db
+```
+
 Для LLM используется отдельный fact endpoint:
 
 ```text
@@ -279,7 +295,8 @@ Endpoint забирает `problem-context` из backend, вызывает LLM �
 2. детерминированно считает базовые метрики;
 3. классифицирует алерты;
 4. запускает `ProjectAnalystAgent`, который по метрикам и алертам готовит управленческую сводку, причины проблем, рекомендации, вопросы тимлиду и флаг эскалации;
-5. запускает `ProjectInternalNotificationAgent`, который готовит `notification_draft` для внутреннего push-уведомления в сервисе.
+5. запускает `ProjectInternalNotificationAgent`, который готовит `notification_draft` для внутреннего push-уведомления в сервисе;
+6. сохраняет уведомление в `notifications`, если draft требует создать уведомление.
 
 
 В основном пайплайне этот граф вызывает главный оркестратор
@@ -306,5 +323,6 @@ python -m agents.project_monitor_graph P001 --as-of 2026-06-15
 - React и Vite;
 - TailwindCSS и daisyUI;
 - проектный dashboard по endpoint `/api/v1/summaries/*`;
+- вкладка уведомлений по endpoint `/api/v1/notifications`;
 - выбор проекта из портфеля;
 - вывод health score, зоны риска, бюджета, блокеров, рисков, коммуникаций и перегрузки ресурсов.

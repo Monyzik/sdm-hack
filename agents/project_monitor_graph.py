@@ -13,6 +13,7 @@ from agents.internal_notification_agent import ProjectInternalNotificationAgent
 from agents.project_analysis_agent import ProjectAnalystAgent
 from backend.app.database.session import create_engine_from_env, create_session_factory
 from backend.app.services.metrics import ProjectMetrics, calculate_project_metrics
+from backend.app.services.notifications import upsert_notification_from_draft
 from backend.app.services.project_summary_repository import (
     ProjectSummaryRepository,
     ProjectSummarySource,
@@ -35,6 +36,7 @@ class ProjectMonitorData(BaseModel):
     alerts: list[dict[str, Any]] = Field(default_factory=list)
     analysis: dict[str, Any] | None = None
     notification_draft: dict[str, Any] | None = None
+    notification_id: str | None = None
 
 
 def state_value(state: ProjectMonitorData | dict[str, Any], key: str, default: Any = None) -> Any:
@@ -441,6 +443,27 @@ def draft_notification_node(agent: ProjectInternalNotificationAgent) -> Any:
     return draft_notification
 
 
+def persist_notification_node(session_factory: sessionmaker) -> Any:
+    def persist_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+        project_id = state_value(state, "project_id")
+        notification_draft = state_value(state, "notification_draft")
+        if not project_id or not notification_draft:
+            return {"notification_id": None}
+
+        with session_factory() as session:
+            notification = upsert_notification_from_draft(
+                session,
+                project_id=project_id,
+                draft=notification_draft,
+            )
+            notification_id = None if notification is None else notification.id
+            session.commit()
+
+        return {"notification_id": notification_id}
+
+    return persist_notification
+
+
 def build_project_monitor_graph(
     session_factory: sessionmaker | None = None,
     analyst: ProjectAnalystAgent | None = None,
@@ -460,13 +483,15 @@ def build_project_monitor_graph(
     graph.add_node("classify_alerts", classify_alerts)
     graph.add_node("analyze_project", analyze_project_node(analyst))
     graph.add_node("draft_notification", draft_notification_node(notification_agent))
+    graph.add_node("persist_notification", persist_notification_node(session_factory))
 
     graph.add_edge(START, "load_project_context")
     graph.add_edge("load_project_context", "calculate_metrics")
     graph.add_edge("calculate_metrics", "classify_alerts")
     graph.add_edge("classify_alerts", "analyze_project")
     graph.add_edge("analyze_project", "draft_notification")
-    graph.add_edge("draft_notification", END)
+    graph.add_edge("draft_notification", "persist_notification")
+    graph.add_edge("persist_notification", END)
 
     return graph.compile()
 
@@ -511,6 +536,7 @@ def main() -> None:
                 "alerts": result["alerts"],
                 "analysis": result["analysis"],
                 "notification_draft": result["notification_draft"],
+                "notification_id": result["notification_id"],
             },
             ensure_ascii=False,
             indent=2,

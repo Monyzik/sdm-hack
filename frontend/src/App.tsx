@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
+  Bell,
   ChevronLeft,
   ChevronRight,
   Gauge,
@@ -16,6 +17,7 @@ import { useEffect, useState } from "react";
 import { ApiError } from "./api/client";
 import { Card, ErrorState, LoadingState } from "./components/ui";
 import { ProjectChatPage } from "./features/chat/ProjectChatPage";
+import { NotificationsPage } from "./features/notifications/NotificationsPage";
 import { PortfolioCommandCenter } from "./features/portfolio/PortfolioCommandCenter";
 import { PortfolioSidebar } from "./features/portfolio/PortfolioSidebar";
 import { ProjectView } from "./features/project/ProjectView";
@@ -33,7 +35,7 @@ function describeError(error: unknown): string {
   return "Не удалось загрузить данные.";
 }
 
-type AppPage = "overview" | "analysis" | "chat";
+type AppPage = "overview" | "analysis" | "chat" | "notifications";
 
 const appPages = [
   {
@@ -53,6 +55,12 @@ const appPages = [
     label: "Чат",
     description: "Вопросы по проекту",
     icon: MessageCircle,
+  },
+  {
+    id: "notifications" as const,
+    label: "Уведомления",
+    description: "Внутренний inbox",
+    icon: Bell,
   },
 ];
 
@@ -282,7 +290,9 @@ export default function App() {
                     ? "Обзор портфеля проектов"
                     : activePage === "analysis"
                       ? "Анализ проекта"
-                      : "Чат по проекту"}
+                      : activePage === "chat"
+                        ? "Чат по проекту"
+                        : "Уведомления"}
                 </h1>
               </div>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -378,6 +388,21 @@ export default function App() {
                   />
                 ) : (
                   <ProjectChatPage
+                    projects={portfolioQuery.data.projects}
+                    selectedProjectId={selectedProjectId}
+                    onSelectProject={setSelectedProjectId}
+                  />
+                )
+              ) : activePage === "notifications" ? (
+                portfolioQuery.isPending ? (
+                  <LoadingState label="Загрузка проектов…" />
+                ) : portfolioQuery.isError ? (
+                  <ErrorState
+                    message={describeError(portfolioQuery.error)}
+                    onRetry={() => portfolioQuery.refetch()}
+                  />
+                ) : (
+                  <NotificationsPage
                     projects={portfolioQuery.data.projects}
                     selectedProjectId={selectedProjectId}
                     onSelectProject={setSelectedProjectId}

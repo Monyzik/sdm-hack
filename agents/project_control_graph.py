@@ -139,6 +139,7 @@ def monitor_project_node(
                 "alerts": monitoring_result["alerts"],
                 "analysis": monitoring_result["analysis"],
                 "notification_draft": monitoring_result["notification_draft"],
+                "notification_id": monitoring_result["notification_id"],
             },
         }
 

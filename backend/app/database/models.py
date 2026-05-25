@@ -2,7 +2,18 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-from sqlalchemy import BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    JSON,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -37,6 +48,7 @@ class Project(Base):
     dependencies: Mapped[list[ProjectDependency]] = relationship(back_populates="project")
     decisions: Mapped[list[Decision]] = relationship(back_populates="project")
     change_requests: Mapped[list[ChangeRequest]] = relationship(back_populates="project")
+    notifications: Mapped[list[Notification]] = relationship(back_populates="project")
 
 
 class Resource(Base):
@@ -291,3 +303,47 @@ class ChangeRequest(Base):
     status: Mapped[str] = mapped_column(String(64), nullable=False)
 
     project: Mapped[Project] = relationship(back_populates="change_requests")
+
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            "deduplication_key",
+            name="uq_notifications_project_deduplication_key",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        ForeignKey("projects.id"),
+        nullable=False,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )
+    source: Mapped[str] = mapped_column(String(64), nullable=False)
+    target_role: Mapped[str] = mapped_column(String(64), nullable=False)
+    recipient_hint: Mapped[str | None] = mapped_column(String(255))
+    severity: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    action_items: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    requires_acknowledgement: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    deduplication_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False)
+
+    project: Mapped[Project] = relationship(back_populates="notifications")

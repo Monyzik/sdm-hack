@@ -87,6 +87,7 @@ def main() -> None:
                         "alerts": monitoring["alerts"],
                         "analysis": monitoring["analysis"],
                         "notification_draft": monitoring["notification_draft"],
+                        "notification_id": monitoring["notification_id"],
                         "error": None,
                     }
                 )

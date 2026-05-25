@@ -7,6 +7,8 @@
  */
 import { AGENTS_API_URL, API_URL } from "../lib/constants";
 import type {
+  InternalNotification,
+  NotificationList,
   PortfolioAttentionSummary,
   PortfolioSummary,
   ProjectManagerBrief,
@@ -25,8 +27,12 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, signal?: AbortSignal): Promise<T> {
-  return requestFrom<T>(API_URL, path, signal);
+async function request<T>(
+  path: string,
+  signal?: AbortSignal,
+  init?: RequestInit,
+): Promise<T> {
+  return requestFrom<T>(API_URL, path, signal, init);
 }
 
 async function requestFrom<T>(
@@ -95,6 +101,41 @@ export function fetchProjectSummary(
   return request<ProjectSummary>(
     `/api/v1/summaries/projects/${encodeURIComponent(projectId)}?${query.toString()}`,
     signal,
+  );
+}
+
+export function fetchNotifications(
+  options: {
+    projectId?: string;
+    unreadOnly?: boolean;
+    limit?: number;
+  } = {},
+  signal?: AbortSignal,
+): Promise<NotificationList> {
+  const query = new URLSearchParams();
+  if (options.projectId) {
+    query.set("project_id", options.projectId);
+  }
+  if (options.unreadOnly) {
+    query.set("unread_only", "true");
+  }
+  if (options.limit) {
+    query.set("limit", options.limit.toString());
+  }
+
+  const queryString = query.toString();
+  const suffix = queryString ? `?${queryString}` : "";
+  return request<NotificationList>(`/api/v1/notifications${suffix}`, signal);
+}
+
+export function markNotificationRead(
+  notificationId: string,
+  signal?: AbortSignal,
+): Promise<InternalNotification> {
+  return request<InternalNotification>(
+    `/api/v1/notifications/${encodeURIComponent(notificationId)}/read`,
+    signal,
+    { method: "PATCH" },
   );
 }
 

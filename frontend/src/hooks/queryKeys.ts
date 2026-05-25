@@ -6,6 +6,8 @@ export const queryKeys = {
   portfolio: (asOf: string) => ["portfolio", asOf] as const,
   portfolioAttention: (asOf: string, lookbackDays: number) =>
     ["portfolio-attention", asOf, lookbackDays] as const,
+  notifications: (projectId: string | null, unreadOnly: boolean) =>
+    ["notifications", projectId ?? "all", unreadOnly] as const,
   project: (projectId: string, asOf: string) =>
     ["project", projectId, asOf] as const,
   projectBrief: (projectId: string, asOf: string) =>
