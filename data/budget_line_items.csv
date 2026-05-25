@@ -1,101 +1,25 @@
-id,project_id,budget_id,category,item_name,planned_amount,actual_amount,owner_team
-BI001,P001,B001,Engineering,Model development,10000000,8500000,Risk Models
-BI002,P001,B001,Integration,Core Platform integration,14000000,12000000,Core Platform
-BI003,P001,B001,Compliance,Security and approvals,16000000,13000000,Security
-BI004,P001,B001,Testing,Pilot rollout,8000000,8000000,PMO
-BI005,P002,B002,Engineering,Streaming core,20000000,18000000,Fraud Platform
-BI006,P002,B002,Integration,Card processing adapter,18000000,16000000,Payments
-BI007,P002,B002,Modeling,Feature store and scoring,20000000,14000000,Risk Models
-BI008,P002,B002,Compliance,UAT and sign-off,14000000,16000000,Compliance
-BI009,P003,B003,UX,Mobile UX and design,10000000,8000000,Mobile
-BI010,P003,B003,Product,Client scenarios,10000000,7000000,Mobile
-BI011,P003,B003,Analytics,Event tracking,12000000,9000000,CRM Analytics
-BI012,P003,B003,Release,Stabilization,10000000,5500000,Quality
-BI013,P004,B004,Engineering,Gateway core,10000000,9000000,Payments
-BI014,P004,B004,Integration,SBP and acquiring adapters,12000000,8000000,Payments
-BI015,P004,B004,Security,PCI DSS workstream,8000000,7000000,Security
-BI016,P004,B004,Observability,Load testing and monitoring,8000000,7000000,Platform
-BI017,P005,B005,Data Quality,Golden record and dedupe,9000000,6000000,CRM Analytics
-BI018,P005,B005,Engineering,CRM profile API,9000000,6000000,CRM Platform
-BI019,P005,B005,Governance,Data quality controls,8000000,5000000,Data Platform
-BI020,P005,B005,Rollout,Pilot rollout,8000000,5500000,Sales
-BI021,P006,B006,Core Platform,MAX2.0 статья 01,15665147,8942188,MAX PMO
-BI022,P006,B006,Integration,MAX2.0 статья 02,19643596,11213219,MAX Analysis
-BI023,P006,B006,Data,MAX2.0 статья 03,23622046,13484251,MAX Architecture
-BI024,P006,B006,AI,MAX2.0 статья 04,27600497,15755283,MAX Core
-BI025,P006,B006,Security,MAX2.0 статья 05,31578947,18026315,MAX Front
-BI026,P006,B006,Compliance,MAX2.0 статья 06,26854538,15329465,MAX Data
-BI027,P006,B006,Testing,MAX2.0 статья 07,30832987,17600497,MAX AI
-BI028,P006,B006,Migration,MAX2.0 статья 08,34811438,19871529,MAX Quality
-BI029,P006,B006,Observability,MAX2.0 статья 09,38789888,22142561,MAX Platform
-BI030,P006,B006,Rollout,MAX2.0 статья 10,42768338,24413592,MAX Security
-BI031,P006,B006,Core Platform,MAX2.0 статья 11,38043929,21716743,MAX Integration
-BI032,P006,B006,Integration,MAX2.0 статья 12,17405718,9935764,MAX Reliability
-BI033,P006,B006,Data,MAX2.0 статья 13,21384168,12206796,MAX Compliance
-BI034,P006,B006,AI,MAX2.0 статья 14,25362618,14477827,MAX CX
-BI035,P006,B006,Security,MAX2.0 статья 15,29341069,16748860,MAX PMO
-BI036,P006,B006,Compliance,MAX2.0 статья 16,24616659,14052009,MAX Analysis
-BI037,P006,B006,Testing,MAX2.0 статья 17,28595109,16323042,MAX Architecture
-BI038,P006,B006,Migration,MAX2.0 статья 18,32573559,18594073,MAX Core
-BI039,P006,B006,Observability,MAX2.0 статья 19,36552010,20865106,MAX Front
-BI040,P006,B006,Rollout,MAX2.0 статья 20,40530460,23136137,MAX Data
-BI041,P006,B006,Core Platform,MAX2.0 статья 21,35806050,20439287,MAX AI
-BI042,P006,B006,Integration,MAX2.0 статья 22,39784500,22710319,MAX Quality
-BI043,P006,B006,Data,MAX2.0 статья 23,19146290,10929341,MAX Platform
-BI044,P006,B006,AI,MAX2.0 статья 24,23124740,13200372,MAX Security
-BI045,P006,B006,Security,MAX2.0 статья 25,27103190,15471404,MAX Integration
-BI046,P006,B006,Compliance,MAX2.0 статья 26,22378782,12774554,MAX Reliability
-BI047,P006,B006,Testing,MAX2.0 статья 27,26357230,15045586,MAX Compliance
-BI048,P006,B006,Migration,MAX2.0 статья 28,30335681,17316618,MAX CX
-BI049,P006,B006,Observability,MAX2.0 статья 29,34314131,19587650,MAX PMO
-BI050,P006,B006,Rollout,MAX2.0 статья 30,38292582,21858682,MAX Analysis
-BI051,P006,B006,Core Platform,MAX2.0 статья 31,33568173,19161832,MAX Architecture
-BI052,P006,B006,Integration,MAX2.0 статья 32,37546621,21432863,MAX Core
-BI053,P006,B006,Data,MAX2.0 статья 33,41525072,23703895,MAX Front
-BI054,P006,B006,AI,MAX2.0 статья 34,20886862,11922917,MAX Data
-BI055,P006,B006,Security,MAX2.0 статья 35,24865312,14193949,MAX AI
-BI056,P006,B006,Compliance,MAX2.0 статья 36,20140903,11497098,MAX Quality
-BI057,P006,B006,Testing,MAX2.0 статья 37,24119353,13768131,MAX Platform
-BI058,P006,B006,Migration,MAX2.0 статья 38,28097803,16039162,MAX Security
-BI059,P006,B006,Observability,MAX2.0 статья 39,32076253,18310194,MAX Integration
-BI060,P006,B006,Rollout,MAX2.0 статья 40,36054703,20581226,MAX Reliability
-BI061,P006,B006,Core Platform,MAX2.0 статья 41,31330295,17884376,MAX Compliance
-BI062,P006,B006,Integration,MAX2.0 статья 42,35308744,20155408,MAX CX
-BI063,P006,B006,Data,MAX2.0 статья 43,39287194,22426439,MAX PMO
-BI064,P006,B006,AI,MAX2.0 статья 44,43265644,24697472,MAX Analysis
-BI065,P006,B006,Security,MAX2.0 статья 45,22627434,12916494,MAX Architecture
-BI066,P006,B006,Compliance,MAX2.0 статья 46,17903025,10219643,MAX Core
-BI067,P006,B006,Testing,MAX2.0 статья 47,21881474,12490675,MAX Front
-BI068,P006,B006,Migration,MAX2.0 статья 48,25859925,14761707,MAX Data
-BI069,P006,B006,Observability,MAX2.0 статья 49,29838375,17032738,MAX AI
-BI070,P006,B006,Rollout,MAX2.0 статья 50,33816825,19303771,MAX Quality
-BI071,P006,B006,Core Platform,MAX2.0 статья 51,29092416,16606920,MAX Platform
-BI072,P006,B006,Integration,MAX2.0 статья 52,33070866,18877953,MAX Security
-BI073,P006,B006,Data,MAX2.0 статья 53,37049316,21148984,MAX Integration
-BI074,P006,B006,AI,MAX2.0 статья 54,41027766,23420016,MAX Reliability
-BI075,P006,B006,Security,MAX2.0 статья 55,45006216,25691048,MAX Compliance
-BI076,P006,B006,Compliance,MAX2.0 статья 56,15665147,8942188,MAX CX
-BI077,P006,B006,Testing,MAX2.0 статья 57,19643596,11213219,MAX PMO
-BI078,P006,B006,Migration,MAX2.0 статья 58,23622046,13484251,MAX Analysis
-BI079,P006,B006,Observability,MAX2.0 статья 59,27600497,15755283,MAX Architecture
-BI080,P006,B006,Rollout,MAX2.0 статья 60,31578947,18026315,MAX Core
-BI081,P006,B006,Core Platform,MAX2.0 статья 61,26854538,15329465,MAX Front
-BI082,P006,B006,Integration,MAX2.0 статья 62,30832987,17600497,MAX Data
-BI083,P006,B006,Data,MAX2.0 статья 63,34811438,19871529,MAX AI
-BI084,P006,B006,AI,MAX2.0 статья 64,38789888,22142561,MAX Quality
-BI085,P006,B006,Security,MAX2.0 статья 65,42768338,24413592,MAX Platform
-BI086,P006,B006,Compliance,MAX2.0 статья 66,38043929,21716743,MAX Security
-BI087,P006,B006,Testing,MAX2.0 статья 67,17405718,9935764,MAX Integration
-BI088,P006,B006,Migration,MAX2.0 статья 68,21384168,12206796,MAX Reliability
-BI089,P006,B006,Observability,MAX2.0 статья 69,25362618,14477827,MAX Compliance
-BI090,P006,B006,Rollout,MAX2.0 статья 70,29341069,16748860,MAX CX
-BI091,P006,B006,Core Platform,MAX2.0 статья 71,24616659,14052009,MAX PMO
-BI092,P006,B006,Integration,MAX2.0 статья 72,28595109,16323042,MAX Analysis
-BI093,P006,B006,Data,MAX2.0 статья 73,32573559,18594073,MAX Architecture
-BI094,P006,B006,AI,MAX2.0 статья 74,36552010,20865106,MAX Core
-BI095,P006,B006,Security,MAX2.0 статья 75,40530460,23136137,MAX Front
-BI096,P006,B006,Compliance,MAX2.0 статья 76,35806050,20439287,MAX Data
-BI097,P006,B006,Testing,MAX2.0 статья 77,39784500,22710319,MAX AI
-BI098,P006,B006,Migration,MAX2.0 статья 78,19146290,10929341,MAX Quality
-BI099,P006,B006,Observability,MAX2.0 статья 79,23124740,13200372,MAX Platform
-BI100,P006,B006,Rollout,MAX2.0 статья 80,27103232,15471443,MAX Security
+идентификатор,идентификатор_проекта,идентификатор_бюджета,категория,название_статьи,плановая_сумма,фактическая_сумма,команда_владелец
+BI001,P001,B001,Разработка,разработка модели,10000000,8500000,Риск-модели
+BI002,P001,B001,Интеграция,интеграция с платформенным ядром,14000000,12000000,Платформенное ядро
+BI003,P001,B001,Соответствие требованиям,безопасность и согласования,16000000,13000000,Безопасность
+BI004,P001,B001,Тестирование,пилотный запуск,8000000,8000000,Проектный офис
+BI005,P002,B002,Разработка,ядро потоковой обработки,20000000,18000000,Антифрод-платформа
+BI006,P002,B002,Интеграция,адаптер карточного процессинга,18000000,16000000,Платежи
+BI007,P002,B002,Моделирование,хранилище признаков и скоринг,20000000,14000000,Риск-модели
+BI008,P002,B002,Соответствие требованиям,приемочное тестирование и согласование,14000000,16000000,Соответствие требованиям
+BI009,P003,B003,Пользовательский опыт,мобильный пользовательский опыт и дизайн,10000000,8000000,Мобильная команда
+BI010,P003,B003,Продукт,клиентские сценарии,10000000,7000000,Мобильная команда
+BI011,P003,B003,Аналитика,отслеживание событий,12000000,9000000,CRM-аналитика
+BI012,P003,B003,Релиз,стабилизация,10000000,5500000,Качество
+BI013,P004,B004,Разработка,ядро платежного шлюза,10000000,9000000,Платежи
+BI014,P004,B004,Интеграция,СБП и адаптеры эквайринга,12000000,8000000,Платежи
+BI015,P004,B004,Безопасность,направление PCI DSS,8000000,7000000,Безопасность
+BI016,P004,B004,Наблюдаемость,нагрузочное тестирование и мониторинг,8000000,7000000,Платформа
+BI017,P005,B005,Качество данных,Золотая запись и дедупликация,9000000,6000000,CRM-аналитика
+BI018,P005,B005,Разработка,программный интерфейс CRM-профиля,9000000,6000000,CRM-платформа
+BI019,P005,B005,Управление,контроли качества данных,8000000,5000000,Платформа данных
+BI020,P005,B005,Запуск,пилотный запуск,8000000,5500000,Продажи
+BI021,P006,B006,Платформенное ядро,MAX2.0 статья 01,8689655,7060345,MAX проектный офис
+BI022,P006,B006,Интеграция,MAX2.0 статья 02,10896550,8853447,MAX аналитика
+BI023,P006,B006,Данные,MAX2.0 статья 03,13103448,10646551,MAX архитектура
+BI024,P006,B006,ИИ,MAX2.0 статья 04,15310347,12439657,MAX ядро

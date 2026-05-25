@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 
 from agents.yandex_client import get_yandex_client, get_yandex_model_uri
 
-
 HealthStatus = Literal["green", "yellow", "red"]
 ActionUrgency = Literal["today", "this_week", "later"]
 
@@ -36,10 +35,10 @@ class ProjectAnalystAgent:
     """LLM-агент для управленческого анализа проекта по рассчитанным метрикам."""
 
     def __init__(
-        self,
-        *,
-        temperature: float = 0.2,
-        max_context_chars: int = 12000,
+            self,
+            *,
+            temperature: float = 0.2,
+            max_context_chars: int = 12000,
     ) -> None:
         self.model = get_yandex_model_uri()
         self.client = get_yandex_client()
@@ -47,22 +46,22 @@ class ProjectAnalystAgent:
         self.max_context_chars = max_context_chars
 
     def analyze(
-        self,
-        *,
-        project: dict[str, Any],
-        metrics: dict[str, Any],
-        alerts: list[dict[str, Any]],
+            self,
+            *,
+            project: dict[str, Any],
+            metrics: dict[str, Any],
+            alerts: list[dict[str, Any]],
     ) -> ProjectAnalysis:
         response_text = self._ask_llm(project=project, metrics=metrics, alerts=alerts)
         result_dict = self._parse_json(response_text)
         return ProjectAnalysis.model_validate(result_dict)
 
     def _ask_llm(
-        self,
-        *,
-        project: dict[str, Any],
-        metrics: dict[str, Any],
-        alerts: list[dict[str, Any]],
+            self,
+            *,
+            project: dict[str, Any],
+            metrics: dict[str, Any],
+            alerts: list[dict[str, Any]],
     ) -> str:
         schema = json.dumps(ProjectAnalysis.model_json_schema(), ensure_ascii=False, indent=2)
         context = json.dumps(

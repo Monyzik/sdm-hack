@@ -37,9 +37,9 @@ def health() -> dict[str, str]:
 
 @app.get("/api/v1/agents/projects/{project_id}/brief", response_model=ProjectManagerBrief)
 def get_project_ai_brief(
-    project_id: str,
-    as_of: date | None = Query(default=None),
-    max_depth: int = Query(default=2, ge=1, le=4),
+        project_id: str,
+        as_of: date | None = Query(default=None),
+        max_depth: int = Query(default=2, ge=1, le=4),
 ) -> ProjectManagerBrief:
     backend_api_url = os.getenv("BACKEND_API_URL", "http://backend:8000")
     try:
@@ -63,8 +63,8 @@ def get_project_ai_brief(
 
 @app.post("/api/v1/agents/projects/{project_id}/ask", response_model=ProjectQuestionAnswer)
 def ask_project_agent(
-    project_id: str,
-    payload: ProjectQuestionRequest,
+        project_id: str,
+        payload: ProjectQuestionRequest,
 ) -> ProjectQuestionAnswer:
     backend_api_url = os.getenv("BACKEND_API_URL", "http://backend:8000")
     try:

@@ -475,9 +475,9 @@ def persist_notification_node(session_factory: sessionmaker) -> Any:
 
 
 def build_project_monitor_graph(
-    session_factory: sessionmaker | None = None,
-    analyst: ProjectAnalystAgent | None = None,
-    notification_agent: ProjectInternalNotificationAgent | None = None,
+        session_factory: sessionmaker | None = None,
+        analyst: ProjectAnalystAgent | None = None,
+        notification_agent: ProjectInternalNotificationAgent | None = None,
 ):
     if session_factory is None:
         engine = create_engine_from_env()
@@ -507,12 +507,12 @@ def build_project_monitor_graph(
 
 
 def run_project_monitor(
-    project_id: str,
-    as_of: date | str | None = None,
-    trigger_event: dict[str, Any] | None = None,
-    session_factory: sessionmaker | None = None,
-    analyst: ProjectAnalystAgent | None = None,
-    notification_agent: ProjectInternalNotificationAgent | None = None,
+        project_id: str,
+        as_of: date | str | None = None,
+        trigger_event: dict[str, Any] | None = None,
+        session_factory: sessionmaker | None = None,
+        analyst: ProjectAnalystAgent | None = None,
+        notification_agent: ProjectInternalNotificationAgent | None = None,
 ) -> dict[str, Any]:
     graph = build_project_monitor_graph(
         session_factory=session_factory,

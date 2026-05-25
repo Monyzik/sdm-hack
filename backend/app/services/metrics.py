@@ -39,6 +39,59 @@ RISK_OPEN_STATUSES = {"active", "escalated", "mitigating", "open"}
 PRIORITY_WEIGHT = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 CRITICALITY_WEIGHT = {"critical": 3, "high": 2, "medium": 1, "low": 0}
 
+STATUS_ALIASES = {
+    "активен": "active",
+    "активна": "active",
+    "активно": "active",
+    "на паузе": "paused",
+    "завершен": "completed",
+    "завершена": "done",
+    "завершено": "completed",
+    "закрыто": "closed",
+    "решено": "resolved",
+    "заблокирована": "blocked",
+    "заблокировано": "blocked",
+    "в работе": "in_progress",
+    "на проверке": "review",
+    "запланирована": "planned",
+    "запланировано": "planned",
+    "задерживается": "delayed",
+    "задержано": "delayed",
+    "под риском": "at_risk",
+    "ожидает": "pending",
+    "на рассмотрении": "under_review",
+    "предложено": "proposed",
+    "согласовано": "approved",
+    "отклонено": "rejected",
+    "эскалировано": "escalated",
+    "снижается": "mitigating",
+    "открыто": "open",
+    "получен ответ": "responded",
+    "отправлено": "sent",
+}
+
+PRIORITY_ALIASES = {
+    "критический": "critical",
+    "критичная": "critical",
+    "критично": "critical",
+    "высокий": "high",
+    "высокая": "high",
+    "средний": "medium",
+    "средняя": "medium",
+    "низкий": "low",
+    "низкая": "low",
+}
+
+
+def normalize_status(value: str) -> str:
+    normalized = value.strip().casefold()
+    return STATUS_ALIASES.get(normalized, normalized)
+
+
+def normalize_priority(value: str) -> str:
+    normalized = value.strip().casefold()
+    return PRIORITY_ALIASES.get(normalized, normalized)
+
 
 @dataclass(frozen=True)
 class ProjectMetricContext:
@@ -410,7 +463,7 @@ def calculate_high_risk_signals(
     return [
         risk
         for risk in signals
-        if risk.score >= 15 and risk.status.casefold() in RISK_OPEN_STATUSES
+        if risk.score >= 15 and normalize_status(risk.status) in RISK_OPEN_STATUSES
     ]
 
 
@@ -446,7 +499,7 @@ def calculate_forecast_total_spent(context: ProjectMetricContext) -> int:
     requested_budget_delta = sum(
         request.requested_budget_delta
         for request in context.source.change_requests
-        if request.status.casefold() in BUDGET_FORECAST_CHANGE_REQUEST_STATUSES
+        if normalize_status(request.status) in BUDGET_FORECAST_CHANGE_REQUEST_STATUSES
     )
     return max(budget.actual_spent, base_forecast + requested_budget_delta)
 
@@ -469,7 +522,7 @@ def calculate_risk_adjusted_roi_percent(context: ProjectMetricContext) -> float:
 def calculate_delayed_communications(context: ProjectMetricContext) -> list[CommunicationSignal]:
     signals: list[CommunicationSignal] = []
     for communication in context.source.communications:
-        status = communication.status.casefold()
+        status = normalize_status(communication.status)
         delay_days = max(0, (context.as_of - communication.expected_response_date).days)
         if status not in OPEN_COMMUNICATION_STATUSES or delay_days == 0:
             continue
@@ -488,7 +541,7 @@ def calculate_delayed_communications(context: ProjectMetricContext) -> list[Comm
         )
     return sorted(
         signals,
-        key=lambda item: (item.delay_days, PRIORITY_WEIGHT.get(item.importance, 0), item.id),
+        key=lambda item: (item.delay_days, PRIORITY_WEIGHT.get(normalize_priority(item.importance), 0), item.id),
         reverse=True,
     )
 
@@ -557,8 +610,8 @@ def calculate_resource_overload_percent(
 def calculate_risky_dependencies(context: ProjectMetricContext) -> list[DependencySignal]:
     signals: list[DependencySignal] = []
     for dependency in context.source.dependencies:
-        status = dependency.status.casefold()
-        criticality = dependency.criticality.casefold()
+        status = normalize_status(dependency.status)
+        criticality = normalize_priority(dependency.criticality)
         delay_days = max(0, (context.as_of - dependency.expected_date).days)
         is_risky = status in OPEN_DEPENDENCY_STATUSES and (
             criticality in {"critical", "high"} or delay_days > 0
@@ -580,7 +633,7 @@ def calculate_risky_dependencies(context: ProjectMetricContext) -> list[Dependen
         )
     return sorted(
         signals,
-        key=lambda item: (CRITICALITY_WEIGHT.get(item.criticality, 0), item.delay_days, item.id),
+        key=lambda item: (CRITICALITY_WEIGHT.get(normalize_priority(item.criticality), 0), item.delay_days, item.id),
         reverse=True,
     )
 
@@ -600,7 +653,7 @@ def calculate_pending_decisions(context: ProjectMetricContext) -> list[DecisionS
             decision_date=decision.decision_date,
         )
         for decision in context.source.decisions
-        if decision.status.casefold() in OPEN_DECISION_STATUSES
+        if normalize_status(decision.status) in OPEN_DECISION_STATUSES
     ]
     return sorted(signals, key=lambda item: (item.decision_date, item.id), reverse=True)
 
@@ -621,7 +674,7 @@ def calculate_open_change_requests(context: ProjectMetricContext) -> list[Change
             description=change_request.description,
         )
         for change_request in context.source.change_requests
-        if change_request.status.casefold() in OPEN_CHANGE_REQUEST_STATUSES
+        if normalize_status(change_request.status) in OPEN_CHANGE_REQUEST_STATUSES
     ]
     return sorted(
         signals,
@@ -668,7 +721,7 @@ def calculate_blocked_age_days(
 
     blocked_since_by_task: dict[str, date] = {}
     for history_item in sorted(context.source.task_history, key=lambda item: item.changed_at):
-        if history_item.field_changed == "status" and history_item.new_value.casefold() in BLOCKED_TASK_STATUSES:
+        if history_item.field_changed == "status" and normalize_status(history_item.new_value) in BLOCKED_TASK_STATUSES:
             blocked_since_by_task[history_item.task_id] = history_item.changed_at.date()
 
     ages: list[int] = []
@@ -712,7 +765,7 @@ def calculate_dependency_sla_breach_count(context: ProjectMetricContext) -> int:
     return sum(
         1
         for dependency in context.source.dependencies
-        if dependency.status.casefold() in OPEN_DEPENDENCY_STATUSES and dependency.expected_date < context.as_of
+        if normalize_status(dependency.status) in OPEN_DEPENDENCY_STATUSES and dependency.expected_date < context.as_of
     )
 
 
@@ -810,7 +863,7 @@ def calculate_critical_task_silence_days(context: ProjectMetricContext) -> int:
 
     silence_days: list[int] = []
     for task in context.source.tasks:
-        if _is_done_task(task) or task.priority.casefold() not in {"critical", "high"}:
+        if _is_done_task(task) or normalize_priority(task.priority) not in {"critical", "high"}:
             continue
         last_comment_date = last_comment_by_task.get(task.id)
         if last_comment_date is None:
@@ -828,7 +881,7 @@ def calculate_risk_trend(
     risks = calculate_high_risk_signals(context) if high_risks is None else high_risks
     if not risks:
         return "none"
-    statuses = {risk.status.casefold() for risk in risks}
+    statuses = {normalize_status(risk.status) for risk in risks}
     if "escalated" in statuses:
         return "worsening"
     if statuses and statuses <= {"mitigating"}:
@@ -840,7 +893,7 @@ def calculate_communication_silence_days(context: ProjectMetricContext) -> int:
     open_communications = [
         communication
         for communication in context.source.communications
-        if communication.status.casefold() in OPEN_COMMUNICATION_STATUSES
+        if normalize_status(communication.status) in OPEN_COMMUNICATION_STATUSES
     ]
     if not open_communications:
         return 0
@@ -1104,7 +1157,7 @@ def build_key_signals(
 ) -> list[str]:
     signals: list[str] = []
     if blocked_tasks:
-        critical = [task for task in blocked_tasks if task.priority == "critical"]
+        critical = [task for task in blocked_tasks if normalize_priority(task.priority) == "critical"]
         head = critical[0] if critical else blocked_tasks[0]
         signals.append(f"{len(blocked_tasks)} заблокированных задач, главный блокер: {head.title}")
     if overdue_tasks:
@@ -1285,17 +1338,17 @@ def _task_delay_days(task: Task | None, as_of: date) -> int:
 def _milestone_delay_days(milestone: Milestone, as_of: date) -> int:
     if milestone.actual_end_date is not None:
         return max(0, (milestone.actual_end_date - milestone.planned_end_date).days)
-    if milestone.status.casefold() in DONE_MILESTONE_STATUSES:
+    if normalize_status(milestone.status) in DONE_MILESTONE_STATUSES:
         return 0
     return max(0, (as_of - milestone.planned_end_date).days)
 
 
 def _is_done_task(task: Task) -> bool:
-    return task.status.casefold() in DONE_TASK_STATUSES or task.actual_end_date is not None
+    return normalize_status(task.status) in DONE_TASK_STATUSES or task.actual_end_date is not None
 
 
 def _is_blocked_task(task: Task) -> bool:
-    return task.is_blocked or task.status.casefold() in BLOCKED_TASK_STATUSES
+    return task.is_blocked or normalize_status(task.status) in BLOCKED_TASK_STATUSES
 
 
 def _is_overdue_task(task: Task, as_of: date) -> bool:
@@ -1306,7 +1359,7 @@ def _is_delayed_milestone(milestone: Milestone, as_of: date) -> bool:
     return (
         milestone.planned_end_date < as_of
         and milestone.actual_end_date is None
-        and milestone.status.casefold() not in DONE_MILESTONE_STATUSES
+        and normalize_status(milestone.status) not in DONE_MILESTONE_STATUSES
     )
 
 
@@ -1314,7 +1367,7 @@ def _sort_tasks(tasks: Iterable[Task]) -> list[Task]:
     return sorted(
         tasks,
         key=lambda task: (
-            PRIORITY_WEIGHT.get(task.priority, 0),
+            PRIORITY_WEIGHT.get(normalize_priority(task.priority), 0),
             -task.planned_due_date.toordinal(),
             task.id,
         ),
@@ -1329,7 +1382,7 @@ def _percent(value: int | float, denominator: int | float) -> float:
 
 
 def _status_weight(status: str) -> int:
-    status_value = status.casefold()
+    status_value = normalize_status(status)
     if status_value == "escalated":
         return 3
     if status_value == "active":

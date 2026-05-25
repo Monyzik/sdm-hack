@@ -17,7 +17,6 @@ try:
 except ModuleNotFoundError:
     END = START = StateGraph = None
 
-
 TECHNICAL_ID_RE = re.compile(r"\b(?:T|TD|RK|C|D|DEC|CR|R|Р)\d{3}\b")
 LLM_PROBLEM_TASK_LIMIT = 35
 LLM_DEPENDENCY_EDGE_LIMIT = 60
@@ -68,7 +67,8 @@ class ProjectManagerBrief(BaseModel):
         description="Человеческая оценка состояния проекта."
     )
     headline: str = Field(description="Одна строка о главном управленческом выводе без технических id.")
-    management_question: str = Field(description="Главный вопрос, который должен решить руководитель проектов или комитет.")
+    management_question: str = Field(
+        description="Главный вопрос, который должен решить руководитель проектов или комитет.")
     diagnosis: str = Field(description="Короткая причинно-следственная диагностика, а не пересказ метрик.")
     bottleneck: str = Field(description="Одно главное узкое место, которое сильнее всего удерживает проект.")
     critical_path: list[str] = Field(
@@ -170,10 +170,10 @@ def state_value(state: ProjectBriefData | dict[str, Any], key: str, default: Any
 
 
 def fetch_project_problem_context(
-    project_id: str,
-    as_of: str,
-    max_depth: int,
-    api_base_url: str,
+        project_id: str,
+        as_of: str,
+        max_depth: int,
+        api_base_url: str,
 ) -> dict[str, Any]:
     query = urlencode({"as_of": as_of, "max_depth": max_depth})
     url = f"{api_base_url}/api/v1/summaries/projects/{project_id}/problem-context?{query}"
@@ -259,15 +259,15 @@ def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None 
         )
 
     return (
-        retry_note
-        + "Сформируй управленческую рекомендацию по JSON problem context.\n"
-        + "Контекст может быть компактной выборкой: counts в metrics являются полными и авторитетными, "
-        + "а problem_tasks и task_dependency_edges содержат только самые важные примеры для evidence_ids.\n"
-        + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей, развилку решения, "
-        + "business impact, поручение, черновик сообщения и follow-up проверку.\n"
-        + "Ответ будет распарсен в строгую Pydantic-схему ProjectManagerBrief.\n\n"
-        + "JSON problem context:\n"
-        + json.dumps(problem_context, ensure_ascii=False)
+            retry_note
+            + "Сформируй управленческую рекомендацию по JSON problem context.\n"
+            + "Контекст может быть компактной выборкой: counts в metrics являются полными и авторитетными, "
+            + "а problem_tasks и task_dependency_edges содержат только самые важные примеры для evidence_ids.\n"
+            + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей, развилку решения, "
+            + "business impact, поручение, черновик сообщения и follow-up проверку.\n"
+            + "Ответ будет распарсен в строгую Pydantic-схему ProjectManagerBrief.\n\n"
+            + "JSON problem context:\n"
+            + json.dumps(problem_context, ensure_ascii=False)
     )
 
 
@@ -319,8 +319,8 @@ def compact_problem_context_for_llm(problem_context: dict[str, Any]) -> dict[str
 
 
 def _build_problem_aggregates(
-    problem_tasks: list[dict[str, Any]],
-    dependency_edges: list[dict[str, Any]],
+        problem_tasks: list[dict[str, Any]],
+        dependency_edges: list[dict[str, Any]],
 ) -> dict[str, Any]:
     overdue_days = [
         _int_value(task.get("overdue_days"))
@@ -419,8 +419,8 @@ def generate_brief_node(agent: Any) -> Any:
 
 
 def build_project_brief_graph(
-    backend_api_url: str | None = None,
-    agent: Any | None = None,
+        backend_api_url: str | None = None,
+        agent: Any | None = None,
 ):
     if StateGraph is None or START is None or END is None:
         raise RuntimeError("LangGraph не установлен в окружении агента.")
@@ -439,11 +439,11 @@ def build_project_brief_graph(
 
 
 def run_project_brief(
-    project_id: str,
-    as_of: date | None = None,
-    max_depth: int = 2,
-    backend_api_url: str | None = None,
-    agent: Any | None = None,
+        project_id: str,
+        as_of: date | None = None,
+        max_depth: int = 2,
+        backend_api_url: str | None = None,
+        agent: Any | None = None,
 ) -> ProjectManagerBrief:
     graph = build_project_brief_graph(backend_api_url=backend_api_url, agent=agent)
     initial_state = ProjectBriefData(project_id=project_id, as_of=as_of, max_depth=max_depth)

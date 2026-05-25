@@ -15,7 +15,6 @@ from agents.project_monitor_graph import run_project_monitor
 from backend.app.database.project_import import update_project_from_schema
 from backend.app.database.session import create_engine_from_env, create_session_factory
 
-
 DocxEventType = Literal["docx_added", "docx_changed"]
 MonitoringEventType = Literal[
     "task_changed",
@@ -36,7 +35,6 @@ MONITORING_EVENTS = {
     "communication_changed",
     "manual_monitoring_requested",
 }
-
 
 EVENT_LABELS = {
     "docx_added": "Добавлен DOCX",
@@ -146,9 +144,9 @@ def update_project_node(session_factory: sessionmaker) -> Any:
 
 
 def monitor_project_node(
-    session_factory: sessionmaker,
-    analyst: ProjectAnalystAgent | None = None,
-    notification_agent: ProjectInternalNotificationAgent | None = None,
+        session_factory: sessionmaker,
+        analyst: ProjectAnalystAgent | None = None,
+        notification_agent: ProjectInternalNotificationAgent | None = None,
 ) -> Any:
     def monitor_project(state: ProjectControlData | dict[str, Any]) -> dict[str, Any]:
         project_id = state_value(state, "project_id")
@@ -180,10 +178,10 @@ def monitor_project_node(
 
 
 def build_project_control_graph(
-    session_factory: sessionmaker | None = None,
-    parser: ProjectParser | None = None,
-    analyst: ProjectAnalystAgent | None = None,
-    notification_agent: ProjectInternalNotificationAgent | None = None,
+        session_factory: sessionmaker | None = None,
+        parser: ProjectParser | None = None,
+        analyst: ProjectAnalystAgent | None = None,
+        notification_agent: ProjectInternalNotificationAgent | None = None,
 ):
     if session_factory is None:
         engine = create_engine_from_env()
@@ -215,13 +213,13 @@ def build_project_control_graph(
 
 
 def run_project_control_event(
-    file_path: str | Path | None = None,
-    event_type: ProjectEventType = "docx_changed",
-    project_id: str | None = None,
-    as_of: date | str | None = None,
-    session_factory: sessionmaker | None = None,
-    analyst: ProjectAnalystAgent | None = None,
-    notification_agent: ProjectInternalNotificationAgent | None = None,
+        file_path: str | Path | None = None,
+        event_type: ProjectEventType = "docx_changed",
+        project_id: str | None = None,
+        as_of: date | str | None = None,
+        session_factory: sessionmaker | None = None,
+        analyst: ProjectAnalystAgent | None = None,
+        notification_agent: ProjectInternalNotificationAgent | None = None,
 ) -> dict[str, Any]:
     graph = build_project_control_graph(
         session_factory=session_factory,

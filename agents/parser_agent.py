@@ -75,10 +75,10 @@ class ProjectParser:
     """Агент для извлечения структуры проекта из DOCX-паспорта."""
 
     def __init__(
-        self,
-        *,
-        max_document_chars: int = 15000,
-        temperature: float = 0.1,
+            self,
+            *,
+            max_document_chars: int = 15000,
+            temperature: float = 0.1,
     ) -> None:
         self.model = get_yandex_model_uri()
         self.client = get_yandex_client()

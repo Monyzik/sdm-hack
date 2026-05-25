@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 
 from agents.yandex_client import get_yandex_client, get_yandex_model_uri
 
-
 NotificationSeverity = Literal["info", "warning", "critical"]
 NotificationTargetRole = Literal["teamlead", "project_manager", "portfolio_manager"]
 
@@ -35,10 +34,10 @@ class ProjectInternalNotificationAgent:
     """LLM-агент для черновика внутреннего уведомления по результатам мониторинга."""
 
     def __init__(
-        self,
-        *,
-        temperature: float = 0.2,
-        max_context_chars: int = 12000,
+            self,
+            *,
+            temperature: float = 0.2,
+            max_context_chars: int = 12000,
     ) -> None:
         self.model = get_yandex_model_uri()
         self.client = get_yandex_client()
@@ -46,12 +45,12 @@ class ProjectInternalNotificationAgent:
         self.max_context_chars = max_context_chars
 
     def draft(
-        self,
-        *,
-        project: dict[str, Any],
-        metrics: dict[str, Any],
-        alerts: list[dict[str, Any]],
-        analysis: dict[str, Any],
+            self,
+            *,
+            project: dict[str, Any],
+            metrics: dict[str, Any],
+            alerts: list[dict[str, Any]],
+            analysis: dict[str, Any],
     ) -> InternalNotificationDraft:
         response_text = self._ask_llm(
             project=project,
@@ -63,12 +62,12 @@ class ProjectInternalNotificationAgent:
         return InternalNotificationDraft.model_validate(result_dict)
 
     def _ask_llm(
-        self,
-        *,
-        project: dict[str, Any],
-        metrics: dict[str, Any],
-        alerts: list[dict[str, Any]],
-        analysis: dict[str, Any],
+            self,
+            *,
+            project: dict[str, Any],
+            metrics: dict[str, Any],
+            alerts: list[dict[str, Any]],
+            analysis: dict[str, Any],
     ) -> str:
         schema = json.dumps(
             InternalNotificationDraft.model_json_schema(),

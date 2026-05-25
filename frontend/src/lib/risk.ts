@@ -34,13 +34,53 @@ export function healthTone(score: number): Tone {
 /** Критичность/важность сущностей -> тон бейджа. */
 export function severityTone(value: string): Tone {
   const normalized = value.toLowerCase();
-  if (["critical", "high", "escalated", "blocked"].includes(normalized)) {
+  if (
+    [
+      "critical",
+      "high",
+      "escalated",
+      "blocked",
+      "критический",
+      "критичная",
+      "высокий",
+      "высокая",
+      "эскалировано",
+      "заблокирована",
+      "заблокировано",
+    ].includes(normalized)
+  ) {
     return "danger";
   }
-  if (["medium", "under_review", "pending"].includes(normalized)) {
+  if (
+    [
+      "medium",
+      "under_review",
+      "pending",
+      "средний",
+      "средняя",
+      "на рассмотрении",
+      "ожидает",
+      "задерживается",
+      "под риском",
+    ].includes(normalized)
+  ) {
     return "warning";
   }
-  if (["low", "resolved", "approved", "done"].includes(normalized)) {
+  if (
+    [
+      "low",
+      "resolved",
+      "approved",
+      "done",
+      "низкий",
+      "низкая",
+      "решено",
+      "согласовано",
+      "завершена",
+      "завершено",
+      "получен ответ",
+    ].includes(normalized)
+  ) {
     return "success";
   }
   return "neutral";

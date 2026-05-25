@@ -6,7 +6,6 @@ from functools import lru_cache
 import openai
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 YANDEX_CLOUD_FOLDER = os.getenv("YANDEX_CLOUD_FOLDER")

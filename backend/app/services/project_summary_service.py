@@ -25,6 +25,8 @@ from backend.app.services.metrics import (
     calculate_portfolio_health_score,
     calculate_project_metrics,
     infer_as_of_date,
+    normalize_priority,
+    normalize_status,
 )
 from backend.app.services.project_summary_repository import ProjectSummaryRepository, ProjectSummarySource
 
@@ -137,7 +139,7 @@ class ProjectSummaryService:
         linked_project_dependencies = [
             dependency for dependency in metrics.risky_dependencies
             if dependency.linked_task_id in context_task_ids
-            or dependency.criticality.casefold() in {"critical", "high"}
+            or normalize_priority(dependency.criticality) in {"critical", "high"}
         ]
         recent_task_history = [
             TaskHistoryFact(
@@ -330,7 +332,7 @@ class ProjectSummaryService:
 
                 task = tasks_by_id.get(item.task_id)
                 task_title = task.title if task else item.task_id
-                if item.field_changed == "status" and item.new_value.casefold() == "blocked":
+                if item.field_changed == "status" and normalize_status(item.new_value) == "blocked":
                     add_signal(
                         signal_id=f"attention-{item.id}",
                         occurred_at=item.changed_at,
@@ -381,7 +383,7 @@ class ProjectSummaryService:
             for item in source.change_requests:
                 if not (window_start <= item.request_date <= as_of_date):
                     continue
-                if item.status.casefold() not in OPEN_CHANGE_REQUEST_STATUSES:
+                if normalize_status(item.status) not in OPEN_CHANGE_REQUEST_STATUSES:
                     continue
                 severity = (
                     "critical"
@@ -401,12 +403,12 @@ class ProjectSummaryService:
                 )
 
             for item in source.communications:
-                if item.status.casefold() not in OPEN_COMMUNICATION_STATUSES:
+                if normalize_status(item.status) not in OPEN_COMMUNICATION_STATUSES:
                     continue
                 if not (window_start <= item.expected_response_date < as_of_date):
                     continue
                 delay_days = max(0, (as_of_date - item.expected_response_date).days)
-                severity = "critical" if delay_days >= 7 or item.importance.casefold() == "critical" else "warning"
+                severity = "critical" if delay_days >= 7 or normalize_priority(item.importance) == "critical" else "warning"
                 add_signal(
                     signal_id=f"attention-{item.id}",
                     occurred_at=_date_to_datetime(item.expected_response_date),
@@ -419,7 +421,7 @@ class ProjectSummaryService:
                 )
 
             for item in source.decisions:
-                if item.status.casefold() not in OPEN_DECISION_STATUSES:
+                if normalize_status(item.status) not in OPEN_DECISION_STATUSES:
                     continue
                 if not (window_start <= item.decision_date <= as_of_date):
                     continue
@@ -481,9 +483,9 @@ class ProjectSummaryService:
 
 def _problem_task_fact(task: Task, as_of: date) -> ProblemTaskFact:
     problem_flags: list[str] = []
-    if task.is_blocked or task.status.casefold() == "blocked":
+    if task.is_blocked or normalize_status(task.status) == "blocked":
         problem_flags.append("blocked")
-    if task.actual_end_date is None and task.status.casefold() not in {"done", "closed", "resolved"} and task.planned_due_date < as_of:
+    if task.actual_end_date is None and normalize_status(task.status) not in {"done", "closed", "resolved"} and task.planned_due_date < as_of:
         problem_flags.append("overdue")
 
     return ProblemTaskFact(
@@ -498,7 +500,7 @@ def _problem_task_fact(task: Task, as_of: date) -> ProblemTaskFact:
         actual_end_date=task.actual_end_date,
         estimated_hours=task.estimated_hours,
         spent_hours=task.spent_hours,
-        is_blocked=task.is_blocked or task.status.casefold() == "blocked",
+        is_blocked=task.is_blocked or normalize_status(task.status) == "blocked",
         blocker_reason=task.blocker_reason or None,
         overdue_days=max(0, (as_of - task.planned_due_date).days),
         problem_flags=problem_flags,
@@ -581,7 +583,7 @@ def _sort_problem_tasks(tasks: Iterable[Task]) -> list[Task]:
     return sorted(
         tasks,
         key=lambda task: (
-            PRIORITY_WEIGHT.get(task.priority, 0),
+            PRIORITY_WEIGHT.get(normalize_priority(task.priority), 0),
             -task.planned_due_date.toordinal(),
             task.id,
         ),

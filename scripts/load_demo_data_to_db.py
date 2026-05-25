@@ -17,6 +17,7 @@ from sqlalchemy.engine import Connection, Engine, make_url
 
 from backend.app.database.models import Base
 from backend.app.database.session import DatabaseUrl, resolve_database_url
+from generate_demo_data import CSV_BOOLEAN_COLUMNS, CSV_COLUMN_LABELS, TASK_HISTORY_FIELD_LABELS
 
 
 @dataclass(frozen=True)
@@ -54,6 +55,18 @@ TABLES: tuple[TableSpec, ...] = (
 )
 
 LEGACY_TABLES: tuple[str, ...] = ("project_events",)
+REVERSE_CSV_COLUMN_LABELS = {label: column for column, label in CSV_COLUMN_LABELS.items()}
+REVERSE_TASK_HISTORY_FIELD_LABELS = {
+    label: field for field, label in TASK_HISTORY_FIELD_LABELS.items()
+}
+LOCALIZED_BOOLEAN_VALUES = {
+    "истина": True,
+    "ложь": False,
+    "true": True,
+    "false": False,
+    True: True,
+    False: False,
+}
 
 
 def mask_database_url(database_url: DatabaseUrl) -> str:
@@ -66,6 +79,13 @@ def load_table(data_dir: Path, table: TableSpec) -> pd.DataFrame:
         raise FileNotFoundError(f"Не найден файл: {path}")
 
     df = pd.read_csv(path, keep_default_na=False)
+    df = df.rename(columns={column: REVERSE_CSV_COLUMN_LABELS.get(column, column) for column in df.columns})
+    for column in CSV_BOOLEAN_COLUMNS.intersection(df.columns):
+        df[column] = df[column].map(lambda value: LOCALIZED_BOOLEAN_VALUES.get(value, value))
+    if "field_changed" in df.columns:
+        df["field_changed"] = df["field_changed"].map(
+            lambda value: REVERSE_TASK_HISTORY_FIELD_LABELS.get(value, value)
+        )
     for column in table.parse_dates:
         if column in df.columns:
             df[column] = pd.to_datetime(df[column], errors="coerce")
