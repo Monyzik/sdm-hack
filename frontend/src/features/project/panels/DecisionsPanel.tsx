@@ -3,7 +3,7 @@ import { FileClock } from "lucide-react";
 import type { DecisionSignal } from "../../../api/types";
 import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDate } from "../../../lib/format";
-import { severityTone } from "../../../lib/risk";
+import { severityTone, statusLabel } from "../../../lib/risk";
 
 /** Ожидающие управленческие решения. */
 export function DecisionsPanel({ decisions }: { decisions: DecisionSignal[] }) {
@@ -29,7 +29,7 @@ export function DecisionsPanel({ decisions }: { decisions: DecisionSignal[] }) {
                   {decision.decision_type}
                 </span>
                 <Badge tone={severityTone(decision.status)}>
-                  {decision.status}
+                  {statusLabel(decision.status)}
                 </Badge>
               </div>
               <p className="line-clamp-2 mt-1 text-sm text-slate-600 dark:text-slate-300">

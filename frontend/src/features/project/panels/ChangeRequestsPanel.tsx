@@ -3,7 +3,7 @@ import { FilePlus2 } from "lucide-react";
 import type { ChangeRequestSignal } from "../../../api/types";
 import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDays, formatMoney } from "../../../lib/format";
-import { severityTone } from "../../../lib/risk";
+import { severityTone, statusLabel } from "../../../lib/risk";
 
 /** Открытые запросы на изменение с запрошенными дельтами бюджета и сроков. */
 export function ChangeRequestsPanel({
@@ -35,7 +35,7 @@ export function ChangeRequestsPanel({
                   {request.change_type}
                 </span>
                 <Badge tone={severityTone(request.status)}>
-                  {request.status}
+                  {statusLabel(request.status)}
                 </Badge>
               </div>
               <p className="line-clamp-2 mt-1 text-sm text-slate-600 dark:text-slate-300">

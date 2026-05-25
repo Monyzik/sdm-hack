@@ -144,6 +144,7 @@ Backend не присылает готовые выводы. Он присыла
 - не вставляй технические id в обычный текст;
 - технические id вида T001, RK001, DEC001, R003 разрешены только в evidence_ids;
 - не используй смесь русского текста и англоязычных системных слов, если можно написать по-русски;
+- не используй многоточие и не обрывай фразы; каждое действие и решение должно быть законченным;
 - не пиши длинную простыню;
 - не делай список очевидных причин, которые пользователь уже видит на дашборде;
 - не повторяй отдельными пунктами блокеры, бюджет, ROI и перегруз, если не связываешь их в причинную цепочку;
@@ -465,8 +466,17 @@ def _strip_technical_ids(value: str) -> str:
 def _limit_text(value: str, limit: int) -> str:
     if len(value) <= limit:
         return value
-    trimmed = value[: limit - 1].rsplit(" ", 1)[0]
-    return f"{trimmed}..."
+
+    sentence_end_positions = [
+        value.rfind(".", 0, limit),
+        value.rfind("!", 0, limit),
+        value.rfind("?", 0, limit),
+    ]
+    sentence_end = max(sentence_end_positions)
+    if sentence_end >= max(40, limit // 2):
+        return value[: sentence_end + 1].strip()
+
+    return value
 
 
 def _clean_brief(brief: ProjectManagerBrief, problem_context: dict[str, Any]) -> ProjectManagerBrief:

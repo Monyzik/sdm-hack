@@ -3,7 +3,7 @@ import { ArrowRight, MessageSquareWarning } from "lucide-react";
 import type { CommunicationSignal } from "../../../api/types";
 import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDate, formatDays } from "../../../lib/format";
-import { severityTone } from "../../../lib/risk";
+import { severityTone, statusLabel } from "../../../lib/risk";
 
 /** Задержанные коммуникации между командами. */
 export function CommunicationsPanel({
@@ -46,9 +46,11 @@ export function CommunicationsPanel({
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <Badge tone={severityTone(item.importance)}>
-                  {item.importance}
+                  {statusLabel(item.importance)}
                 </Badge>
-                <Badge tone={severityTone(item.status)}>{item.status}</Badge>
+                <Badge tone={severityTone(item.status)}>
+                  {statusLabel(item.status)}
+                </Badge>
                 <span>
                   Ожидался ответ: {formatDate(item.expected_response_date)}
                 </span>

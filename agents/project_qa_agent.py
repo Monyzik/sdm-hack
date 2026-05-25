@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import date
-from typing import Any
+from typing import Annotated, Any, Callable, TypedDict
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -12,8 +12,18 @@ from agents.yandex_client import get_yandex_client, get_yandex_model_uri
 
 try:
     from langgraph.graph import END, START, StateGraph
+    from langgraph.graph.message import add_messages
+    from langgraph.prebuilt import ToolNode
+    from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
+    from langchain_core.tools import BaseTool, StructuredTool
+    from langchain_core.utils.function_calling import convert_to_openai_tool
 except ModuleNotFoundError:
     END = START = StateGraph = None
+    add_messages = None
+    ToolNode = None
+    AIMessage = BaseMessage = HumanMessage = SystemMessage = ToolMessage = None
+    BaseTool = StructuredTool = None
+    convert_to_openai_tool = None
 
 
 DEFAULT_AS_OF = "2026-06-19"
@@ -34,18 +44,17 @@ class ProjectQuestionAnswer(BaseModel):
     suggested_questions: list[str] = Field(default_factory=list)
 
 
-class ProjectQuestionState(BaseModel):
+class ProjectQuestionState(TypedDict, total=False):
     project_id: str
     question: str
     as_of: str
-    max_depth: int = 2
-    request_intent: str | None = None
-    needs_project_tools: bool = True
-    messages: list[dict[str, Any]] = Field(default_factory=list)
-    pending_tool_calls: list[dict[str, Any]] = Field(default_factory=list)
-    used_tools: list[str] = Field(default_factory=list)
-    tool_rounds: int = 0
-    final_content: str | None = None
+    max_depth: int
+    request_intent: str | None
+    needs_project_tools: bool
+    messages: Annotated[list[Any], add_messages]
+    used_tools: list[str]
+    tool_rounds: int
+    final_content: str | None
 
 
 REQUEST_ROUTER_PROMPT = """
@@ -98,124 +107,60 @@ JSON schema:
 """.strip()
 
 
-QA_TOOLS: list[dict[str, Any]] = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_project_summary",
-            "description": "Получить детерминированный summary проекта: метрики, health, сигналы и топ-сущности.",
-            "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_problem_context",
-            "description": "Получить контекст фактов: проблемные задачи, граф зависимостей, риски, коммуникации, решения, бюджет и ресурсы.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "max_depth": {"type": "integer", "minimum": 1, "maximum": 4},
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "search_tasks",
-            "description": "Найти проблемные, заблокированные и просроченные задачи по query/status/priority/assignee.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string"},
-                    "status": {"type": "string"},
-                    "priority": {"type": "string"},
-                    "assignee": {"type": "string"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 20},
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "search_risks",
-            "description": "Найти связанные и топовые риски проекта по query/status/min_score.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string"},
-                    "status": {"type": "string"},
-                    "min_score": {"type": "integer", "minimum": 0, "maximum": 25},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 20},
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "search_communications",
-            "description": "Найти просроченные или эскалированные коммуникации проекта по query/status/team.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string"},
-                    "status": {"type": "string"},
-                    "team": {"type": "string"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 20},
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "search_decisions",
-            "description": "Найти ожидающие решения и открытые change requests.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "status": {"type": "string"},
-                    "owner": {"type": "string"},
-                    "query": {"type": "string"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 20},
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "search_dependencies",
-            "description": "Найти проектные зависимости по query/status/criticality.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string"},
-                    "status": {"type": "string"},
-                    "criticality": {"type": "string"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 20},
-                },
-                "additionalProperties": False,
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_budget",
-            "description": "Получить бюджет проекта и влияние открытых change requests.",
-            "parameters": {"type": "object", "properties": {}, "additionalProperties": False},
-        },
-    },
-]
+class NoArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class ProblemContextArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    max_depth: int | None = Field(default=None, ge=1, le=4)
+
+
+class SearchTasksArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = None
+    status: str | None = None
+    priority: str | None = None
+    assignee: str | None = None
+    limit: int | None = Field(default=None, ge=1, le=20)
+
+
+class SearchRisksArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = None
+    status: str | None = None
+    min_score: int | None = Field(default=None, ge=0, le=25)
+    limit: int | None = Field(default=None, ge=1, le=20)
+
+
+class SearchCommunicationsArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = None
+    status: str | None = None
+    team: str | None = None
+    limit: int | None = Field(default=None, ge=1, le=20)
+
+
+class SearchDecisionsArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = None
+    status: str | None = None
+    owner: str | None = None
+    limit: int | None = Field(default=None, ge=1, le=20)
+
+
+class SearchDependenciesArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str | None = None
+    status: str | None = None
+    criticality: str | None = None
+    limit: int | None = Field(default=None, ge=1, le=20)
 
 
 def run_project_question(
@@ -260,24 +205,25 @@ class ProjectQuestionAgent:
             tool_executor=tool_executor,
             temperature=self.temperature,
         )
-        messages: list[dict[str, Any]] = [
-            {"role": "system", "content": QA_SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": (
+        messages = [
+            SystemMessage(content=QA_SYSTEM_PROMPT),
+            HumanMessage(
+                content=(
                     f"project_id={project_id}, as_of={as_of_value}\n"
                     f"Вопрос пользователя: {question}"
-                ),
-            },
+                )
+            ),
         ]
-        state = ProjectQuestionState(
-            project_id=project_id,
-            question=question,
-            as_of=as_of_value,
-            max_depth=max_depth,
-            messages=messages,
-        )
-        result = graph.invoke(state.model_dump())
+        state: ProjectQuestionState = {
+            "project_id": project_id,
+            "question": question,
+            "as_of": as_of_value,
+            "max_depth": max_depth,
+            "messages": messages,
+            "used_tools": [],
+            "tool_rounds": 0,
+        }
+        result = graph.invoke(state)
         return _parse_agent_answer(
             _state_value(result, "final_content", "{}") or "{}",
             _state_value(result, "used_tools", []),
@@ -291,16 +237,32 @@ def build_project_question_graph(
     model: str,
     tool_executor: "ProjectFactToolExecutor",
     temperature: float,
-    max_tool_rounds: int = 5,
+    max_tool_rounds: int = 3,
 ) -> Any:
-    if StateGraph is None or START is None or END is None:
+    if (
+        StateGraph is None
+        or START is None
+        or END is None
+        or ToolNode is None
+        or StructuredTool is None
+        or convert_to_openai_tool is None
+    ):
         raise RuntimeError("LangGraph не установлен в окружении агента.")
+
+    tools = build_project_tools(tool_executor)
+    tool_specs = [convert_to_openai_tool(tool) for tool in tools]
 
     graph = StateGraph(ProjectQuestionState)
     graph.add_node("route_request", route_request_node(client=client, model=model))
-    graph.add_node("call_model", call_model_node(client=client, model=model, temperature=temperature))
-    graph.add_node("run_tools", run_tools_node(tool_executor))
-    graph.add_node("finalize", finalize_answer_node(client=client, model=model, temperature=temperature))
+    graph.add_node(
+        "call_model",
+        call_model_node(client=client, model=model, tools=tool_specs, temperature=temperature),
+    )
+    graph.add_node("run_tools", run_tools_node(tools))
+    graph.add_node(
+        "finalize",
+        finalize_answer_node(client=client, model=model, tools=tool_specs, temperature=temperature),
+    )
 
     graph.add_edge(START, "route_request")
     graph.add_conditional_edges(
@@ -362,25 +324,7 @@ def route_request_node(*, client: Any, model: str) -> Any:
             payload.get("needs_project_tools", True)
         )
 
-        messages = [
-            *_state_value(state, "messages", []),
-            {
-                "role": "assistant",
-                "content": (
-                    "Роутер запроса: "
-                    + json.dumps(
-                        {
-                            "intent": intent,
-                            "needs_project_tools": needs_project_tools,
-                            "reason": payload.get("reason"),
-                        },
-                        ensure_ascii=False,
-                    )
-                ),
-            },
-        ]
         return {
-            "messages": messages,
             "request_intent": intent,
             "needs_project_tools": needs_project_tools,
         }
@@ -388,50 +332,39 @@ def route_request_node(*, client: Any, model: str) -> Any:
     return route_request
 
 
-def call_model_node(*, client: Any, model: str, temperature: float) -> Any:
+def call_model_node(*, client: Any, model: str, tools: list[dict[str, Any]], temperature: float) -> Any:
     def call_model(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
+        needs_project_tools = _state_value(state, "needs_project_tools", True)
+        used_tools = _state_value(state, "used_tools", [])
         response = client.chat.completions.create(
             model=model,
-            messages=_state_value(state, "messages", []),
-            tools=QA_TOOLS,
-            tool_choice="required" if _state_value(state, "needs_project_tools", True) else "auto",
+            messages=_messages_to_openai(_state_value(state, "messages", [])),
+            tools=tools,
+            tool_choice="required" if needs_project_tools and not used_tools else "auto",
             temperature=temperature,
             response_format={"type": "json_object"},
         )
         message = response.choices[0].message
-        tool_calls = _tool_calls_from_message(message)
-        messages = [*_state_value(state, "messages", []), _assistant_message(message)]
+        ai_message = _ai_message_from_openai(message)
         return {
-            "messages": messages,
-            "pending_tool_calls": tool_calls,
-            "final_content": None if tool_calls else (message.content or "{}"),
+            "messages": [ai_message],
+            "final_content": None if ai_message.tool_calls else (message.content or "{}"),
         }
 
     return call_model
 
 
-def run_tools_node(tool_executor: "ProjectFactToolExecutor") -> Any:
-    def run_tools(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
-        messages = list(_state_value(state, "messages", []))
-        used_tools = list(_state_value(state, "used_tools", []))
+def run_tools_node(tools: list[Any]) -> Any:
+    tool_node = ToolNode(tools)
 
-        for tool_call in _state_value(state, "pending_tool_calls", []):
-            tool_name = str(tool_call.get("name") or "")
-            used_tools.append(tool_name)
-            arguments = _parse_tool_arguments(tool_call.get("arguments"))
-            result = tool_executor.execute(tool_name, arguments)
-            messages.append(
-                {
-                    "role": "tool",
-                    "tool_call_id": tool_call.get("id"),
-                    "name": tool_name,
-                    "content": json.dumps(result, ensure_ascii=False),
-                }
-            )
+    def run_tools(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
+        used_tools = list(_state_value(state, "used_tools", []))
+        result = tool_node.invoke(state)
+        tool_messages = _state_value(result, "messages", [])
+        used_tools.extend(_tool_names_from_messages(tool_messages))
 
         return {
-            "messages": messages,
-            "pending_tool_calls": [],
+            "messages": tool_messages,
             "used_tools": _unique(used_tools),
             "tool_rounds": int(_state_value(state, "tool_rounds", 0) or 0) + 1,
         }
@@ -439,7 +372,7 @@ def run_tools_node(tool_executor: "ProjectFactToolExecutor") -> Any:
     return run_tools
 
 
-def finalize_answer_node(*, client: Any, model: str, temperature: float) -> Any:
+def finalize_answer_node(*, client: Any, model: str, tools: list[dict[str, Any]], temperature: float) -> Any:
     def finalize_answer(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
         if _state_value(state, "needs_project_tools", True):
             final_instruction = "Сформируй финальный JSON ProjectQuestionAnswer по уже полученным tool results."
@@ -450,23 +383,19 @@ def finalize_answer_node(*, client: Any, model: str, temperature: float) -> Any:
             )
         messages = [
             *_state_value(state, "messages", []),
-            {
-                "role": "user",
-                "content": final_instruction,
-            },
+            HumanMessage(content=final_instruction),
         ]
         response = client.chat.completions.create(
             model=model,
-            messages=messages,
-            tools=QA_TOOLS,
+            messages=_messages_to_openai(messages),
+            tools=tools,
             tool_choice="none",
             temperature=temperature,
             response_format={"type": "json_object"},
         )
         message = response.choices[0].message
         return {
-            "messages": [*messages, _assistant_message(message)],
-            "pending_tool_calls": [],
+            "messages": [HumanMessage(content=final_instruction), _ai_message_from_openai(message)],
             "final_content": message.content or "{}",
         }
 
@@ -480,7 +409,8 @@ def route_after_request_router(state: ProjectQuestionState | dict[str, Any]) -> 
 
 
 def route_after_model(state: ProjectQuestionState | dict[str, Any]) -> str:
-    if _state_value(state, "pending_tool_calls", []):
+    last_message = _last_message(_state_value(state, "messages", []))
+    if getattr(last_message, "tool_calls", None):
         return "tools"
     return "done"
 
@@ -494,6 +424,170 @@ def route_after_tools(max_tool_rounds: int) -> Any:
     return route
 
 
+def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTool]:
+    """Create request-scoped LangChain tools for LangGraph ToolNode."""
+
+    def get_project_summary() -> dict[str, Any]:
+        return _compact_project_summary(tool_executor.project_summary())
+
+    def get_problem_context(max_depth: int | None = None) -> dict[str, Any]:
+        depth = _bounded_limit(max_depth, default=tool_executor.max_depth, maximum=4)
+        return _compact_problem_context(tool_executor.problem_context(max_depth=depth))
+
+    def search_tasks(
+        query: str | None = None,
+        status: str | None = None,
+        priority: str | None = None,
+        assignee: str | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        result = tool_executor.search_tasks(
+            {
+                "query": query,
+                "status": status,
+                "priority": priority,
+                "assignee": assignee,
+                "limit": limit,
+            }
+        )
+        return _compact_search_result(result, TASK_FIELDS)
+
+    def search_risks(
+        query: str | None = None,
+        status: str | None = None,
+        min_score: int | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        result = tool_executor.search_risks(
+            {
+                "query": query,
+                "status": status,
+                "min_score": min_score,
+                "limit": limit,
+            }
+        )
+        return _compact_search_result(result, RISK_FIELDS)
+
+    def search_communications(
+        query: str | None = None,
+        status: str | None = None,
+        team: str | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        result = tool_executor.search_communications(
+            {
+                "query": query,
+                "status": status,
+                "team": team,
+                "limit": limit,
+            }
+        )
+        return _compact_search_result(result, COMMUNICATION_FIELDS)
+
+    def search_decisions(
+        query: str | None = None,
+        status: str | None = None,
+        owner: str | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        result = tool_executor.search_decisions(
+            {
+                "query": query,
+                "status": status,
+                "owner": owner,
+                "limit": limit,
+            }
+        )
+        return _compact_search_result(result, DECISION_FIELDS + CHANGE_REQUEST_FIELDS)
+
+    def search_dependencies(
+        query: str | None = None,
+        status: str | None = None,
+        criticality: str | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        result = tool_executor.search_dependencies(
+            {
+                "query": query,
+                "status": status,
+                "criticality": criticality,
+                "limit": limit,
+            }
+        )
+        return _compact_search_result(result, DEPENDENCY_FIELDS)
+
+    def get_budget() -> dict[str, Any]:
+        return _compact_budget_result(tool_executor.budget())
+
+    def make_tool(
+        *,
+        name: str,
+        description: str,
+        args_schema: type[BaseModel],
+        func: Callable[..., dict[str, Any]],
+    ) -> BaseTool:
+        return StructuredTool.from_function(
+            func=func,
+            name=name,
+            description=description,
+            args_schema=args_schema,
+        )
+
+    return [
+        make_tool(
+            name="get_project_summary",
+            description="Получить детерминированный summary проекта: метрики, health, сигналы и топ-сущности.",
+            args_schema=NoArgs,
+            func=get_project_summary,
+        ),
+        make_tool(
+            name="get_problem_context",
+            description=(
+                "Получить контекст фактов: проблемные задачи, граф зависимостей, риски, "
+                "коммуникации, решения, бюджет и ресурсы."
+            ),
+            args_schema=ProblemContextArgs,
+            func=get_problem_context,
+        ),
+        make_tool(
+            name="search_tasks",
+            description="Найти проблемные, заблокированные и просроченные задачи по query/status/priority/assignee.",
+            args_schema=SearchTasksArgs,
+            func=search_tasks,
+        ),
+        make_tool(
+            name="search_risks",
+            description="Найти связанные и топовые риски проекта по query/status/min_score.",
+            args_schema=SearchRisksArgs,
+            func=search_risks,
+        ),
+        make_tool(
+            name="search_communications",
+            description="Найти просроченные или эскалированные коммуникации проекта по query/status/team.",
+            args_schema=SearchCommunicationsArgs,
+            func=search_communications,
+        ),
+        make_tool(
+            name="search_decisions",
+            description="Найти ожидающие решения и открытые change requests.",
+            args_schema=SearchDecisionsArgs,
+            func=search_decisions,
+        ),
+        make_tool(
+            name="search_dependencies",
+            description="Найти проектные зависимости по query/status/criticality.",
+            args_schema=SearchDependenciesArgs,
+            func=search_dependencies,
+        ),
+        make_tool(
+            name="get_budget",
+            description="Получить бюджет проекта и влияние открытых change requests.",
+            args_schema=NoArgs,
+            func=get_budget,
+        ),
+    ]
+
+
 class ProjectFactToolExecutor:
     """Исполнитель инструментов, который читает факты проекта из API бэкенда."""
 
@@ -505,26 +599,6 @@ class ProjectFactToolExecutor:
         self._summary: dict[str, Any] | None = None
         self._context: dict[str, Any] | None = None
         self._context_depth: int | None = None
-
-    def execute(self, tool_name: str, arguments: dict[str, Any]) -> dict[str, Any]:
-        if tool_name == "get_project_summary":
-            return self.project_summary()
-        if tool_name == "get_problem_context":
-            max_depth = _bounded_limit(arguments.get("max_depth"), default=self.max_depth, maximum=4)
-            return self.problem_context(max_depth=max_depth)
-        if tool_name == "search_tasks":
-            return self.search_tasks(arguments)
-        if tool_name == "search_risks":
-            return self.search_risks(arguments)
-        if tool_name == "search_communications":
-            return self.search_communications(arguments)
-        if tool_name == "search_decisions":
-            return self.search_decisions(arguments)
-        if tool_name == "search_dependencies":
-            return self.search_dependencies(arguments)
-        if tool_name == "get_budget":
-            return self.budget()
-        return {"error": f"Неизвестный tool: {tool_name}"}
 
     def project_summary(self) -> dict[str, Any]:
         if self._summary is None:
@@ -680,40 +754,87 @@ class ProjectFactToolExecutor:
 
 
 def _state_value(state: ProjectQuestionState | dict[str, Any], key: str, default: Any = None) -> Any:
-    if isinstance(state, ProjectQuestionState):
-        return getattr(state, key)
-    return state.get(key, default)
+    if isinstance(state, dict):
+        return state.get(key, default)
+    return getattr(state, key, default)
 
 
-def _assistant_message(message: Any) -> dict[str, Any]:
-    payload: dict[str, Any] = {"role": "assistant", "content": message.content or ""}
-    tool_calls = _tool_calls_from_message(message)
-    if tool_calls:
-        payload["tool_calls"] = [
-            {
-                "id": tool_call["id"],
-                "type": "function",
-                "function": {
-                    "name": tool_call["name"],
-                    "arguments": tool_call["arguments"],
-                },
-            }
-            for tool_call in tool_calls
-        ]
-    return payload
+def _messages_to_openai(messages: list[Any]) -> list[dict[str, Any]]:
+    return [_message_to_openai(message) for message in messages]
 
 
-def _tool_calls_from_message(message: Any) -> list[dict[str, str]]:
-    result: list[dict[str, str]] = []
+def _message_to_openai(message: Any) -> dict[str, Any]:
+    if isinstance(message, dict):
+        return message
+
+    if SystemMessage is not None and isinstance(message, SystemMessage):
+        return {"role": "system", "content": _message_content(message.content)}
+
+    if HumanMessage is not None and isinstance(message, HumanMessage):
+        return {"role": "user", "content": _message_content(message.content)}
+
+    if AIMessage is not None and isinstance(message, AIMessage):
+        payload: dict[str, Any] = {"role": "assistant", "content": _message_content(message.content)}
+        if message.tool_calls:
+            payload["tool_calls"] = [
+                {
+                    "id": str(tool_call.get("id")),
+                    "type": "function",
+                    "function": {
+                        "name": str(tool_call.get("name")),
+                        "arguments": json.dumps(tool_call.get("args") or {}, ensure_ascii=False),
+                    },
+                }
+                for tool_call in message.tool_calls
+            ]
+        return payload
+
+    if ToolMessage is not None and isinstance(message, ToolMessage):
+        payload = {
+            "role": "tool",
+            "tool_call_id": message.tool_call_id,
+            "content": _message_content(message.content),
+        }
+        if message.name:
+            payload["name"] = message.name
+        return payload
+
+    role = getattr(message, "type", "user")
+    return {"role": "assistant" if role == "ai" else role, "content": _message_content(message.content)}
+
+
+def _ai_message_from_openai(message: Any) -> Any:
+    tool_calls = []
     for tool_call in message.tool_calls or []:
-        result.append(
+        tool_calls.append(
             {
                 "id": str(tool_call.id),
                 "name": str(tool_call.function.name),
-                "arguments": str(tool_call.function.arguments or "{}"),
+                "args": _parse_tool_arguments(tool_call.function.arguments),
             }
         )
-    return result
+    return AIMessage(content=message.content or "", tool_calls=tool_calls)
+
+
+def _last_message(messages: list[Any]) -> Any | None:
+    return messages[-1] if messages else None
+
+
+def _tool_names_from_messages(messages: list[Any]) -> list[str]:
+    names: list[str] = []
+    for message in messages:
+        name = getattr(message, "name", None)
+        if name:
+            names.append(str(name))
+    return names
+
+
+def _message_content(content: Any) -> str:
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(str(part) for part in content)
+    return json.dumps(content, ensure_ascii=False) if isinstance(content, dict) else str(content)
 
 
 def _parse_tool_arguments(raw_arguments: Any) -> dict[str, Any]:
@@ -800,6 +921,301 @@ def _tool_result(items: list[dict[str, Any]], limit: Any) -> dict[str, Any]:
         "count": len(items),
         "items": items[:limit_value],
     }
+
+
+SUMMARY_FIELDS = (
+    "project_id",
+    "project_name",
+    "owner_name",
+    "status",
+    "priority",
+    "as_of_date",
+    "completion_percent",
+    "total_tasks_count",
+    "completed_tasks_count",
+    "overdue_tasks_count",
+    "delayed_milestones_count",
+    "blocked_tasks_count",
+    "high_risk_count",
+    "dependency_risk_count",
+    "pending_decision_count",
+    "open_change_request_count",
+    "dependency_sla_breach_count",
+    "milestone_slip_days",
+    "critical_path_delay_days",
+    "blocked_age_days",
+    "decision_age_days",
+    "net_change_request_impact_days",
+    "net_change_request_impact_budget",
+    "scope_churn_rate",
+    "burn_rate_percent",
+    "schedule_variance_percent",
+    "stale_tasks_count",
+    "max_status_age_days",
+    "estimate_overrun_percent",
+    "workload_imbalance_index",
+    "key_person_dependency_percent",
+    "critical_task_silence_days",
+    "communication_silence_days",
+    "data_freshness_days",
+    "cost_of_delay_exposure",
+    "risk_trend",
+    "resource_overload_percent",
+    "max_communication_delay_days",
+    "project_health_score",
+    "risk_level",
+    "executive_summary",
+)
+PROJECT_FIELDS = (
+    "id",
+    "name",
+    "owner_name",
+    "status",
+    "priority",
+    "start_date",
+    "planned_end_date",
+    "business_goal",
+    "expected_result",
+    "business_value",
+)
+METRIC_FIELDS = tuple(
+    field
+    for field in SUMMARY_FIELDS
+    if field
+    not in {
+        "project_id",
+        "project_name",
+        "owner_name",
+        "status",
+        "priority",
+        "as_of_date",
+        "executive_summary",
+    }
+)
+BUDGET_FIELDS = (
+    "planned_budget",
+    "actual_spent",
+    "forecast_total_spent",
+    "expected_economic_effect",
+    "cost_of_delay_per_day",
+    "currency",
+    "budget_deviation_percent",
+    "roi_percent",
+    "risk_adjusted_roi_percent",
+)
+TASK_FIELDS = (
+    "id",
+    "external_id",
+    "title",
+    "assignee_name",
+    "status",
+    "priority",
+    "planned_due_date",
+    "actual_end_date",
+    "estimated_hours",
+    "spent_hours",
+    "is_blocked",
+    "blocker_reason",
+    "overdue_days",
+    "problem_flags",
+)
+TASK_EDGE_FIELDS = (
+    "id",
+    "root_task_id",
+    "direction",
+    "depth",
+    "task_id",
+    "task_title",
+    "depends_on_task_id",
+    "depends_on_task_title",
+    "dependency_type",
+    "is_critical_path",
+    "lag_days",
+    "reason",
+)
+RISK_FIELDS = (
+    "id",
+    "risk_type",
+    "description",
+    "probability",
+    "impact",
+    "score",
+    "status",
+    "owner_name",
+    "linked_task_id",
+)
+COMMUNICATION_FIELDS = (
+    "id",
+    "from_team",
+    "to_team",
+    "topic",
+    "status",
+    "importance",
+    "expected_response_date",
+    "delay_days",
+    "linked_task_id",
+)
+DEPENDENCY_FIELDS = (
+    "id",
+    "dependency_type",
+    "depends_on",
+    "owner_team",
+    "expected_date",
+    "status",
+    "criticality",
+    "linked_task_id",
+    "delay_days",
+)
+DECISION_FIELDS = ("id", "decision_type", "description", "decision_owner", "status", "decision_date")
+CHANGE_REQUEST_FIELDS = ("id", "change_type", "requested_by", "status", "impact_budget", "impact_days", "description")
+RESOURCE_FIELDS = (
+    "resource_id",
+    "full_name",
+    "role",
+    "team",
+    "available_hours_per_week",
+    "project_actual_hours_per_week",
+    "total_actual_hours_per_week",
+    "total_allocation_percent",
+    "overload_percent",
+)
+HISTORY_FIELDS = ("id", "task_id", "changed_at", "field_changed", "old_value", "new_value", "changed_by")
+COMMENT_FIELDS = ("id", "task_id", "author_name", "created_at", "channel", "text", "mentions_count")
+
+
+def _compact_project_summary(summary: dict[str, Any]) -> dict[str, Any]:
+    return {
+        **_pick(summary, SUMMARY_FIELDS),
+        "key_signals": _compact_list(summary.get("key_signals", []), limit=8),
+        "budget": _pick(summary.get("budget"), BUDGET_FIELDS),
+        "blocked_tasks": _compact_items(summary.get("blocked_tasks", []), TASK_FIELDS, limit=6),
+        "overdue_tasks": _compact_items(summary.get("overdue_tasks", []), TASK_FIELDS, limit=6),
+        "delayed_milestones": _compact_items(
+            summary.get("delayed_milestones", []),
+            ("id", "name", "status", "planned_end_date", "delay_days", "responsible_team"),
+            limit=6,
+        ),
+        "top_risks": _compact_items(summary.get("top_risks", []), RISK_FIELDS, limit=6),
+        "delayed_communications": _compact_items(
+            summary.get("delayed_communications", []),
+            COMMUNICATION_FIELDS,
+            limit=6,
+        ),
+        "overloaded_resources": _compact_items(
+            summary.get("overloaded_resources", []),
+            RESOURCE_FIELDS,
+            limit=6,
+        ),
+        "risky_dependencies": _compact_items(
+            summary.get("risky_dependencies", []),
+            DEPENDENCY_FIELDS,
+            limit=6,
+        ),
+        "pending_decisions": _compact_items(summary.get("pending_decisions", []), DECISION_FIELDS, limit=6),
+        "open_change_requests": _compact_items(
+            summary.get("open_change_requests", []),
+            CHANGE_REQUEST_FIELDS,
+            limit=6,
+        ),
+    }
+
+
+def _compact_problem_context(context: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "project": _pick(context.get("project"), PROJECT_FIELDS),
+        "as_of_date": context.get("as_of_date"),
+        "metrics": _pick(context.get("metrics"), METRIC_FIELDS),
+        "budget": _pick(context.get("budget"), BUDGET_FIELDS),
+        "problem_tasks": _compact_items(context.get("problem_tasks", []), TASK_FIELDS, limit=8),
+        "task_dependency_edges": _compact_items(
+            context.get("task_dependency_edges", []),
+            TASK_EDGE_FIELDS,
+            limit=12,
+        ),
+        "linked_risks": _compact_items(context.get("linked_risks", []), RISK_FIELDS, limit=8),
+        "linked_communications": _compact_items(
+            context.get("linked_communications", []),
+            COMMUNICATION_FIELDS,
+            limit=8,
+        ),
+        "linked_project_dependencies": _compact_items(
+            context.get("linked_project_dependencies", []),
+            DEPENDENCY_FIELDS,
+            limit=8,
+        ),
+        "pending_decisions": _compact_items(context.get("pending_decisions", []), DECISION_FIELDS, limit=8),
+        "open_change_requests": _compact_items(
+            context.get("open_change_requests", []),
+            CHANGE_REQUEST_FIELDS,
+            limit=8,
+        ),
+        "overloaded_resources": _compact_items(
+            context.get("overloaded_resources", []),
+            RESOURCE_FIELDS,
+            limit=8,
+        ),
+        "recent_task_history": _compact_items(context.get("recent_task_history", []), HISTORY_FIELDS, limit=6),
+        "recent_task_comments": _compact_items(context.get("recent_task_comments", []), COMMENT_FIELDS, limit=6),
+    }
+
+
+def _compact_search_result(result: dict[str, Any], fields: tuple[str, ...]) -> dict[str, Any]:
+    return {
+        "count": result.get("count", 0),
+        "items": _compact_items(result.get("items", []), fields, limit=10),
+    }
+
+
+def _compact_budget_result(result: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "budget": _pick(result.get("budget"), BUDGET_FIELDS),
+        "budget_metrics": _compact_value(result.get("budget_metrics", {})),
+        "open_change_requests": _compact_items(
+            result.get("open_change_requests", []),
+            CHANGE_REQUEST_FIELDS,
+            limit=8,
+        ),
+    }
+
+
+def _compact_items(items: Any, fields: tuple[str, ...], *, limit: int) -> list[dict[str, Any]]:
+    if not isinstance(items, list):
+        return []
+    return [_pick(item, fields) for item in items[:limit] if isinstance(item, dict)]
+
+
+def _pick(item: Any, fields: tuple[str, ...]) -> dict[str, Any]:
+    if not isinstance(item, dict):
+        return {}
+    result: dict[str, Any] = {}
+    for field in fields:
+        if field not in item or item[field] is None:
+            continue
+        result[field] = _compact_value(item[field])
+    return result
+
+
+def _compact_list(items: Any, *, limit: int) -> list[Any]:
+    if not isinstance(items, list):
+        return []
+    return [_compact_value(item) for item in items[:limit]]
+
+
+def _compact_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return _limit_text(value, 260)
+    if isinstance(value, list):
+        return [_compact_value(item) for item in value[:12]]
+    if isinstance(value, dict):
+        return {key: _compact_value(item) for key, item in value.items() if item is not None}
+    return value
+
+
+def _limit_text(value: str, limit: int) -> str:
+    text = " ".join(value.split())
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 3)].rstrip() + "..."
 
 
 def _bounded_limit(value: Any, default: int, minimum: int = 1, maximum: int = 20) -> int:

@@ -1,5 +1,5 @@
 import { ArrowUp, Bot, Copy, Sparkles } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import type { PortfolioProjectSummary, ProjectQuestionAnswer } from "../../api/types";
 import { Badge } from "../../components/ui";
@@ -24,14 +24,12 @@ interface ProjectChatPageProps {
   projects: PortfolioProjectSummary[];
   selectedProjectId: string | null;
   asOfDate: string;
-  onSelectProject: (projectId: string) => void;
 }
 
 export function ProjectChatPage({
   projects,
   selectedProjectId,
   asOfDate,
-  onSelectProject,
 }: ProjectChatPageProps) {
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
@@ -65,15 +63,6 @@ export function ProjectChatPage({
       },
     ]);
   }, [asOfDate, selectedProjectId, selectedProjectName]);
-
-  const compactProjectOptions = useMemo(
-    () =>
-      projects.map((project) => ({
-        id: project.project_id,
-        label: project.project_name,
-      })),
-    [projects],
-  );
 
   function sendQuestion(question: string) {
     const value = question.trim();
@@ -123,28 +112,6 @@ export function ProjectChatPage({
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-132px)] w-full max-w-5xl flex-col">
-      <div className="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-            Чат по проекту
-          </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Ответы строятся по фактам проекта и возвращают evidence ids.
-          </p>
-        </div>
-        <select
-          value={selectedProjectId ?? ""}
-          onChange={(event) => onSelectProject(event.target.value)}
-          className="h-10 min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm outline-none transition hover:bg-slate-50 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus:border-slate-600 dark:focus:ring-slate-800 sm:min-w-80"
-        >
-          {compactProjectOptions.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <div className="flex-1 space-y-8 pb-32">
         {messages.map((message) => (
           <ChatBubble

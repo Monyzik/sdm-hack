@@ -30,7 +30,7 @@ export function ProjectView({
   const [activeTab, setActiveTab] = useState<
     "summary" | "work" | "coordination"
   >("summary");
-  const [isBriefRequested, setIsBriefRequested] = useState(false);
+  const [isBriefRequested, setIsBriefRequested] = useState(true);
   const briefQuery = useProjectBrief(
     project.project_id,
     asOfDate,
@@ -38,7 +38,7 @@ export function ProjectView({
   );
 
   useEffect(() => {
-    setIsBriefRequested(false);
+    setIsBriefRequested(true);
   }, [asOfDate, project.project_id]);
 
   const briefErrorMessage = useMemo(() => {
@@ -57,11 +57,13 @@ export function ProjectView({
       {
         id: "work" as const,
         label: "Работа",
+        counterLabel: "задач",
         count: project.blocked_tasks_count + project.overdue_tasks_count,
       },
       {
         id: "coordination" as const,
         label: "Координация",
+        counterLabel: "событий",
         count:
           project.dependency_risk_count +
           project.pending_decision_count +
@@ -92,13 +94,13 @@ export function ProjectView({
             <span className="truncate">{tab.label}</span>
             {tab.count ? (
               <span
-                className={`rounded-full px-1.5 text-xs tabular-nums ${
+                className={`rounded-full px-1.5 text-xs ${
                   activeTab === tab.id
                     ? "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-100"
                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                 }`}
               >
-                {tab.count}
+                {tab.count} {tab.counterLabel}
               </span>
             ) : null}
           </button>
@@ -119,6 +121,7 @@ export function ProjectView({
               }
               setIsBriefRequested(true);
             }}
+            onOpenTasks={() => setActiveTab("work")}
           />
           <KeySignalsPanel signals={project.key_signals.slice(0, 5)} />
           <BudgetPanel budget={project.budget} />
@@ -129,13 +132,13 @@ export function ProjectView({
       {activeTab === "work" ? (
         <div className="flex flex-col gap-4">
           <TasksPanel
-            title="Блокеры"
+            title="Блокируют"
             icon={<AlertTriangle className="size-4" />}
             tasks={project.blocked_tasks}
             emptyMessage="Заблокированных задач нет"
           />
           <TasksPanel
-            title="Просроченные задачи"
+            title="Просрочены"
             icon={<Clock3 className="size-4" />}
             tasks={project.overdue_tasks}
             emptyMessage="Просроченных задач нет"

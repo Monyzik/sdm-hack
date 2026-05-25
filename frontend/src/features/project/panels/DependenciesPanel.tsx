@@ -3,7 +3,7 @@ import { GitBranch } from "lucide-react";
 import type { DependencySignal } from "../../../api/types";
 import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDate, formatDays } from "../../../lib/format";
-import { severityTone } from "../../../lib/risk";
+import { severityTone, statusLabel } from "../../../lib/risk";
 
 /** Рискованные внешние зависимости проекта. */
 export function DependenciesPanel({
@@ -45,10 +45,10 @@ export function DependenciesPanel({
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <Badge tone={severityTone(dependency.criticality)}>
-                  {dependency.criticality}
+                  {statusLabel(dependency.criticality)}
                 </Badge>
                 <Badge tone={severityTone(dependency.status)}>
-                  {dependency.status}
+                  {statusLabel(dependency.status)}
                 </Badge>
                 <span>Ожидается: {formatDate(dependency.expected_date)}</span>
               </div>

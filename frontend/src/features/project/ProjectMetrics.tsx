@@ -21,13 +21,13 @@ export function ProjectMetrics({ project }: { project: ProjectSummary }) {
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       <MetricTile
-        label="Просрочено"
+        label="Просрочены"
         value={project.overdue_tasks_count}
         tone={countTone(project.overdue_tasks_count, "danger")}
         icon={<Clock3 className="size-4" />}
       />
       <MetricTile
-        label="Блокеры"
+        label="Блокируют"
         value={project.blocked_tasks_count}
         tone={countTone(project.blocked_tasks_count, "danger")}
         icon={<AlertTriangle className="size-4" />}

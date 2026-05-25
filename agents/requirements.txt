@@ -3,4 +3,5 @@ uvicorn[standard]>=0.30,<1.0
 python-dotenv==1.2.2
 openai==2.38.0
 pydantic==2.13.4
+langchain-core
 langgraph

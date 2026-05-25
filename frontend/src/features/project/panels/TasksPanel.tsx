@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { TaskSignal } from "../../../api/types";
 import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDate, formatDays } from "../../../lib/format";
-import { severityTone } from "../../../lib/risk";
+import { severityTone, statusLabel } from "../../../lib/risk";
 
 interface TasksPanelProps {
   title: string;
@@ -29,8 +29,8 @@ function TaskItem({ task }: { task: TaskSignal }) {
         ) : null}
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <Badge tone={severityTone(task.priority)}>{task.priority}</Badge>
-        <Badge tone={severityTone(task.status)}>{task.status}</Badge>
+        <Badge tone={severityTone(task.priority)}>{statusLabel(task.priority)}</Badge>
+        <Badge tone={severityTone(task.status)}>{statusLabel(task.status)}</Badge>
         <span className="text-xs text-slate-500 dark:text-slate-400">
           Срок: {formatDate(task.planned_due_date)}
         </span>
@@ -44,7 +44,7 @@ function TaskItem({ task }: { task: TaskSignal }) {
   );
 }
 
-/** Список задач (используется и для блокеров, и для просрочек). */
+/** Список задач: заблокированные и просроченные. */
 export function TasksPanel({
   title,
   icon,

@@ -5,6 +5,7 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
   Gauge,
   LayoutDashboard,
   MessageCircle,
@@ -22,6 +23,7 @@ import { NotificationsPage } from "./features/notifications/NotificationsPage";
 import { PortfolioCommandCenter } from "./features/portfolio/PortfolioCommandCenter";
 import { PortfolioSidebar } from "./features/portfolio/PortfolioSidebar";
 import { ProjectView } from "./features/project/ProjectView";
+import { TaskTrackerPage } from "./features/tasks/TaskTrackerPage";
 import { usePortfolio } from "./hooks/usePortfolio";
 import { usePortfolioAttention } from "./hooks/usePortfolioAttention";
 import { useProjectSummary } from "./hooks/useProjectSummary";
@@ -36,7 +38,7 @@ function describeError(error: unknown): string {
   return "Не удалось загрузить данные.";
 }
 
-type AppPage = "overview" | "analysis" | "chat" | "notifications";
+type AppPage = "overview" | "analysis" | "tasks" | "chat" | "notifications";
 
 const appPages = [
   {
@@ -50,6 +52,12 @@ const appPages = [
     label: "Анализ",
     description: "Выбранный проект",
     icon: BarChart3,
+  },
+  {
+    id: "tasks" as const,
+    label: "Задачи",
+    description: "Трекер задач",
+    icon: ClipboardList,
   },
   {
     id: "chat" as const,
@@ -67,7 +75,7 @@ const appPages = [
 
 export default function App() {
   const queryClient = useQueryClient();
-  const [isNavCollapsed, setIsNavCollapsed] = useState(false);
+  const [isNavCollapsed, setIsNavCollapsed] = useState(true);
   const [activePage, setActivePage] = useState<AppPage>("overview");
   const [asOfDate, setAsOfDate] = useState(AS_OF_DATE);
   const [previewProjectId, setPreviewProjectId] = useState<string | null>(null);
@@ -161,14 +169,6 @@ export default function App() {
                   />
                 </div>
               )}
-              <div className={`min-w-0 ${isNavCollapsed ? "lg:hidden" : ""}`}>
-                <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-                  Control Tower
-                </p>
-                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                  AI Portfolio
-                </p>
-              </div>
             </div>
 
             <button
@@ -281,7 +281,7 @@ export default function App() {
         </nav>
 
         <div className="min-w-0">
-          <div className="mx-auto flex max-w-[1480px] flex-col gap-4 px-4 py-4 sm:px-6">
+          <div className="mx-auto flex w-full max-w-none flex-col gap-4 px-4 py-4 sm:px-6">
             <header
               id="overview"
               className="flex flex-col gap-3 border-b border-slate-200 pb-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between"
@@ -292,12 +292,14 @@ export default function App() {
                     ? "Обзор портфеля проектов"
                     : activePage === "analysis"
                       ? "Анализ проекта"
-                      : activePage === "chat"
-                        ? "Чат по проекту"
-                        : "Уведомления"}
+                      : activePage === "tasks"
+                        ? "Задачи"
+                        : activePage === "chat"
+                          ? "Чат по проекту"
+                          : "Уведомления"}
                 </h1>
               </div>
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                 <label className="sr-only" htmlFor="as-of-date">
                   Дата среза
                 </label>
@@ -322,15 +324,15 @@ export default function App() {
                   }
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                   className="inline-grid size-9 place-items-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
-                >
-                  {theme === "dark" ? (
-                    <Sun aria-hidden className="size-3.5" />
-                  ) : (
-                    <Moon aria-hidden className="size-3.5" />
-                  )}
-                  <span className="sr-only">Переключить тему</span>
-                </button>
-                {activePage === "analysis" ? (
+                  >
+                    {theme === "dark" ? (
+                      <Sun aria-hidden className="size-3.5" />
+                    ) : (
+                      <Moon aria-hidden className="size-3.5" />
+                    )}
+                    <span className="sr-only">Переключить тему</span>
+                  </button>
+                {(activePage === "chat" || activePage === "analysis") ? (
                   <>
                     <label className="sr-only" htmlFor="project-select">
                       Выбрать проект
@@ -395,6 +397,25 @@ export default function App() {
                     />
                   </div>
                 )
+              ) : activePage === "tasks" ? (
+                portfolioQuery.isPending ? (
+                  <LoadingState label="Загрузка проектов…" />
+                ) : portfolioQuery.isError ? (
+                  <ErrorState
+                    message={describeError(portfolioQuery.error)}
+                    onRetry={() => portfolioQuery.refetch()}
+                  />
+                ) : (
+                  <TaskTrackerPage
+                    projects={portfolioQuery.data.projects}
+                    asOf={asOfDate}
+                    enabled={activePage === "tasks"}
+                    onOpenProject={(projectId) => {
+                      setSelectedProjectId(projectId);
+                      setActivePage("analysis");
+                    }}
+                  />
+                )
               ) : activePage === "chat" ? (
                 portfolioQuery.isPending ? (
                   <LoadingState label="Загрузка проектов…" />
@@ -408,7 +429,6 @@ export default function App() {
                     projects={portfolioQuery.data.projects}
                     selectedProjectId={selectedProjectId}
                     asOfDate={asOfDate}
-                    onSelectProject={setSelectedProjectId}
                   />
                 )
               ) : activePage === "notifications" ? (
@@ -481,7 +501,7 @@ export default function App() {
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Health
+                  Здоровье
                 </p>
                 <p className="mt-1 text-xl font-semibold tabular-nums">
                   {previewProject.project_health_score}
@@ -497,7 +517,7 @@ export default function App() {
               </div>
               <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Блокеры
+                  Блокируют
                 </p>
                 <p className="mt-1 text-xl font-semibold tabular-nums">
                   {previewProject.blocked_tasks_count}
@@ -505,7 +525,7 @@ export default function App() {
               </div>
               <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Просрочки
+                  Просрочены
                 </p>
                 <p className="mt-1 text-xl font-semibold tabular-nums">
                   {previewProject.overdue_tasks_count}

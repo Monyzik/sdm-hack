@@ -45,3 +45,32 @@ export function severityTone(value: string): Tone {
   }
   return "neutral";
 }
+
+const STATUS_LABELS: Record<string, string> = {
+  active: "активен",
+  approved: "согласовано",
+  blocked: "заблокировано",
+  closed: "закрыто",
+  completed: "завершено",
+  critical: "критичный",
+  delayed: "задержано",
+  done: "готово",
+  escalated: "эскалировано",
+  high: "высокий",
+  in_progress: "в работе",
+  low: "низкий",
+  medium: "средний",
+  mitigating: "снижается",
+  open: "открыто",
+  pending: "ожидает",
+  proposed: "предложено",
+  resolved: "решено",
+  under_review: "на рассмотрении",
+  warning: "важно",
+  info: "информация",
+};
+
+export function statusLabel(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  return STATUS_LABELS[normalized] ?? value;
+}

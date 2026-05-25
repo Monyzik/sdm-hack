@@ -1,6 +1,6 @@
 import type { PortfolioProjectSummary } from "../../api/types";
-import { Card, ProgressBar, RiskBadge } from "../../components/ui";
-import { healthTone } from "../../lib/risk";
+import { Badge, Card, RiskBadge } from "../../components/ui";
+import { formatPercent } from "../../lib/format";
 
 interface PortfolioSidebarProps {
   projects: PortfolioProjectSummary[];
@@ -8,17 +8,14 @@ interface PortfolioSidebarProps {
   onSelect?: (projectId: string) => void;
 }
 
-/**
- * Список проектов портфеля. Реализован как набор кнопок с явным состоянием
- * выбора (`aria-current`), что делает навигацию доступной с клавиатуры.
- */
+/** Компактный список проектов без дублирующих индикаторов и прогресс-метрик. */
 export function PortfolioSidebar({
   projects,
   selectedProjectId,
   onSelect,
 }: PortfolioSidebarProps) {
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
           Проекты
@@ -30,9 +27,7 @@ export function PortfolioSidebar({
       <ul className="divide-y divide-slate-100 dark:divide-slate-800">
         {projects.map((project) => {
           const isActive = project.project_id === selectedProjectId;
-          const totalSignals =
-            project.overdue_tasks_count + project.blocked_tasks_count;
-          const rowClasses = `relative flex w-full items-center gap-3 px-3.5 py-2.5 text-left transition ${
+          const rowClasses = `w-full px-4 py-3 text-left transition ${
             isActive
               ? "bg-slate-100 dark:bg-slate-800/70"
               : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
@@ -47,72 +42,14 @@ export function PortfolioSidebar({
                   onClick={() => onSelect(project.project_id)}
                   className={`${rowClasses} focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400`}
                 >
-                  <span className="relative z-10 min-w-0 grid flex-1 gap-1">
-                    <span className="line-clamp-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {project.project_name}
-                    </span>
-                    <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="truncate">{project.priority}</span>
-                      <span className="tabular-nums">
-                        {Math.round(project.completion_percent)}%
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <RiskBadge level={project.risk_level} />
-                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                        {totalSignals} сигн.
-                      </span>
-                    </span>
-                    <ProgressBar
-                      value={project.completion_percent}
-                      tone={healthTone(project.project_health_score)}
-                      ariaLabel={`Готовность проекта ${project.project_name}: ${Math.round(
-                        project.completion_percent,
-                      )}%`}
-                    />
-                  </span>
-                  <span className="shrink-0 text-sm font-semibold tabular-nums text-slate-950 dark:text-slate-50">
-                    <span className="inline-grid min-w-[2.5rem] justify-items-end">
-                      {project.project_health_score}
-                    </span>
-                  </span>
+                  <ProjectRow project={project} />
                 </button>
               ) : (
                 <div
                   aria-current={isActive ? "true" : undefined}
-                  className={`flex w-full items-center gap-3 px-3.5 py-2.5 ${
-                    isActive ? "bg-slate-100 dark:bg-slate-800/70" : ""
-                  }`}
+                  className={rowClasses}
                 >
-                  <span className="min-w-0 grid flex-1 gap-1">
-                    <span className="line-clamp-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      {project.project_name}
-                    </span>
-                    <span className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                      <span className="truncate">{project.priority}</span>
-                      <span className="tabular-nums">
-                        {Math.round(project.completion_percent)}%
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <RiskBadge level={project.risk_level} />
-                      <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                        {totalSignals} сигн.
-                      </span>
-                    </span>
-                    <ProgressBar
-                      value={project.completion_percent}
-                      tone={healthTone(project.project_health_score)}
-                      ariaLabel={`Готовность проекта ${project.project_name}: ${Math.round(
-                        project.completion_percent,
-                      )}%`}
-                    />
-                  </span>
-                  <span className="shrink-0 text-sm font-semibold tabular-nums text-slate-950 dark:text-slate-50">
-                    <span className="inline-grid min-w-[2.5rem] justify-items-end">
-                      {project.project_health_score}
-                    </span>
-                  </span>
+                  <ProjectRow project={project} />
                 </div>
               )}
             </li>
@@ -121,4 +58,48 @@ export function PortfolioSidebar({
       </ul>
     </Card>
   );
+}
+
+function ProjectRow({ project }: { project: PortfolioProjectSummary }) {
+  const totalSignals =
+    project.overdue_tasks_count + project.blocked_tasks_count + project.high_risk_count;
+  const problem = getProjectProblem(project);
+
+  return (
+    <div className="min-w-0 space-y-2">
+      <div className="min-w-0">
+        <p className="line-clamp-1 text-sm font-semibold text-slate-950 dark:text-slate-50">
+          {project.project_name}
+        </p>
+        <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+          {project.priority}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <RiskBadge level={project.risk_level} />
+        {totalSignals > 0 ? (
+          <Badge tone="neutral">{totalSignals} сигналов</Badge>
+        ) : null}
+      </div>
+      <p className="line-clamp-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+        {problem}
+      </p>
+    </div>
+  );
+}
+
+function getProjectProblem(project: PortfolioProjectSummary) {
+  if (project.blocked_tasks_count > 0) {
+    return "Блокируют задачи";
+  }
+  if ((project.budget_deviation_percent ?? 0) > 10) {
+    return `Бюджет выше плана на ${formatPercent(project.budget_deviation_percent ?? 0)}`;
+  }
+  if (project.overdue_tasks_count > 0) {
+    return "Просрочены задачи";
+  }
+  if (project.high_risk_count > 0) {
+    return "Высокие риски";
+  }
+  return project.top_signals[0] ?? "Критичных проблем нет";
 }

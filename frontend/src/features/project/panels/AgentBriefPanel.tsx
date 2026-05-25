@@ -10,6 +10,7 @@ interface AgentBriefPanelProps {
   errorMessage: string | null;
   hasRequested: boolean;
   onRequest: () => void;
+  onOpenTasks: () => void;
 }
 
 const statusTone = {
@@ -24,10 +25,11 @@ export function AgentBriefPanel({
   errorMessage,
   hasRequested,
   onRequest,
+  onOpenTasks,
 }: AgentBriefPanelProps) {
   return (
     <Panel
-      title="Вывод агента"
+      title="Требуется решение"
       icon={<Bot className="size-4" />}
       action={
         <button
@@ -55,7 +57,7 @@ export function AgentBriefPanel({
           {errorMessage}
         </div>
       ) : brief ? (
-        <BriefContent brief={brief} />
+        <BriefContent brief={brief} onOpenTasks={onOpenTasks} />
       ) : (
         <div className="text-sm text-slate-500 dark:text-slate-400">
           Вывод агента не сформирован
@@ -65,38 +67,44 @@ export function AgentBriefPanel({
   );
 }
 
-function BriefContent({ brief }: { brief: ProjectManagerBrief }) {
+function BriefContent({
+  brief,
+  onOpenTasks,
+}: {
+  brief: ProjectManagerBrief;
+  onOpenTasks: () => void;
+}) {
   const primaryAction = brief.next_actions[0];
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="rounded-xl border border-rose-200 bg-white px-4 py-4 dark:border-rose-900/60 dark:bg-slate-950/40">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={statusTone[brief.status]}>{brief.status}</Badge>
           <h3 className="text-base font-semibold text-slate-950 dark:text-slate-50">
             {brief.headline}
           </h3>
         </div>
+        <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
+          {brief.management_question}
+        </p>
       </div>
 
-      <BriefImpact brief={brief} />
-      <BriefBox title="Следующий ход" value={brief.recommended_move} />
-
       {primaryAction ? (
-        <BriefAction
-          title="Поручение"
-          action={primaryAction.action}
-          meta={`${primaryAction.owner_hint} · ${primaryAction.deadline}`}
-          value={primaryAction.success_signal}
+        <NextActionCard
+          recommendation={brief.recommended_move}
+          action={primaryAction}
+          onOpenTasks={onOpenTasks}
         />
       ) : null}
 
+      <BriefImpact brief={brief} />
+
       <details className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950/40">
         <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-slate-800 outline-none transition hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-100 dark:hover:bg-slate-900">
-          Обоснование и черновики
+          Подробнее: источники, расчеты, черновик агента
         </summary>
         <div className="space-y-4 border-t border-slate-100 p-3 dark:border-slate-800">
-          <BriefBox title="Вопрос для решения" value={brief.management_question} />
           <BriefBox title="Диагноз" value={brief.diagnosis} />
           <BriefBox title="Узкое место" value={brief.bottleneck} />
           <BriefList title="Цепочка влияния" items={brief.critical_path} />
@@ -147,18 +155,23 @@ function BriefImpact({ brief }: { brief: ProjectManagerBrief }) {
   const impact = brief.business_impact;
   const items = [
     impact.delay_days !== null
-      ? { label: "Срок", value: formatDays(impact.delay_days) }
+      ? impact.delay_days < 0
+        ? { label: "Сокращение задержки", value: formatDays(Math.abs(impact.delay_days)) }
+        : { label: "Задержка", value: formatDays(impact.delay_days) }
       : null,
     impact.cost_of_delay !== null
-      ? { label: "Цена задержки", value: formatMoney(impact.cost_of_delay) }
+      ? { label: "Потери от задержки", value: formatMoney(impact.cost_of_delay) }
       : null,
     impact.budget_delta !== null
-      ? { label: "Бюджет", value: formatMoney(impact.budget_delta) }
+      ? {
+          label: impact.budget_delta < 0 ? "Экономия бюджета" : "Бюджетный эффект",
+          value: formatMoney(Math.abs(impact.budget_delta)),
+        }
       : null,
   ].filter((item): item is { label: string; value: string } => item !== null);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-800 dark:bg-slate-950/40">
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-slate-800 dark:bg-slate-950/40">
       <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
         Impact
       </div>
@@ -167,7 +180,7 @@ function BriefImpact({ brief }: { brief: ProjectManagerBrief }) {
           {items.map((item) => (
             <div
               key={item.label}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-900"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-900"
             >
               <div className="text-xs text-slate-500 dark:text-slate-400">
                 {item.label}
@@ -186,30 +199,58 @@ function BriefImpact({ brief }: { brief: ProjectManagerBrief }) {
   );
 }
 
-function BriefAction({
-  title,
+function NextActionCard({
+  recommendation,
   action,
-  meta,
-  value,
+  onOpenTasks,
 }: {
-  title: string;
-  action: string;
-  meta: string;
-  value: string;
+  recommendation: string;
+  action: ProjectManagerBrief["next_actions"][number];
+  onOpenTasks: () => void;
 }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-slate-800 dark:bg-slate-950/40">
       <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-        {title}
+        Следующее действие
       </div>
-      <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-        {action}
+      <div className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-300">
+        Рекомендация:{" "}
+        <span className="font-semibold text-slate-950 dark:text-slate-50">
+          {recommendation}
+        </span>
       </div>
-      <div className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-        {meta}
+      <div className="mt-3 text-sm font-semibold text-slate-900 dark:text-slate-100">
+        {action.action}
       </div>
-      <div className="mt-2 rounded-lg bg-slate-50 px-2 py-2 text-xs leading-5 text-slate-500 dark:bg-slate-900 dark:text-slate-400">
-        {value}
+      <div className="mt-2 grid grid-cols-1 gap-2 text-xs text-slate-500 dark:text-slate-400 sm:grid-cols-3">
+        <div>Ответственный: {action.owner_hint}</div>
+        <div>Срок: {action.deadline}</div>
+        <div>Результат: {action.success_signal}</div>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button
+          type="button"
+          disabled
+          title="Действие будет подключено после появления workflow согласований"
+          className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white opacity-50 dark:bg-slate-100 dark:text-slate-950"
+        >
+          Утвердить рекомендацию
+        </button>
+        <button
+          type="button"
+          disabled
+          title="Действие будет подключено после интеграции календаря или коммуникаций"
+          className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 opacity-50 dark:border-slate-800 dark:text-slate-200"
+        >
+          Запросить обсуждение
+        </button>
+        <button
+          type="button"
+          onClick={onOpenTasks}
+          className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-900"
+        >
+          Открыть задачи
+        </button>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import type { PortfolioSummary } from "../../api/types";
 import { Card, CircularGauge, MiniBar } from "../../components/ui";
 import { healthTone } from "../../lib/risk";
 
-/** Сводные плитки по всему портфелю: число проектов, health, красные/зелёные. */
+/** Сводные плитки по всему портфелю: число проектов, здоровье, красные/зелёные. */
 export function PortfolioStats({ portfolio }: { portfolio: PortfolioSummary }) {
   const total = Math.max(portfolio.projects_count, 1);
 
@@ -21,7 +21,7 @@ export function PortfolioStats({ portfolio }: { portfolio: PortfolioSummary }) {
         </div>
         <CircularGauge
           value={portfolio.portfolio_health_score}
-          label="health"
+          label="Здоровье"
           tone={healthTone(portfolio.portfolio_health_score)}
         />
       </div>
