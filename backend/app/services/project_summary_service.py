@@ -16,7 +16,11 @@ from backend.app.schemas.project_summary import (
     ProjectMetricsFact,
     ProjectProblemContext,
     ProjectSummary,
+    ProjectTrendPoint,
+    ProjectTrends,
+    ResourceCostSignal,
     TaskCommentFact,
+    TaskDependencyGraphEdge,
     TaskDependencyEdgeFact,
     TaskHistoryFact,
 )
@@ -27,8 +31,11 @@ from backend.app.services.metrics import (
     infer_as_of_date,
     normalize_priority,
     normalize_status,
+    project_metrics_fact_payload,
+    project_summary_payload,
 )
-from backend.app.services.project_summary_repository import ProjectSummaryRepository, ProjectSummarySource
+from backend.app.services.data_classes import ProjectSummarySource
+from backend.app.services.protocols import ProjectSummaryReader
 
 
 OPEN_COMMUNICATION_STATUSES = {"pending", "delayed", "escalated"}
@@ -38,75 +45,39 @@ PRIORITY_WEIGHT = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 
 
 class ProjectSummaryService:
-    def __init__(self, repository: ProjectSummaryRepository) -> None:
+    def __init__(self, repository: ProjectSummaryReader) -> None:
         self._repository = repository
 
-    def build_project_summary(self, project_id: str, as_of: date | None = None) -> ProjectSummary:
-        source = self._repository.get_project_source(project_id)
-        metrics = calculate_project_metrics(source, as_of=as_of)
+    async def build_project_summary(self, project_id: str, as_of: date | None = None) -> ProjectSummary:
+        source = await self._repository.get_project_source(project_id)
+        return _build_project_summary_from_source(source, as_of=as_of)
 
-        return ProjectSummary(
+    async def build_project_trends(
+        self,
+        project_id: str,
+        as_of: date | None = None,
+        points: int = 8,
+    ) -> ProjectTrends:
+        source = await self._repository.get_project_source(project_id)
+        end_date = as_of or infer_as_of_date(source)
+        trend_dates = _trend_dates(source.project.start_date, end_date, points)
+
+        return ProjectTrends(
             project_id=source.project.id,
             project_name=source.project.name,
-            lifecycle_status=source.project.lifecycle_status,
-            priority=source.project.priority,
-            as_of_date=metrics.as_of_date,
-            completion_percent=metrics.completion_percent,
-            total_tasks_count=metrics.total_tasks_count,
-            completed_tasks_count=metrics.completed_tasks_count,
-            overdue_tasks_count=metrics.overdue_tasks_count,
-            delayed_milestones_count=metrics.delayed_milestones_count,
-            blocked_tasks_count=metrics.blocked_tasks_count,
-            high_risk_count=metrics.high_risk_count,
-            dependency_risk_count=metrics.dependency_risk_count,
-            pending_decision_count=metrics.pending_decision_count,
-            open_change_request_count=metrics.open_change_request_count,
-            dependency_sla_breach_count=metrics.dependency_sla_breach_count,
-            budget=metrics.budget,
-            milestone_slip_days=metrics.milestone_slip_days,
-            critical_path_delay_days=metrics.critical_path_delay_days,
-            blocked_age_days=metrics.blocked_age_days,
-            decision_age_days=metrics.decision_age_days,
-            net_change_request_impact_days=metrics.net_change_request_impact_days,
-            net_change_request_impact_budget=metrics.net_change_request_impact_budget,
-            scope_churn_rate=metrics.scope_churn_rate,
-            burn_rate_percent=metrics.burn_rate_percent,
-            schedule_variance_percent=metrics.schedule_variance_percent,
-            stale_tasks_count=metrics.stale_tasks_count,
-            max_status_age_days=metrics.max_status_age_days,
-            estimate_overrun_percent=metrics.estimate_overrun_percent,
-            workload_imbalance_index=metrics.workload_imbalance_index,
-            key_person_dependency_percent=metrics.key_person_dependency_percent,
-            critical_task_silence_days=metrics.critical_task_silence_days,
-            communication_silence_days=metrics.communication_silence_days,
-            data_freshness_days=metrics.data_freshness_days,
-            cost_of_delay_exposure=metrics.cost_of_delay_exposure,
-            risk_trend=metrics.risk_trend,
-            resource_overload_percent=metrics.resource_overload_percent,
-            max_communication_delay_days=metrics.max_communication_delay_days,
-            project_health_score=metrics.project_health_score,
-            risk_level=metrics.risk_level,
-            executive_summary=metrics.executive_summary,
-            key_signals=metrics.key_signals,
-            blocked_tasks=metrics.blocked_tasks[:7],
-            overdue_tasks=metrics.overdue_tasks[:7],
-            delayed_milestones=metrics.delayed_milestones[:7],
-            top_risks=metrics.top_risks[:7],
-            delayed_communications=metrics.delayed_communications[:7],
-            overloaded_resources=metrics.overloaded_resources[:7],
-            risky_dependencies=metrics.risky_dependencies[:7],
-            pending_decisions=metrics.pending_decisions[:7],
-            open_change_requests=metrics.open_change_requests[:7],
-            owner_action_load=metrics.owner_action_load[:7],
+            points=[
+                _project_trend_point(source=source, as_of=trend_date)
+                for trend_date in trend_dates
+            ],
         )
 
-    def build_project_problem_context(
+    async def build_project_problem_context(
         self,
         project_id: str,
         as_of: date | None = None,
         max_depth: int = 2,
     ) -> ProjectProblemContext:
-        source = self._repository.get_project_source(project_id)
+        source = await self._repository.get_project_source(project_id)
         metrics = calculate_project_metrics(source, as_of=as_of)
         max_depth = min(max(max_depth, 1), 4)
 
@@ -184,43 +155,7 @@ class ProjectSummaryService:
                 business_value=source.project.business_value,
             ),
             as_of_date=metrics.as_of_date,
-            metrics=ProjectMetricsFact(
-                completion_percent=metrics.completion_percent,
-                total_tasks_count=metrics.total_tasks_count,
-                completed_tasks_count=metrics.completed_tasks_count,
-                overdue_tasks_count=metrics.overdue_tasks_count,
-                delayed_milestones_count=metrics.delayed_milestones_count,
-                blocked_tasks_count=metrics.blocked_tasks_count,
-                high_risk_count=metrics.high_risk_count,
-                dependency_risk_count=metrics.dependency_risk_count,
-                pending_decision_count=metrics.pending_decision_count,
-                open_change_request_count=metrics.open_change_request_count,
-                dependency_sla_breach_count=metrics.dependency_sla_breach_count,
-                budget_deviation_percent=metrics.budget.budget_deviation_percent if metrics.budget else None,
-                milestone_slip_days=metrics.milestone_slip_days,
-                critical_path_delay_days=metrics.critical_path_delay_days,
-                blocked_age_days=metrics.blocked_age_days,
-                decision_age_days=metrics.decision_age_days,
-                net_change_request_impact_days=metrics.net_change_request_impact_days,
-                net_change_request_impact_budget=metrics.net_change_request_impact_budget,
-                scope_churn_rate=metrics.scope_churn_rate,
-                burn_rate_percent=metrics.burn_rate_percent,
-                schedule_variance_percent=metrics.schedule_variance_percent,
-                stale_tasks_count=metrics.stale_tasks_count,
-                max_status_age_days=metrics.max_status_age_days,
-                estimate_overrun_percent=metrics.estimate_overrun_percent,
-                workload_imbalance_index=metrics.workload_imbalance_index,
-                key_person_dependency_percent=metrics.key_person_dependency_percent,
-                critical_task_silence_days=metrics.critical_task_silence_days,
-                communication_silence_days=metrics.communication_silence_days,
-                data_freshness_days=metrics.data_freshness_days,
-                cost_of_delay_exposure=metrics.cost_of_delay_exposure,
-                risk_trend=metrics.risk_trend,
-                resource_overload_percent=metrics.resource_overload_percent,
-                max_communication_delay_days=metrics.max_communication_delay_days,
-                project_health_score=metrics.project_health_score,
-                risk_level=metrics.risk_level,
-            ),
+            metrics=ProjectMetricsFact(**project_metrics_fact_payload(metrics)),
             budget=metrics.budget,
             problem_tasks=[_problem_task_fact(task, metrics.as_of_date) for task in problem_tasks],
             task_dependency_edges=dependency_edges,
@@ -229,14 +164,19 @@ class ProjectSummaryService:
             linked_project_dependencies=linked_project_dependencies[:20],
             pending_decisions=metrics.pending_decisions[:20],
             open_change_requests=metrics.open_change_requests[:20],
+            project_resources=_build_project_resources(source),
+            task_dependency_graph=_build_task_dependency_graph(source),
             overloaded_resources=metrics.overloaded_resources[:20],
             recent_task_history=recent_task_history,
             recent_task_comments=recent_task_comments,
         )
 
-    def build_portfolio_summary(self, as_of: date | None = None) -> PortfolioSummary:
-        project_ids = [project.id for project in self._repository.list_projects()]
-        project_summaries = [self.build_project_summary(project_id, as_of=as_of) for project_id in project_ids]
+    async def build_portfolio_summary(self, as_of: date | None = None) -> PortfolioSummary:
+        sources = await self._project_sources()
+        project_summaries = [
+            _build_project_summary_from_source(source, as_of=as_of)
+            for source in sources
+        ]
         portfolio_as_of = max((summary.as_of_date for summary in project_summaries), default=date.today())
 
         compact_projects = [
@@ -273,15 +213,12 @@ class ProjectSummaryService:
             projects=compact_projects,
         )
 
-    def build_portfolio_attention(
+    async def build_portfolio_attention(
         self,
         as_of: date | None = None,
         lookback_days: int = 7,
     ) -> PortfolioAttentionSummary:
-        sources = [
-            self._repository.get_project_source(project.id)
-            for project in self._repository.list_projects()
-        ]
+        sources = await self._project_sources()
         as_of_date = as_of or max(
             (infer_as_of_date(source) for source in sources),
             default=date.today(),
@@ -292,7 +229,7 @@ class ProjectSummaryService:
         window_end_at = datetime.combine(as_of_date, time.max)
 
         project_summaries = {
-            source.project.id: self.build_project_summary(source.project.id, as_of=as_of_date)
+            source.project.id: _build_project_summary_from_source(source, as_of=as_of_date)
             for source in sources
         }
         signals: list[PortfolioAttentionSignal] = []
@@ -374,9 +311,9 @@ class ProjectSummaryService:
                     occurred_at=item.message_time,
                     signal_type="communication_escalated",
                     severity="critical",
-                    title="Появилась эскалация в коммуникациях",
+                    title="Нужно решение по коммуникациям",
                     description=item.summary,
-                    recommended_action="Назначить ответственного за закрытие эскалации и срок следующего ответа.",
+                    recommended_action="Назначить ответственного за ответ и срок следующего контакта.",
                     evidence_ids=[item.id, item.communication_id],
                 )
 
@@ -396,7 +333,7 @@ class ProjectSummaryService:
                     occurred_at=_date_to_datetime(item.request_date),
                     signal_type="change_request_opened",
                     severity=severity,
-                    title="Открыт change request",
+                    title="Открыт запрос на изменение",
                     description=item.description,
                     recommended_action="Принять или отклонить изменение, потому что оно меняет срок, бюджет или scope.",
                     evidence_ids=[item.id],
@@ -480,6 +417,24 @@ class ProjectSummaryService:
             signals=signals[:20],
         )
 
+    async def _project_sources(self) -> list[ProjectSummarySource]:
+        sources: list[ProjectSummarySource] = []
+        for project in await self._repository.list_projects():
+            sources.append(await self._repository.get_project_source(project.id))
+        return sources
+
+
+def _build_project_summary_from_source(source: ProjectSummarySource, as_of: date | None = None) -> ProjectSummary:
+    metrics = calculate_project_metrics(source, as_of=as_of)
+
+    return ProjectSummary(
+        project_id=source.project.id,
+        project_name=source.project.name,
+        lifecycle_status=source.project.lifecycle_status,
+        priority=source.project.priority,
+        **project_summary_payload(metrics),
+    )
+
 
 def _problem_task_fact(task: Task, as_of: date) -> ProblemTaskFact:
     problem_flags: list[str] = []
@@ -505,6 +460,61 @@ def _problem_task_fact(task: Task, as_of: date) -> ProblemTaskFact:
         overdue_days=max(0, (as_of - task.planned_due_date).days),
         problem_flags=problem_flags,
     )
+
+
+def _build_project_resources(source: ProjectSummarySource) -> list[ResourceCostSignal]:
+    planned_by_resource: defaultdict[str, int] = defaultdict(int)
+    actual_by_resource: defaultdict[str, int] = defaultdict(int)
+    for allocation in source.project_allocations:
+        planned_by_resource[allocation.resource_id] += allocation.planned_hours_per_week
+        actual_by_resource[allocation.resource_id] += allocation.actual_hours_per_week
+
+    result: list[ResourceCostSignal] = []
+    for resource_id in sorted(planned_by_resource):
+        resource = source.resources_by_id.get(resource_id)
+        if resource is None:
+            continue
+        weekly_cost = actual_by_resource[resource_id] * resource.hour_rate
+        result.append(
+            ResourceCostSignal(
+                resource_id=resource.id,
+                full_name=resource.full_name,
+                role=resource.role,
+                team=resource.team,
+                seniority=resource.seniority,
+                hour_rate=resource.hour_rate,
+                available_hours_per_week=resource.available_hours_per_week,
+                project_planned_hours_per_week=planned_by_resource[resource_id],
+                project_actual_hours_per_week=actual_by_resource[resource_id],
+                weekly_project_cost=weekly_cost,
+                daily_project_cost=round(weekly_cost / 5),
+            )
+        )
+    return result
+
+
+def _build_task_dependency_graph(source: ProjectSummarySource) -> list[TaskDependencyGraphEdge]:
+    tasks_by_id = {task.id: task for task in source.tasks}
+    result: list[TaskDependencyGraphEdge] = []
+    for dependency in source.task_dependencies:
+        task = tasks_by_id.get(dependency.task_id)
+        depends_on_task = tasks_by_id.get(dependency.depends_on_task_id)
+        if task is None or depends_on_task is None:
+            continue
+        result.append(
+            TaskDependencyGraphEdge(
+                id=dependency.id,
+                task_id=dependency.task_id,
+                task_title=task.title,
+                depends_on_task_id=dependency.depends_on_task_id,
+                depends_on_task_title=depends_on_task.title,
+                dependency_type=dependency.dependency_type,
+                is_critical_path=dependency.is_critical_path,
+                lag_days=dependency.lag_days,
+                reason=dependency.reason,
+            )
+        )
+    return result
 
 
 def _build_task_dependency_edges(
@@ -589,6 +599,95 @@ def _sort_problem_tasks(tasks: Iterable[Task]) -> list[Task]:
         ),
         reverse=True,
     )
+
+
+def _trend_dates(start_date: date, end_date: date, points: int) -> list[date]:
+    points = min(max(points, 2), 12)
+    if start_date >= end_date:
+        return [end_date]
+
+    total_days = max(1, (end_date - start_date).days)
+    dates: list[date] = []
+    for index in range(points):
+        offset = round(total_days * index / (points - 1))
+        trend_date = start_date + timedelta(days=offset)
+        if not dates or dates[-1] != trend_date:
+            dates.append(trend_date)
+    if dates[-1] != end_date:
+        dates[-1] = end_date
+    return dates
+
+
+def _project_trend_point(source: ProjectSummarySource, as_of: date) -> ProjectTrendPoint:
+    total_tasks_count = len(source.tasks)
+    completed_tasks_count = sum(
+        1
+        for task in source.tasks
+        if task.actual_end_date is not None and task.actual_end_date <= as_of
+    )
+    high_risk_score_sum = sum(
+        risk.probability * risk.impact
+        for risk in source.risks
+        if risk.probability * risk.impact >= 15
+        and risk.status.casefold() in {"active", "escalated", "mitigating", "open"}
+    )
+    high_risk_count = sum(
+        1
+        for risk in source.risks
+        if risk.probability * risk.impact >= 15
+        and risk.status.casefold() in {"active", "escalated", "mitigating", "open"}
+    )
+    dependency_sla_breach_count = sum(
+        1
+        for dependency in source.dependencies
+        if dependency.status.casefold() in {"pending", "delayed", "blocked"}
+        and dependency.expected_date < as_of
+    )
+    overdue_problem_count = sum(
+        1
+        for task in source.tasks
+        if task.actual_end_date is None and task.planned_due_date < as_of
+    )
+    resource_overload_percent = _trend_resource_overload_percent(source)
+    risk_pressure_score = min(
+        100,
+        round(
+            high_risk_score_sum * 1.4
+            + dependency_sla_breach_count * 8
+            + overdue_problem_count * 1.5
+            + resource_overload_percent * 0.25
+        ),
+    )
+    return ProjectTrendPoint(
+        as_of_date=as_of,
+        completion_percent=round(
+            (completed_tasks_count / total_tasks_count * 100) if total_tasks_count else 0,
+            1,
+        ),
+        completed_tasks_count=completed_tasks_count,
+        high_risk_count=high_risk_count,
+        risk_pressure_score=risk_pressure_score,
+        dependency_sla_breach_count=dependency_sla_breach_count,
+        resource_overload_percent=resource_overload_percent,
+    )
+
+
+def _trend_resource_overload_percent(source: ProjectSummarySource) -> float:
+    resources_by_id = source.resources_by_id
+    actual_hours_by_resource: dict[str, int] = defaultdict(int)
+    for allocation in source.related_allocations:
+        actual_hours_by_resource[allocation.resource_id] += allocation.actual_hours_per_week
+
+    overloaded = 0
+    total = 0
+    for resource_id, actual_hours in actual_hours_by_resource.items():
+        resource = resources_by_id.get(resource_id)
+        if resource is None:
+            continue
+        total += 1
+        if actual_hours > resource.available_hours_per_week:
+            overloaded += 1
+    return round((overloaded / total * 100) if total else 0, 1)
 
 
 def _date_to_datetime(value: date) -> datetime:

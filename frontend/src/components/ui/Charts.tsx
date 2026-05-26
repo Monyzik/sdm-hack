@@ -95,3 +95,165 @@ export function MiniBar({ label, value, tone = "neutral" }: MiniBarProps) {
     </div>
   );
 }
+
+interface LineSeries {
+  label: string;
+  values: number[];
+  tone?: Tone;
+  suffix?: string;
+}
+
+interface TrendLineChartProps {
+  labels: string[];
+  series: LineSeries[];
+  height?: number;
+}
+
+export function TrendLineChart({
+  labels,
+  series,
+  height = 180,
+}: TrendLineChartProps) {
+  const width = 640;
+  const paddingX = 28;
+  const paddingY = 18;
+  const allValues = series.flatMap((item) => item.values);
+  const maxValue = Math.max(1, ...allValues);
+  const minValue = Math.min(0, ...allValues);
+  const span = Math.max(1, maxValue - minValue);
+  const plotWidth = width - paddingX * 2;
+  const plotHeight = height - paddingY * 2;
+
+  function point(value: number, index: number) {
+    const x =
+      paddingX +
+      (labels.length <= 1 ? 0 : (plotWidth * index) / (labels.length - 1));
+    const y = paddingY + plotHeight - ((value - minValue) / span) * plotHeight;
+    return { x, y };
+  }
+
+  return (
+    <div className="w-full overflow-hidden">
+      <svg
+        aria-hidden
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-44 w-full"
+        preserveAspectRatio="none"
+      >
+        {[0, 0.5, 1].map((ratio) => {
+          const y = paddingY + plotHeight * ratio;
+          return (
+            <line
+              key={ratio}
+              x1={paddingX}
+              x2={width - paddingX}
+              y1={y}
+              y2={y}
+              className="stroke-slate-100 dark:stroke-slate-800"
+              strokeWidth="1"
+            />
+          );
+        })}
+        {series.map((item) => {
+          const d = item.values
+            .map((value, index) => {
+              const { x, y } = point(value, index);
+              return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+            })
+            .join(" ");
+          return (
+            <path
+              key={item.label}
+              d={d}
+              fill="none"
+              className={toneStroke[item.tone ?? "neutral"]}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          );
+        })}
+        {series.map((item) =>
+          item.values.map((value, index) => {
+            const { x, y } = point(value, index);
+            return (
+              <circle
+                key={`${item.label}-${index}`}
+                cx={x}
+                cy={y}
+                r="3.5"
+                className={`${toneStroke[item.tone ?? "neutral"]} fill-white dark:fill-slate-950`}
+                strokeWidth="2"
+              />
+            );
+          }),
+        )}
+      </svg>
+      <div className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        {labels.map((label) => (
+          <span key={label} className="truncate">
+            {label}
+          </span>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-3">
+        {series.map((item) => {
+          const latest = item.values[item.values.length - 1] ?? 0;
+          return (
+            <div
+              key={item.label}
+              className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300"
+            >
+              <span className={`size-2 rounded-full ${toneFill[item.tone ?? "neutral"]}`} />
+              <span>{item.label}</span>
+              <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                {Math.round(latest)}
+                {item.suffix ?? ""}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+interface HorizontalBarDatum {
+  label: string;
+  value: number;
+  hint?: string;
+  tone?: Tone;
+}
+
+export function HorizontalBarChart({ data }: { data: HorizontalBarDatum[] }) {
+  return (
+    <div className="space-y-3">
+      {data.map((item) => {
+        const percent = Math.max(0, Math.min(140, item.value));
+        return (
+          <div key={item.label} className="space-y-1.5">
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <span className="min-w-0 truncate font-medium text-slate-700 dark:text-slate-200">
+                {item.label}
+              </span>
+              <span className="shrink-0 tabular-nums text-slate-500 dark:text-slate-400">
+                {Math.round(item.value)}%
+              </span>
+            </div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <div
+                className={`h-full rounded-full ${toneFill[item.tone ?? "neutral"]}`}
+                style={{ width: `${Math.min(100, percent)}%` }}
+              />
+            </div>
+            {item.hint ? (
+              <div className="truncate text-xs text-slate-500 dark:text-slate-400">
+                {item.hint}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

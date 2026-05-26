@@ -173,11 +173,38 @@ class ResourceLoadSignal(BaseModel):
     full_name: str
     role: str
     team: str
+    hour_rate: int
     available_hours_per_week: int
     project_actual_hours_per_week: int
     total_actual_hours_per_week: int
     total_allocation_percent: float
     overload_percent: float
+
+
+class ResourceCostSignal(BaseModel):
+    resource_id: str
+    full_name: str
+    role: str
+    team: str
+    seniority: str
+    hour_rate: int
+    available_hours_per_week: int
+    project_planned_hours_per_week: int
+    project_actual_hours_per_week: int
+    weekly_project_cost: int
+    daily_project_cost: int
+
+
+class TaskDependencyGraphEdge(BaseModel):
+    id: str
+    task_id: str
+    task_title: str
+    depends_on_task_id: str
+    depends_on_task_title: str
+    dependency_type: str
+    is_critical_path: bool
+    lag_days: int
+    reason: str
 
 
 class DependencySignal(BaseModel):
@@ -281,6 +308,22 @@ class ProjectSummary(BaseModel):
     owner_action_load: list[OwnerActionLoadSignal]
 
 
+class ProjectTrendPoint(BaseModel):
+    as_of_date: date
+    completion_percent: float
+    completed_tasks_count: int
+    high_risk_count: int
+    risk_pressure_score: int = Field(ge=0, le=100)
+    dependency_sla_breach_count: int
+    resource_overload_percent: float
+
+
+class ProjectTrends(BaseModel):
+    project_id: str
+    project_name: str
+    points: list[ProjectTrendPoint]
+
+
 class ProjectProblemContext(BaseModel):
     project: ProjectFact
     as_of_date: date
@@ -293,6 +336,8 @@ class ProjectProblemContext(BaseModel):
     linked_project_dependencies: list[DependencySignal]
     pending_decisions: list[DecisionSignal]
     open_change_requests: list[ChangeRequestSignal]
+    project_resources: list[ResourceCostSignal]
+    task_dependency_graph: list[TaskDependencyGraphEdge]
     overloaded_resources: list[ResourceLoadSignal]
     recent_task_history: list[TaskHistoryFact]
     recent_task_comments: list[TaskCommentFact]

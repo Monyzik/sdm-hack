@@ -17,7 +17,6 @@ import type { RiskLevel } from "../../api/types";
 import { riskLabel } from "../../lib/risk";
 import { Badge, Card } from "../../components/ui";
 import type { ReactNode } from "react";
-import { AttentionInbox } from "./AttentionInbox";
 
 interface PortfolioCommandCenterProps {
   portfolio: PortfolioSummary;
@@ -156,13 +155,6 @@ export function PortfolioCommandCenter({
         budgetRiskProjects={budgetRiskProjects}
       />
 
-      {attention ? (
-        <AttentionInbox
-          attention={attention}
-          onSelectProject={onSelectProject}
-        />
-      ) : null}
-
       <InterventionList
         projects={focusProjects}
         onSelectProject={onSelectProject}
@@ -296,7 +288,7 @@ function InterventionList({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-            Требуют вмешательства сегодня
+            Требуют решения сегодня
           </h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Проекты, где есть риск для сроков, бюджета или критичного пути.
@@ -319,7 +311,7 @@ function InterventionList({
           ))
         ) : (
           <p className="rounded-lg bg-slate-50 px-3 py-6 text-center text-sm text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
-            На сегодня нет проектов, требующих вмешательства.
+            На сегодня нет проектов, требующих отдельного решения.
           </p>
         )}
       </div>

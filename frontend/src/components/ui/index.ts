@@ -1,5 +1,7 @@
 /** Бочка-экспорт UI-примитивов для коротких импортов. */
 export { Badge } from "./Badge";
+export { AppNavigation } from "./AppNavigation";
+export type { NavigationPage } from "./AppNavigation";
 export { Card, Panel } from "./Card";
 export { CircularGauge, MiniBar } from "./Charts";
 export { MetricTile } from "./MetricTile";

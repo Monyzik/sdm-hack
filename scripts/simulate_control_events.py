@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import sys
 from datetime import date, datetime, timedelta
@@ -11,9 +12,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from agents.project_control_graph import ProjectControlData, build_project_control_graph
+from agents.workflows.project_control import ProjectControlData, build_project_control_graph
 from backend.app.database.models import Base
-from backend.app.database.session import create_engine_from_env, create_session_factory
+from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
 
 
 EVENTS_FILE = PROJECT_ROOT / "data/control_events.jsonl"
@@ -119,12 +120,13 @@ def save_json(path: Path, payload: Any) -> None:
     )
 
 
-def main() -> None:
+async def async_main() -> None:
     events = load_events(EVENTS_FILE)
 
-    engine = create_engine_from_env()
-    Base.metadata.create_all(engine)
-    session_factory = create_session_factory(engine)
+    engine = create_async_engine_from_env()
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    session_factory = create_async_session_factory(engine)
     graph = build_project_control_graph(session_factory=session_factory)
 
     results = []
@@ -133,7 +135,7 @@ def main() -> None:
 
         try:
             event = ProjectControlData.model_validate(raw_event)
-            result = graph.invoke(event.model_dump())
+            result = await graph.ainvoke(event.model_dump())
             results.append(
                 {
                     "event": event.model_dump(exclude_none=True),
@@ -167,6 +169,11 @@ def main() -> None:
 
     print(f"События: {payload['processed']}/{payload['total']} обработано")
     print(f"JSON результата: {OUTPUT_FILE}")
+    await engine.dispose()
+
+
+def main() -> None:
+    asyncio.run(async_main())
 
 
 if __name__ == "__main__":

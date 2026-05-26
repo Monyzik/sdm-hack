@@ -6,11 +6,11 @@ import re
 from datetime import date
 from typing import Any, Literal
 from urllib.parse import urlencode
-from urllib.request import urlopen
 
+import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from agents.yandex_client import get_yandex_client, get_yandex_model_uri
+from agents.infrastructure.llm import get_llm_adapter
 
 try:
     from langgraph.graph import END, START, StateGraph
@@ -29,8 +29,8 @@ class BusinessImpact(BaseModel):
 
     delay_days: int | None = Field(None, description="Оценка задержки в днях из входных метрик.")
     cost_of_delay: int | None = Field(None, description="Денежный exposure задержки из входных метрик.")
-    budget_delta: int | None = Field(None, description="Отклонение или impact бюджета из входных данных.")
-    impact_summary: str = Field(description="Короткое объяснение управленческого impact.")
+    budget_delta: int | None = Field(None, description="Отклонение или влияние на бюджет из входных данных.")
+    impact_summary: str = Field(description="Короткое объяснение влияния на срок, деньги и результат проекта.")
 
 
 class AgentActionItem(BaseModel):
@@ -55,7 +55,7 @@ class FollowUpCheck(BaseModel):
 
     check_after: str = Field(description="Когда агент должен проверить изменения.")
     success_condition: str = Field(description="Какой факт во входных данных будет означать улучшение.")
-    escalation_condition: str = Field(description="Что считать поводом для следующей эскалации.")
+    escalation_condition: str = Field(description="Что считать поводом вынести решение на комитет или зафиксировать отдельное поручение.")
 
 
 class ProjectManagerBrief(BaseModel):
@@ -82,9 +82,7 @@ class ProjectManagerBrief(BaseModel):
         max_length=3,
         description="Реальные развилки решения с компромиссами.",
     )
-    business_impact: BusinessImpact = Field(
-        description="Перевод проблемы в срок, деньги и управленческий impact."
-    )
+    business_impact: BusinessImpact = Field(description="Перевод проблемы в срок, деньги и решение по проекту.")
     next_actions: list[AgentActionItem] = Field(
         min_length=1,
         max_length=3,
@@ -103,7 +101,7 @@ class ProjectManagerBrief(BaseModel):
     )
     evidence_ids: list[str] = Field(
         max_length=20,
-        description="Id источников из JSON problem context для трассировки. Не показывать в обычном тексте.",
+        description="ID источников из JSON проблемного контекста для трассировки. Не показывать в обычном тексте.",
     )
     missing_data: list[str] = Field(
         max_length=3,
@@ -144,17 +142,21 @@ Backend не присылает готовые выводы. Он присыла
 - не вставляй технические id в обычный текст;
 - технические id вида T001, RK001, DEC001, R003 разрешены только в evidence_ids;
 - не используй смесь русского текста и англоязычных системных слов, если можно написать по-русски;
+- не называй передачу вопроса наверх отдельным процессом; пиши "вынести на комитет", "зафиксировать решение" или "назначить владельца и срок";
+- отвечай максимально русскими словами, но сохраняй общепринятые названия метрик, систем и команд из входных данных;
+- не используй английские статусы и служебные слова из входных данных; переводи их на русский;
+- избегай лишних англицизмов в обычном тексте: если это не название метрики, команды или системы, пиши по-русски;
 - не используй многоточие и не обрывай фразы; каждое действие и решение должно быть законченным;
 - не пиши длинную простыню;
 - не делай список очевидных причин, которые пользователь уже видит на дашборде;
-- не повторяй отдельными пунктами блокеры, бюджет, ROI и перегруз, если не связываешь их в причинную цепочку;
+- не повторяй отдельными пунктами блокеры, бюджет, окупаемость и перегруз, если не связываешь их в причинную цепочку;
 - сначала найди узкое место и цепочку зависимостей из problem_tasks и task_dependency_edges;
 - потом сформулируй управленческую развилку: что именно надо решить, какие есть опции и цена каждой;
 - recommended_move должен быть одним ходом, а не списком поручений;
-- business_impact заполни только из метрик и фактов: задержка, cost of delay, бюджетный impact, краткий смысл;
+- business_impact заполни только из метрик и фактов: сдвиг срока, цена задержки, влияние на бюджет, краткий смысл;
 - next_actions должны быть готовыми поручениями с владельцем, сроком реакции и измеримым признаком успеха;
 - draft_message должен быть готовым коротким сообщением владельцу блокера, решения или зависимости;
-- follow_up_check должен описывать, что агент проверит после действия и когда нужна повторная эскалация;
+- follow_up_check должен описывать, что агент проверит после действия и когда нужно вынести решение на комитет или создать отдельное поручение;
 - watchouts используй для вещей, которые могут выглядеть правильными, но не решат проблему;
 - если вывод не следует из problem_context, не пиши его;
 - все использованные id положи только в поле evidence_ids;
@@ -169,83 +171,57 @@ def state_value(state: ProjectBriefData | dict[str, Any], key: str, default: Any
     return state.get(key, default)
 
 
-def fetch_project_problem_context(
-        project_id: str,
-        as_of: str,
-        max_depth: int,
-        api_base_url: str,
+async def fetch_project_problem_context(
+    project_id: str,
+    as_of: str,
+    max_depth: int,
+    api_base_url: str,
 ) -> dict[str, Any]:
     query = urlencode({"as_of": as_of, "max_depth": max_depth})
     url = f"{api_base_url}/api/v1/summaries/projects/{project_id}/problem-context?{query}"
-    with urlopen(url, timeout=10) as response:
-        return json.loads(response.read().decode("utf-8"))
+    async with httpx.AsyncClient(timeout=10) as client:
+        response = await client.get(url, headers={"Accept": "application/json"})
+        response.raise_for_status()
+        return response.json()
 
 
 class ProjectBriefAgent:
-    """Агент, который строит управленческий brief по fact context."""
+    """Агент, который строит управленческий brief по фактическому контексту."""
 
     def __init__(self, *, temperature: float = 0.2) -> None:
-        self.model = get_yandex_model_uri()
-        self.client = get_yandex_client()
+        self.llm = get_llm_adapter()
         self.temperature = temperature
 
-    def build(self, problem_context: dict[str, Any]) -> ProjectManagerBrief:
+    async def build(self, problem_context: dict[str, Any]) -> ProjectManagerBrief:
         first_error = ""
         try:
-            return _clean_brief(self._ask_llm(problem_context), problem_context)
+            return _clean_brief(await self._ask_llm(problem_context), problem_context)
         except (json.JSONDecodeError, ValidationError, ValueError) as exc:
             first_error = str(exc)
             try:
-                return _clean_brief(self._ask_llm(problem_context, bad_response=first_error), problem_context)
+                return _clean_brief(
+                    await self._ask_llm(problem_context, bad_response=first_error),
+                    problem_context,
+                )
             except (json.JSONDecodeError, ValidationError, ValueError) as exc:
                 raise RuntimeError(
                     "LLM вернула ответ не по JSON-контракту. "
                     f"Причина: {str(exc)[:700]}"
                 ) from exc
 
-    def _ask_llm(self, problem_context: dict[str, Any], bad_response: str | None = None) -> ProjectManagerBrief:
+    async def _ask_llm(
+        self,
+        problem_context: dict[str, Any],
+        bad_response: str | None = None,
+    ) -> ProjectManagerBrief:
         llm_context = compact_problem_context_for_llm(problem_context)
         prompt = build_user_prompt(llm_context, bad_response)
-        try:
-            return self._ask_llm_with_responses_parse(prompt)
-        except Exception:
-            return self._ask_llm_with_chat_completion(prompt)
-
-    def _ask_llm_with_responses_parse(self, prompt: str) -> ProjectManagerBrief:
-        response = self.client.responses.parse(
-            model=self.model,
-            instructions=SYSTEM_PROMPT,
-            input=prompt,
+        return await self.llm.parse_pydantic(
+            response_model=ProjectManagerBrief,
+            system_prompt=SYSTEM_PROMPT,
+            user_prompt=prompt,
             temperature=self.temperature,
-            text_format=ProjectManagerBrief,
         )
-        if response.output_parsed is None:
-            raise ValueError("LLM вернула пустой parsed response")
-        return response.output_parsed
-
-    def _ask_llm_with_chat_completion(self, prompt: str) -> ProjectManagerBrief:
-        schema = json.dumps(ProjectManagerBrief.model_json_schema(), ensure_ascii=False, indent=2)
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        f"{SYSTEM_PROMPT}\n\n"
-                        "Отвечай только валидным JSON без markdown. "
-                        "JSON должен соответствовать схеме ProjectManagerBrief."
-                    ),
-                },
-                {
-                    "role": "user",
-                    "content": f"{prompt}\n\nJSON Schema ProjectManagerBrief:\n{schema}",
-                },
-            ],
-            temperature=self.temperature,
-            response_format={"type": "json_object"},
-        )
-        response_text = response.choices[0].message.content or "{}"
-        return ProjectManagerBrief.model_validate(_parse_json(response_text))
 
 
 def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None = None) -> str:
@@ -259,15 +235,15 @@ def build_user_prompt(problem_context: dict[str, Any], bad_response: str | None 
         )
 
     return (
-            retry_note
-            + "Сформируй управленческую рекомендацию по JSON problem context.\n"
-            + "Контекст может быть компактной выборкой: counts в metrics являются полными и авторитетными, "
-            + "а problem_tasks и task_dependency_edges содержат только самые важные примеры для evidence_ids.\n"
-            + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей, развилку решения, "
-            + "business impact, поручение, черновик сообщения и follow-up проверку.\n"
-            + "Ответ будет распарсен в строгую Pydantic-схему ProjectManagerBrief.\n\n"
-            + "JSON problem context:\n"
-            + json.dumps(problem_context, ensure_ascii=False)
+        retry_note
+        + "Сформируй управленческую рекомендацию по JSON problem context.\n"
+        + "Контекст может быть компактной выборкой: counts в metrics являются полными и авторитетными, "
+        + "а problem_tasks и task_dependency_edges содержат только самые важные примеры для evidence_ids.\n"
+        + "Не пересказывай видимые метрики. Найди узкое место, цепочку зависимостей, развилку решения, "
+        + "бизнес-влияние, поручение, черновик сообщения и последующую проверку.\n"
+        + "Ответ будет распарсен в строгую Pydantic-схему ProjectManagerBrief.\n\n"
+        + "JSON problem context:\n"
+        + json.dumps(problem_context, ensure_ascii=False)
     )
 
 
@@ -279,11 +255,13 @@ def compact_problem_context_for_llm(problem_context: dict[str, Any]) -> dict[str
     linked_project_dependencies = _list_value(problem_context.get("linked_project_dependencies"))
     pending_decisions = _list_value(problem_context.get("pending_decisions"))
     open_change_requests = _list_value(problem_context.get("open_change_requests"))
+    project_resources = _list_value(problem_context.get("project_resources"))
+    task_dependency_graph = _list_value(problem_context.get("task_dependency_graph"))
     overloaded_resources = _list_value(problem_context.get("overloaded_resources"))
     recent_task_history = _list_value(problem_context.get("recent_task_history"))
     recent_task_comments = _list_value(problem_context.get("recent_task_comments"))
 
-    return {
+    compact_context = {
         "project": problem_context.get("project"),
         "as_of_date": problem_context.get("as_of_date"),
         "metrics": problem_context.get("metrics"),
@@ -301,6 +279,8 @@ def compact_problem_context_for_llm(problem_context: dict[str, Any]) -> dict[str
             "linked_project_dependencies": max(0, len(linked_project_dependencies) - LLM_LINKED_FACT_LIMIT),
             "pending_decisions": max(0, len(pending_decisions) - LLM_LINKED_FACT_LIMIT),
             "open_change_requests": max(0, len(open_change_requests) - LLM_LINKED_FACT_LIMIT),
+            "project_resources": max(0, len(project_resources) - LLM_LINKED_FACT_LIMIT),
+            "task_dependency_graph": max(0, len(task_dependency_graph) - LLM_DEPENDENCY_EDGE_LIMIT),
             "overloaded_resources": max(0, len(overloaded_resources) - LLM_LINKED_FACT_LIMIT),
             "recent_task_history": max(0, len(recent_task_history) - LLM_RECENT_EVENT_LIMIT),
             "recent_task_comments": max(0, len(recent_task_comments) - LLM_RECENT_EVENT_LIMIT),
@@ -312,10 +292,13 @@ def compact_problem_context_for_llm(problem_context: dict[str, Any]) -> dict[str
         "linked_project_dependencies": linked_project_dependencies[:LLM_LINKED_FACT_LIMIT],
         "pending_decisions": pending_decisions[:LLM_LINKED_FACT_LIMIT],
         "open_change_requests": open_change_requests[:LLM_LINKED_FACT_LIMIT],
+        "project_resources": project_resources[:LLM_LINKED_FACT_LIMIT],
+        "task_dependency_graph": task_dependency_graph[:LLM_DEPENDENCY_EDGE_LIMIT],
         "overloaded_resources": overloaded_resources[:LLM_LINKED_FACT_LIMIT],
         "recent_task_history": recent_task_history[:LLM_RECENT_EVENT_LIMIT],
         "recent_task_comments": recent_task_comments[:LLM_RECENT_EVENT_LIMIT],
     }
+    return _humanize_context_values(compact_context)
 
 
 def _build_problem_aggregates(
@@ -392,10 +375,10 @@ def _top_flag_counts(problem_tasks: list[dict[str, Any]], limit: int = 10) -> li
 
 
 def fetch_problem_context_node(backend_api_url: str) -> Any:
-    def fetch_problem_context(state: ProjectBriefData | dict[str, Any]) -> dict[str, Any]:
+    async def fetch_problem_context(state: ProjectBriefData | dict[str, Any]) -> dict[str, Any]:
         as_of = state_value(state, "as_of")
         as_of_value = as_of.isoformat() if isinstance(as_of, date) else str(as_of or "2026-06-19")
-        problem_context = fetch_project_problem_context(
+        problem_context = await fetch_project_problem_context(
             project_id=state_value(state, "project_id"),
             as_of=as_of_value,
             max_depth=state_value(state, "max_depth", 2),
@@ -407,12 +390,12 @@ def fetch_problem_context_node(backend_api_url: str) -> Any:
 
 
 def generate_brief_node(agent: Any) -> Any:
-    def generate_brief(state: ProjectBriefData | dict[str, Any]) -> dict[str, Any]:
+    async def generate_brief(state: ProjectBriefData | dict[str, Any]) -> dict[str, Any]:
         problem_context = state_value(state, "problem_context")
         if problem_context is None:
             raise ValueError("Нет problem_context для генерации brief")
 
-        brief = agent.build(problem_context)
+        brief = await agent.build(problem_context)
         return {"brief": brief.model_dump(mode="json")}
 
     return generate_brief
@@ -438,16 +421,16 @@ def build_project_brief_graph(
     return graph.compile()
 
 
-def run_project_brief(
-        project_id: str,
-        as_of: date | None = None,
-        max_depth: int = 2,
-        backend_api_url: str | None = None,
-        agent: Any | None = None,
+async def run_project_brief(
+    project_id: str,
+    as_of: date | None = None,
+    max_depth: int = 2,
+    backend_api_url: str | None = None,
+    agent: Any | None = None,
 ) -> ProjectManagerBrief:
     graph = build_project_brief_graph(backend_api_url=backend_api_url, agent=agent)
     initial_state = ProjectBriefData(project_id=project_id, as_of=as_of, max_depth=max_depth)
-    result = graph.invoke(initial_state.model_dump())
+    result = await graph.ainvoke(initial_state.model_dump())
     return ProjectManagerBrief.model_validate(result["brief"])
 
 
@@ -537,7 +520,71 @@ def _clean_text_value(value: str, replacements: dict[str, str]) -> str:
     for source_id, replacement in sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True):
         pattern = _id_pattern(source_id)
         value = re.sub(pattern, replacement, value)
-    return _strip_technical_ids(value)
+    return _humanize_agent_text(_strip_technical_ids(value))
+
+
+def _humanize_agent_text(value: str) -> str:
+    replacements = {
+        "pending change request": "запрос на изменение, ожидающий решения",
+        "open change request": "открытый запрос на изменение",
+        "blocked task": "заблокированная задача",
+        "pending": "ожидает решения",
+        "open": "открыт",
+        "blocked": "заблокирован",
+        "critical path": "критический путь",
+        "critical": "критичный",
+        "high": "высокий",
+        "medium": "средний",
+        "low": "низкий",
+        "change request": "запрос на изменение",
+        "follow-up": "последующая проверка",
+        "status": "статус",
+    }
+    value = re.sub(r"\bпакет\s+эскалаци[ия]\b", "набор материалов для решения", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bэскалаци\w*\b", "решение на уровне комитета", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bescalat\w*\b", "решение на уровне комитета", value, flags=re.IGNORECASE)
+    for source, replacement in replacements.items():
+        value = re.sub(rf"\b{re.escape(source)}\b", replacement, value, flags=re.IGNORECASE)
+    value = re.sub(r"\s{2,}", " ", value)
+    return value.strip()
+
+
+HUMAN_VALUE_LABELS = {
+    "active": "активен",
+    "approved": "согласовано",
+    "blocked": "заблокировано",
+    "closed": "закрыто",
+    "completed": "завершено",
+    "critical": "критичный",
+    "delayed": "задержано",
+    "done": "готово",
+    "escalated": "требует решения",
+    "green": "зелёная зона",
+    "high": "высокий",
+    "in_progress": "в работе",
+    "low": "низкий",
+    "medium": "средний",
+    "mitigating": "снижается",
+    "open": "открыто",
+    "pending": "ожидает решения",
+    "proposed": "предложено",
+    "red": "красная зона",
+    "resolved": "решено",
+    "under_review": "на рассмотрении",
+    "warning": "важно",
+    "yellow": "жёлтая зона",
+}
+
+
+def _humanize_context_values(value: Any) -> Any:
+    if isinstance(value, str):
+        normalized = value.strip().casefold()
+        return HUMAN_VALUE_LABELS.get(normalized, _humanize_agent_text(value))
+    if isinstance(value, list):
+        return [_humanize_context_values(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _humanize_context_values(item) for key, item in value.items()}
+    return value
 
 
 def _id_pattern(source_id: str) -> str:
@@ -563,17 +610,7 @@ def _build_id_replacements(problem_context: dict[str, Any]) -> dict[str, str]:
     for decision in problem_context.get("pending_decisions", []):
         replacements[decision["id"]] = f"решение «{decision['description']}»"
     for change_request in problem_context.get("open_change_requests", []):
-        replacements[change_request["id"]] = f"change request «{change_request['description']}»"
+        replacements[change_request["id"]] = f"запрос на изменение «{change_request['description']}»"
     for resource in problem_context.get("overloaded_resources", []):
         replacements[resource["resource_id"]] = resource["full_name"]
     return replacements
-
-
-def _parse_json(response_text: str) -> dict[str, Any]:
-    try:
-        return json.loads(response_text)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", response_text, flags=re.DOTALL)
-        if not match:
-            raise
-        return json.loads(match.group(0))

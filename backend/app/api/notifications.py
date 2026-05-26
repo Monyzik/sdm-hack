@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database.models import Notification
 from backend.app.dependencies import get_session
@@ -19,15 +19,15 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
 @router.get("", response_model=NotificationList)
-def get_notifications(
+async def get_notifications(
     project_id: str | None = Query(default=None),
     severity: str | None = Query(default=None, pattern="^(info|warning|critical)$"),
     as_of_date: date | None = Query(default=None),
     unread_only: bool = Query(default=False),
     limit: int = Query(default=100, ge=1, le=500),
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> NotificationList:
-    notifications = list_notifications(
+    notifications = await list_notifications(
         session,
         project_id=project_id,
         severity=severity,
@@ -36,14 +36,14 @@ def get_notifications(
         limit=limit,
     )
     return NotificationList(
-        total=count_notifications(
+        total=await count_notifications(
             session,
             project_id=project_id,
             severity=severity,
             as_of_date=as_of_date,
             unread_only=unread_only,
         ),
-        unread_count=count_notifications(
+        unread_count=await count_notifications(
             session,
             project_id=project_id,
             severity=severity,
@@ -55,14 +55,14 @@ def get_notifications(
 
 
 @router.patch("/{notification_id}/read", response_model=NotificationItem)
-def read_notification(
+async def read_notification(
     notification_id: str,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ) -> NotificationItem:
-    notification = mark_notification_read(session, notification_id)
+    notification = await mark_notification_read(session, notification_id)
     if notification is None:
         raise HTTPException(status_code=404, detail="Уведомление не найдено")
-    session.commit()
+    await session.commit()
     return notification_to_item(notification)
 
 

@@ -9,7 +9,10 @@ COPY agents/requirements.txt /app/agents/requirements.txt
 RUN pip install --no-cache-dir -r /app/agents/requirements.txt
 
 COPY agents /app/agents
+COPY backend /app/backend
+COPY scripts /app/scripts
+COPY data /app/data
 
 EXPOSE 8010
 
-CMD ["uvicorn", "agents.app:app", "--host", "0.0.0.0", "--port", "8010"]
+CMD ["uvicorn", "agents.api.app:app", "--host", "0.0.0.0", "--port", "8010"]

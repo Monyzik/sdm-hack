@@ -1,7 +1,11 @@
 import { ArrowUp, Bot, Copy, Sparkles } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
-import type { PortfolioProjectSummary, ProjectQuestionAnswer } from "../../api/types";
+import type {
+  PortfolioProjectSummary,
+  ProjectChatContextMessage,
+  ProjectQuestionAnswer,
+} from "../../api/types";
 import { Badge } from "../../components/ui";
 import { useProjectQuestion } from "../../hooks/useProjectQuestion";
 import { MarkdownContent } from "./MarkdownContent";
@@ -19,6 +23,10 @@ type ChatMessage =
       role: "user";
       content: string;
     };
+
+const CONTEXT_MESSAGE_LIMIT = 6;
+const CONTEXT_CHARS_PER_MESSAGE = 500;
+const CONTEXT_TOTAL_CHARS = 2200;
 
 interface ProjectChatPageProps {
   projects: PortfolioProjectSummary[];
@@ -75,9 +83,10 @@ export function ProjectChatPage({
     };
     setMessages((items) => [...items, userMessage]);
     setDraft("");
+    const conversationContext = buildConversationContext(messages);
 
     questionMutation.mutate(
-      { question: value },
+      { question: value, conversationContext },
       {
         onSuccess: (answer: ProjectQuestionAnswer) => {
           setMessages((items) => [
@@ -139,7 +148,7 @@ export function ProjectChatPage({
                 sendQuestion(draft);
               }
             }}
-            placeholder="Спросите по проекту"
+            placeholder="Задайте вопрос о проекте"
             rows={1}
             className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-3 py-2 text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
@@ -162,6 +171,36 @@ function formatAgentError(error: unknown) {
     return `Не смог получить ответ агента: ${error.message}`;
   }
   return "Не смог получить ответ агента. Проверьте agents API, backend и настройки LLM.";
+}
+
+function buildConversationContext(messages: ChatMessage[]): ProjectChatContextMessage[] {
+  const relevantMessages = messages
+    .filter((message) => !message.id.startsWith("welcome") && message.content.trim().length > 0)
+    .slice(-CONTEXT_MESSAGE_LIMIT);
+
+  const context: ProjectChatContextMessage[] = [];
+  let remainingChars = CONTEXT_TOTAL_CHARS;
+
+  for (const message of relevantMessages) {
+    if (remainingChars <= 0) break;
+
+    const content = trimForContext(
+      message.content,
+      Math.min(CONTEXT_CHARS_PER_MESSAGE, remainingChars),
+    );
+    if (!content) continue;
+
+    context.push({ role: message.role, content });
+    remainingChars -= content.length;
+  }
+
+  return context;
+}
+
+function trimForContext(value: string, limit: number) {
+  const compact = value.replace(/\s+/g, " ").trim();
+  if (compact.length <= limit) return compact;
+  return `${compact.slice(0, Math.max(0, limit - 3)).trim()}...`;
 }
 
 function ChatBubble({

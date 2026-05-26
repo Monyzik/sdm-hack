@@ -41,6 +41,7 @@ services:
     restart: unless-stopped
     environment:
       BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8000}
+      DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack}
       AGENTS_CORS_ORIGINS: ${AGENTS_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
       YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-}
       YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}

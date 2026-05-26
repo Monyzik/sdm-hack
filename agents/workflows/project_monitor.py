@@ -1,23 +1,25 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 from datetime import date
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from agents.internal_notification_agent import ProjectInternalNotificationAgent
-from agents.project_analysis_agent import ProjectAnalystAgent
-from backend.app.database.session import create_engine_from_env, create_session_factory
-from backend.app.services.metrics import ProjectMetrics, calculate_project_metrics
-from backend.app.services.notifications import upsert_notification_from_draft
-from backend.app.services.project_summary_repository import (
-    ProjectSummaryRepository,
-    ProjectSummarySource,
+from agents.services.internal_notifications import ProjectInternalNotificationAgent
+from agents.services.project_analysis import ProjectAnalystAgent
+from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
+from backend.app.services.data_classes import ProjectMetrics, ProjectSummarySource
+from backend.app.services.metrics import (
+    calculate_project_metrics,
+    project_metrics_fact_payload,
 )
+from backend.app.services.notifications import upsert_notification_from_draft
+from backend.app.services.project_summary_repository import ProjectSummaryRepository
 
 
 class ProjectMonitorData(BaseModel):
@@ -169,25 +171,25 @@ def project_context_from_source(source: ProjectSummarySource) -> dict[str, Any]:
     }
 
 
-def load_project_context_node(session_factory: sessionmaker) -> Any:
-    def load_project_context(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+def load_project_context_node(session_factory: async_sessionmaker[AsyncSession]) -> Any:
+    async def load_project_context(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
         project_id = state_value(state, "project_id")
 
-        with session_factory() as session:
-            source = ProjectSummaryRepository(session).get_project_source(project_id)
+        async with session_factory() as session:
+            source = await ProjectSummaryRepository(session).get_project_source(project_id)
 
         return project_context_from_source(source)
 
     return load_project_context
 
 
-def calculate_metrics_node(session_factory: sessionmaker) -> Any:
-    def calculate_metrics(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+def calculate_metrics_node(session_factory: async_sessionmaker[AsyncSession]) -> Any:
+    async def calculate_metrics(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
         project_id = state_value(state, "project_id")
         as_of = coerce_as_of(state_value(state, "as_of"))
 
-        with session_factory() as session:
-            source = ProjectSummaryRepository(session).get_project_source(project_id)
+        async with session_factory() as session:
+            source = await ProjectSummaryRepository(session).get_project_source(project_id)
             project_metrics = calculate_project_metrics(source, as_of=as_of)
 
         return {
@@ -207,51 +209,16 @@ def project_monitor_metrics(metrics: ProjectMetrics) -> dict[str, Any]:
     budget_deviation_pct = None
     if metrics.budget is not None:
         budget_deviation_pct = round(metrics.budget.budget_deviation_percent / 100, 4)
+    metric_payload = project_metrics_fact_payload(metrics)
 
     return {
         "as_of_date": metrics.as_of_date,
-        "completion_percent": metrics.completion_percent,
-        "total_tasks_count": metrics.total_tasks_count,
-        "completed_tasks_count": metrics.completed_tasks_count,
-        "overdue_tasks_count": metrics.overdue_tasks_count,
-        "blocked_tasks_count": metrics.blocked_tasks_count,
-        "delayed_milestones_count": metrics.delayed_milestones_count,
-        "high_risk_count": metrics.high_risk_count,
-        "dependency_risk_count": metrics.dependency_risk_count,
-        "pending_decision_count": metrics.pending_decision_count,
-        "open_change_request_count": metrics.open_change_request_count,
-        "dependency_sla_breach_count": metrics.dependency_sla_breach_count,
-        "budget_deviation_percent": None
-        if metrics.budget is None
-        else metrics.budget.budget_deviation_percent,
+        **metric_payload,
         "budget_deviation_pct": budget_deviation_pct,
         "roi_percent": None if metrics.budget is None else metrics.budget.roi_percent,
         "risk_adjusted_roi_percent": None
         if metrics.budget is None
         else metrics.budget.risk_adjusted_roi_percent,
-        "milestone_slip_days": metrics.milestone_slip_days,
-        "critical_path_delay_days": metrics.critical_path_delay_days,
-        "blocked_age_days": metrics.blocked_age_days,
-        "decision_age_days": metrics.decision_age_days,
-        "net_change_request_impact_days": metrics.net_change_request_impact_days,
-        "net_change_request_impact_budget": metrics.net_change_request_impact_budget,
-        "scope_churn_rate": metrics.scope_churn_rate,
-        "burn_rate_percent": metrics.burn_rate_percent,
-        "schedule_variance_percent": metrics.schedule_variance_percent,
-        "stale_tasks_count": metrics.stale_tasks_count,
-        "max_status_age_days": metrics.max_status_age_days,
-        "estimate_overrun_percent": metrics.estimate_overrun_percent,
-        "workload_imbalance_index": metrics.workload_imbalance_index,
-        "key_person_dependency_percent": metrics.key_person_dependency_percent,
-        "critical_task_silence_days": metrics.critical_task_silence_days,
-        "communication_silence_days": metrics.communication_silence_days,
-        "data_freshness_days": metrics.data_freshness_days,
-        "cost_of_delay_exposure": metrics.cost_of_delay_exposure,
-        "risk_trend": metrics.risk_trend,
-        "resource_overload_percent": metrics.resource_overload_percent,
-        "max_communication_delay_days": metrics.max_communication_delay_days,
-        "project_health_score": metrics.project_health_score,
-        "risk_level": metrics.risk_level,
         "executive_summary": metrics.executive_summary,
         "key_signals": metrics.key_signals,
         "budget": None if metrics.budget is None else metrics.budget.model_dump(mode="json"),
@@ -370,7 +337,7 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
             {
                 "level": "Warning",
                 "metric": "open_change_requests",
-                "message": f"Есть открытые change requests: {open_change_requests}",
+                "message": f"Есть открытые запросы на изменение: {open_change_requests}",
             }
         )
     if critical_path_delay_days > 0:
@@ -378,7 +345,7 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
             {
                 "level": "Critical",
                 "metric": "critical_path_delay_days",
-                "message": f"Critical path задержан на {critical_path_delay_days} дней",
+                "message": f"Критический путь задержан на {critical_path_delay_days} дней",
             }
         )
     if dependency_sla_breach_count > 0:
@@ -386,7 +353,7 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
             {
                 "level": "Warning",
                 "metric": "dependency_sla_breach_count",
-                "message": f"Есть SLA breach по зависимостям: {dependency_sla_breach_count}",
+                "message": f"Есть нарушение SLA по зависимостям: {dependency_sla_breach_count}",
             }
         )
     if cost_of_delay_exposure > 0:
@@ -394,7 +361,7 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
             {
                 "level": "Warning",
                 "metric": "cost_of_delay_exposure",
-                "message": f"Cost of delay exposure: {cost_of_delay_exposure}",
+                "message": f"Оценка стоимости задержки: {cost_of_delay_exposure}",
             }
         )
     if stale_tasks_count > 3:
@@ -420,8 +387,8 @@ def classify_alerts(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any
 
 
 def analyze_project_node(agent: ProjectAnalystAgent) -> Any:
-    def analyze_project(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
-        analysis = agent.analyze(
+    async def analyze_project(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+        analysis = await agent.analyze(
             project=state_value(state, "project", {}),
             metrics=state_value(state, "metrics", {}),
             alerts=state_value(state, "alerts", []),
@@ -432,9 +399,9 @@ def analyze_project_node(agent: ProjectAnalystAgent) -> Any:
 
 
 def draft_notification_node(agent: ProjectInternalNotificationAgent) -> Any:
-    def draft_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+    async def draft_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
         metrics = state_value(state, "metrics", {})
-        notification_draft = agent.draft(
+        notification_draft = await agent.draft(
             project=state_value(state, "project", {}),
             metrics=metrics,
             alerts=state_value(state, "alerts", []),
@@ -453,21 +420,21 @@ def draft_notification_node(agent: ProjectInternalNotificationAgent) -> Any:
     return draft_notification
 
 
-def persist_notification_node(session_factory: sessionmaker) -> Any:
-    def persist_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
+def persist_notification_node(session_factory: async_sessionmaker[AsyncSession]) -> Any:
+    async def persist_notification(state: ProjectMonitorData | dict[str, Any]) -> dict[str, Any]:
         project_id = state_value(state, "project_id")
         notification_draft = state_value(state, "notification_draft")
         if not project_id or not notification_draft:
             return {"notification_id": None}
 
-        with session_factory() as session:
-            notification = upsert_notification_from_draft(
+        async with session_factory() as session:
+            notification = await upsert_notification_from_draft(
                 session,
                 project_id=project_id,
                 draft=notification_draft,
             )
             notification_id = None if notification is None else notification.id
-            session.commit()
+            await session.commit()
 
         return {"notification_id": notification_id}
 
@@ -475,13 +442,13 @@ def persist_notification_node(session_factory: sessionmaker) -> Any:
 
 
 def build_project_monitor_graph(
-        session_factory: sessionmaker | None = None,
-        analyst: ProjectAnalystAgent | None = None,
-        notification_agent: ProjectInternalNotificationAgent | None = None,
+    session_factory: async_sessionmaker[AsyncSession] | None = None,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
 ):
     if session_factory is None:
-        engine = create_engine_from_env()
-        session_factory = create_session_factory(engine)
+        engine = create_async_engine_from_env()
+        session_factory = create_async_session_factory(engine)
     if analyst is None:
         analyst = ProjectAnalystAgent()
     if notification_agent is None:
@@ -506,13 +473,13 @@ def build_project_monitor_graph(
     return graph.compile()
 
 
-def run_project_monitor(
-        project_id: str,
-        as_of: date | str | None = None,
-        trigger_event: dict[str, Any] | None = None,
-        session_factory: sessionmaker | None = None,
-        analyst: ProjectAnalystAgent | None = None,
-        notification_agent: ProjectInternalNotificationAgent | None = None,
+async def run_project_monitor(
+    project_id: str,
+    as_of: date | str | None = None,
+    trigger_event: dict[str, Any] | None = None,
+    session_factory: async_sessionmaker[AsyncSession] | None = None,
+    analyst: ProjectAnalystAgent | None = None,
+    notification_agent: ProjectInternalNotificationAgent | None = None,
 ) -> dict[str, Any]:
     graph = build_project_monitor_graph(
         session_factory=session_factory,
@@ -524,7 +491,7 @@ def run_project_monitor(
         initial_state.as_of = as_of
     if trigger_event:
         initial_state.trigger_event = trigger_event
-    return graph.invoke(initial_state.model_dump())
+    return await graph.ainvoke(initial_state.model_dump())
 
 
 def json_default(value: Any) -> str:
@@ -533,14 +500,14 @@ def json_default(value: Any) -> str:
     return str(value)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Run project monitoring LangGraph workflow.")
+async def async_main() -> None:
+    parser = argparse.ArgumentParser(description="Запуск графа мониторинга проекта.")
     parser.add_argument("project_id", nargs="?", default="P001")
-    parser.add_argument("--as-of", dest="as_of", default=None, help="Date in YYYY-MM-DD format")
+    parser.add_argument("--as-of", dest="as_of", default=None, help="Дата в формате YYYY-MM-DD")
     args = parser.parse_args()
 
     as_of = date.fromisoformat(args.as_of) if args.as_of else None
-    result = run_project_monitor(args.project_id, as_of=as_of)
+    result = await run_project_monitor(args.project_id, as_of=as_of)
     print(
         json.dumps(
             {
@@ -556,6 +523,10 @@ def main() -> None:
             default=json_default,
         )
     )
+
+
+def main() -> None:
+    asyncio.run(async_main())
 
 
 if __name__ == "__main__":

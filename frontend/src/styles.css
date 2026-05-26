@@ -4,6 +4,7 @@
 
 html {
   background: #f4f6f8;
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -11,6 +12,14 @@ body {
   min-width: 320px;
   color: #18212f;
   background: #f4f6f8;
+  overscroll-behavior-y: none;
+  overflow-x: hidden;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 button,
@@ -22,10 +31,12 @@ textarea {
 
 .dark {
   color-scheme: dark;
+  background: #080c14;
 }
 
-.dark body,
-.dark html {
+html.dark,
+html.dark body,
+html.dark #root {
   color: #e5e7eb;
   background: #080c14;
 }

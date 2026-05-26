@@ -11,9 +11,14 @@ import type {
   NotificationList,
   PortfolioAttentionSummary,
   PortfolioSummary,
+  ProjectChatContextMessage,
   ProjectManagerBrief,
+  ProjectProblemContext,
   ProjectQuestionAnswer,
   ProjectSummary,
+  ProjectTrends,
+  SimulationClearResult,
+  SimulationJob,
 } from "./types";
 
 /** Ошибка запроса с сохранённым HTTP-статусом — удобно различать 404 и прочее. */
@@ -104,6 +109,38 @@ export function fetchProjectSummary(
   );
 }
 
+export function fetchProjectProblemContext(
+  projectId: string,
+  asOf: string,
+  maxDepth = 2,
+  signal?: AbortSignal,
+): Promise<ProjectProblemContext> {
+  const query = new URLSearchParams({
+    as_of: asOf,
+    max_depth: maxDepth.toString(),
+  });
+  return request<ProjectProblemContext>(
+    `/api/v1/summaries/projects/${encodeURIComponent(projectId)}/problem-context?${query.toString()}`,
+    signal,
+  );
+}
+
+export function fetchProjectTrends(
+  projectId: string,
+  asOf: string,
+  points = 8,
+  signal?: AbortSignal,
+): Promise<ProjectTrends> {
+  const query = new URLSearchParams({
+    as_of: asOf,
+    points: points.toString(),
+  });
+  return request<ProjectTrends>(
+    `/api/v1/summaries/projects/${encodeURIComponent(projectId)}/trends?${query.toString()}`,
+    signal,
+  );
+}
+
 export function fetchNotifications(
   options: {
     projectId?: string;
@@ -143,6 +180,39 @@ export function markNotificationRead(
   );
 }
 
+export function startControlEventSimulation(
+  signal?: AbortSignal,
+): Promise<SimulationJob> {
+  return requestFrom<SimulationJob>(
+    AGENTS_API_URL,
+    "/api/v1/agents/control-events/simulation",
+    signal,
+    { method: "POST" },
+  );
+}
+
+export function fetchControlEventSimulation(
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<SimulationJob> {
+  return requestFrom<SimulationJob>(
+    AGENTS_API_URL,
+    `/api/v1/agents/control-events/simulation/${encodeURIComponent(jobId)}`,
+    signal,
+  );
+}
+
+export function clearControlEventSimulation(
+  signal?: AbortSignal,
+): Promise<SimulationClearResult> {
+  return requestFrom<SimulationClearResult>(
+    AGENTS_API_URL,
+    "/api/v1/agents/control-events/simulation",
+    signal,
+    { method: "DELETE" },
+  );
+}
+
 export function fetchProjectBrief(
   projectId: string,
   asOf: string,
@@ -160,6 +230,7 @@ export function askProjectAgent(
   projectId: string,
   question: string,
   asOf: string,
+  conversationContext?: ProjectChatContextMessage[],
   signal?: AbortSignal,
 ): Promise<ProjectQuestionAnswer> {
   return requestFrom<ProjectQuestionAnswer>(
@@ -169,7 +240,12 @@ export function askProjectAgent(
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question, as_of: asOf, max_depth: 2 }),
+      body: JSON.stringify({
+        question,
+        as_of: asOf,
+        max_depth: 2,
+        conversation_context: conversationContext ?? [],
+      }),
     },
   );
 }

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from typing import Any, TypeVar, cast
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.database.models import (
     Budget,
@@ -23,117 +23,103 @@ from backend.app.database.models import (
     TaskDependency,
     TaskHistory,
 )
+from backend.app.services.data_classes import ProjectSummarySource
 
 
-@dataclass(frozen=True)
-class ProjectSummarySource:
-    project: Project
-    tasks: list[Task]
-    task_history: list[TaskHistory]
-    task_comments: list[TaskComment]
-    milestones: list[Milestone]
-    budget: Budget | None
-    budget_line_items: list[BudgetLineItem]
-    risks: list[Risk]
-    communications: list[Communication]
-    communication_messages: list[CommunicationMessage]
-    project_allocations: list[ResourceAllocation]
-    related_allocations: list[ResourceAllocation]
-    resources_by_id: dict[str, Resource]
-    task_dependencies: list[TaskDependency]
-    dependencies: list[ProjectDependency]
-    decisions: list[Decision]
-    change_requests: list[ChangeRequest]
+_ModelT = TypeVar("_ModelT")
 
 
 class ProjectSummaryRepository:
-    def __init__(self, session: Session) -> None:
+    def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    def list_projects(self) -> list[Project]:
-        return list(
-            self._session.scalars(
-                select(Project).order_by(Project.priority.asc(), Project.id.asc())
-            ).all()
+    async def list_projects(self) -> list[Project]:
+        result = await self._session.scalars(
+            select(Project).order_by(Project.priority.asc(), Project.id.asc())
         )
+        return list(result.all())
 
-    def get_project_source(self, project_id: str) -> ProjectSummarySource:
-        project = self._session.get(Project, project_id)
+    async def get_project_source(self, project_id: str) -> ProjectSummarySource:
+        project = await self._session.get(Project, project_id)
         if project is None:
             raise ValueError(f"Project not found: {project_id}")
 
-        tasks = self._scalars(select(Task).where(Task.project_id == project_id).order_by(Task.planned_due_date, Task.id))
-        task_history = self._scalars(
-            select(TaskHistory)
-            .where(TaskHistory.project_id == project_id)
-            .order_by(TaskHistory.changed_at.desc(), TaskHistory.id)
+        tasks = await self._project_items(Task, project_id, Task.planned_due_date, Task.id)
+        task_history = await self._project_items(
+            TaskHistory,
+            project_id,
+            TaskHistory.changed_at.desc(),
+            TaskHistory.id,
         )
-        task_comments = self._scalars(
-            select(TaskComment)
-            .where(TaskComment.project_id == project_id)
-            .order_by(TaskComment.created_at.desc(), TaskComment.id)
+        task_comments = await self._project_items(
+            TaskComment,
+            project_id,
+            TaskComment.created_at.desc(),
+            TaskComment.id,
         )
-        milestones = self._scalars(
-            select(Milestone)
-            .where(Milestone.project_id == project_id)
-            .order_by(Milestone.planned_start_date, Milestone.id)
+        milestones = await self._project_items(
+            Milestone,
+            project_id,
+            Milestone.planned_start_date,
+            Milestone.id,
         )
-        budget = self._session.scalar(select(Budget).where(Budget.project_id == project_id))
-        budget_line_items = self._scalars(
-            select(BudgetLineItem)
-            .where(BudgetLineItem.project_id == project_id)
-            .order_by(BudgetLineItem.category, BudgetLineItem.id)
+        budget = await self._session.scalar(select(Budget).where(Budget.project_id == project_id))
+        budget_line_items = await self._project_items(
+            BudgetLineItem,
+            project_id,
+            BudgetLineItem.category,
+            BudgetLineItem.id,
         )
-        risks = self._scalars(
-            select(Risk).where(Risk.project_id == project_id).order_by(Risk.probability.desc(), Risk.impact.desc(), Risk.id)
+        risks = await self._project_items(
+            Risk,
+            project_id,
+            Risk.probability.desc(),
+            Risk.impact.desc(),
+            Risk.id,
         )
-        communications = self._scalars(
-            select(Communication)
-            .where(Communication.project_id == project_id)
-            .order_by(Communication.expected_response_date, Communication.id)
+        communications = await self._project_items(
+            Communication,
+            project_id,
+            Communication.expected_response_date,
+            Communication.id,
         )
-        communication_messages = self._scalars(
-            select(CommunicationMessage)
-            .where(CommunicationMessage.project_id == project_id)
-            .order_by(CommunicationMessage.message_time.desc(), CommunicationMessage.id)
+        communication_messages = await self._project_items(
+            CommunicationMessage,
+            project_id,
+            CommunicationMessage.message_time.desc(),
+            CommunicationMessage.id,
         )
-        project_allocations = self._scalars(
-            select(ResourceAllocation)
-            .where(ResourceAllocation.project_id == project_id)
-            .order_by(ResourceAllocation.resource_id, ResourceAllocation.id)
+        project_allocations = await self._project_items(
+            ResourceAllocation,
+            project_id,
+            ResourceAllocation.resource_id,
+            ResourceAllocation.id,
         )
-        task_dependencies = self._scalars(
-            select(TaskDependency)
-            .where(TaskDependency.project_id == project_id)
-            .order_by(TaskDependency.is_critical_path.desc(), TaskDependency.id)
+        task_dependencies = await self._project_items(
+            TaskDependency,
+            project_id,
+            TaskDependency.is_critical_path.desc(),
+            TaskDependency.id,
         )
-        dependencies = self._scalars(
-            select(ProjectDependency)
-            .where(ProjectDependency.project_id == project_id)
-            .order_by(ProjectDependency.expected_date, ProjectDependency.id)
+        dependencies = await self._project_items(
+            ProjectDependency,
+            project_id,
+            ProjectDependency.expected_date,
+            ProjectDependency.id,
         )
-        decisions = self._scalars(
-            select(Decision)
-            .where(Decision.project_id == project_id)
-            .order_by(Decision.decision_date.desc(), Decision.id)
+        decisions = await self._project_items(
+            Decision,
+            project_id,
+            Decision.decision_date.desc(),
+            Decision.id,
         )
-        change_requests = self._scalars(
-            select(ChangeRequest)
-            .where(ChangeRequest.project_id == project_id)
-            .order_by(ChangeRequest.request_date.desc(), ChangeRequest.id)
+        change_requests = await self._project_items(
+            ChangeRequest,
+            project_id,
+            ChangeRequest.request_date.desc(),
+            ChangeRequest.id,
         )
-
-        resource_ids = {allocation.resource_id for allocation in project_allocations}
-        related_allocations: list[ResourceAllocation] = []
-        resources_by_id: dict[str, Resource] = {}
-        if resource_ids:
-            related_allocations = self._scalars(
-                select(ResourceAllocation)
-                .where(ResourceAllocation.resource_id.in_(resource_ids))
-                .order_by(ResourceAllocation.resource_id, ResourceAllocation.project_id)
-            )
-            resources = self._scalars(select(Resource).where(Resource.id.in_(resource_ids)).order_by(Resource.id))
-            resources_by_id = {resource.id: resource for resource in resources}
+        related_allocations, resources_by_id = await self._load_related_resources(project_allocations)
 
         return ProjectSummarySource(
             project=project,
@@ -155,5 +141,35 @@ class ProjectSummaryRepository:
             change_requests=change_requests,
         )
 
-    def _scalars(self, statement: object) -> list:
-        return list(self._session.scalars(statement).all())
+    async def _project_items(
+        self,
+        model: type[_ModelT],
+        project_id: str,
+        *order_by: Any,
+    ) -> list[_ModelT]:
+        statement = select(model).where(model.project_id == project_id).order_by(*order_by)
+        return cast(list[_ModelT], await self._scalars(statement))
+
+    async def _load_related_resources(
+        self,
+        project_allocations: list[ResourceAllocation],
+    ) -> tuple[list[ResourceAllocation], dict[str, Resource]]:
+        resource_ids = {allocation.resource_id for allocation in project_allocations}
+        if not resource_ids:
+            return [], {}
+
+        related_allocations = await self._scalars(
+            select(ResourceAllocation)
+            .where(ResourceAllocation.resource_id.in_(resource_ids))
+            .order_by(ResourceAllocation.resource_id, ResourceAllocation.project_id)
+        )
+        resources = await self._scalars(
+            select(Resource)
+            .where(Resource.id.in_(resource_ids))
+            .order_by(Resource.id)
+        )
+        return related_allocations, {resource.id: resource for resource in resources}
+
+    async def _scalars(self, statement: Any) -> list[Any]:
+        result = await self._session.scalars(statement)
+        return list(result.all())

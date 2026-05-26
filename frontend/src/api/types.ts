@@ -23,6 +23,24 @@ export interface TaskSignal {
   blocker_reason: string | null;
 }
 
+export interface ProblemTaskFact {
+  id: string;
+  external_id: string;
+  title: string;
+  assignee_id: string;
+  assignee_name: string;
+  status: string;
+  priority: string;
+  planned_due_date: string;
+  actual_end_date: string | null;
+  estimated_hours: number;
+  spent_hours: number;
+  is_blocked: boolean;
+  blocker_reason: string | null;
+  overdue_days: number;
+  problem_flags: string[];
+}
+
 export interface MilestoneSignal {
   id: string;
   name: string;
@@ -123,6 +141,24 @@ export interface OwnerActionLoadSignal {
   communication_count: number;
 }
 
+export interface TaskDependencyGraphEdge {
+  id: string;
+  task_id: string;
+  task_title: string;
+  depends_on_task_id: string;
+  depends_on_task_title: string;
+  dependency_type: string;
+  is_critical_path: boolean;
+  lag_days: number;
+  reason: string;
+}
+
+export interface ProjectProblemContext {
+  as_of_date: string;
+  problem_tasks: ProblemTaskFact[];
+  task_dependency_graph: TaskDependencyGraphEdge[];
+}
+
 export interface ProjectSummary {
   project_id: string;
   project_name: string;
@@ -179,6 +215,22 @@ export interface ProjectSummary {
   pending_decisions: DecisionSignal[];
   open_change_requests: ChangeRequestSignal[];
   owner_action_load: OwnerActionLoadSignal[];
+}
+
+export interface ProjectTrendPoint {
+  as_of_date: string;
+  completion_percent: number;
+  completed_tasks_count: number;
+  high_risk_count: number;
+  risk_pressure_score: number;
+  dependency_sla_breach_count: number;
+  resource_overload_percent: number;
+}
+
+export interface ProjectTrends {
+  project_id: string;
+  project_name: string;
+  points: ProjectTrendPoint[];
 }
 
 export interface PortfolioProjectSummary {
@@ -273,6 +325,42 @@ export interface NotificationList {
   items: InternalNotification[];
 }
 
+export type SimulationStageStatus = "pending" | "running" | "success" | "error";
+export type SimulationJobStatus = "queued" | "running" | "completed" | "failed";
+
+export interface SimulationStage {
+  id: string;
+  label: string;
+  detail: string | null;
+  status: SimulationStageStatus;
+  timestamp: string;
+}
+
+export interface SimulationEventResult {
+  event_type: string;
+  event_label: string;
+  project_id: string | null;
+  notification_id: string | null;
+  error: string | null;
+}
+
+export interface SimulationJob {
+  job_id: string;
+  status: SimulationJobStatus;
+  total_events: number;
+  processed_events: number;
+  failed_events: number;
+  stages: SimulationStage[];
+  results: SimulationEventResult[];
+  output_file: string | null;
+  error: string | null;
+}
+
+export interface SimulationClearResult {
+  deleted_notifications: number;
+  output_file_removed: boolean;
+}
+
 export type AgentBriefStatus = "в норме" | "под наблюдением" | "критично";
 
 export interface DecisionOption {
@@ -330,4 +418,9 @@ export interface ProjectQuestionAnswer {
   evidence_ids: string[];
   used_tools: string[];
   suggested_questions: string[];
+}
+
+export interface ProjectChatContextMessage {
+  role: "user" | "assistant";
+  content: string;
 }

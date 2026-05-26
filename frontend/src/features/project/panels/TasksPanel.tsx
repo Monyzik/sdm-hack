@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import type { TaskSignal } from "../../../api/types";
 import { Badge, EmptyState, Panel } from "../../../components/ui";
 import { formatDate, formatDays } from "../../../lib/format";
-import { severityTone, statusLabel } from "../../../lib/risk";
+import { statusLabel } from "../../../lib/risk";
 
 interface TasksPanelProps {
   title: string;
@@ -13,8 +13,15 @@ interface TasksPanelProps {
 }
 
 function TaskItem({ task }: { task: TaskSignal }) {
+  const isBlocked = task.status.trim().toLowerCase() === "blocked";
+
   return (
-    <li className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
+    <li
+      className={[
+        "rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950/30",
+        isBlocked ? "border-l-4 border-l-rose-500 dark:border-l-rose-400" : "",
+      ].join(" ")}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="line-clamp-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -25,18 +32,20 @@ function TaskItem({ task }: { task: TaskSignal }) {
           </p>
         </div>
         {task.overdue_days > 0 ? (
-          <Badge tone="danger">{formatDays(task.overdue_days)}</Badge>
+          <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-500 dark:text-slate-400">
+            {formatDays(task.overdue_days)}
+          </span>
         ) : null}
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <Badge tone={severityTone(task.priority)}>{statusLabel(task.priority)}</Badge>
-        <Badge tone={severityTone(task.status)}>{statusLabel(task.status)}</Badge>
+        <Badge tone="neutral">{statusLabel(task.priority)}</Badge>
+        <Badge tone="neutral">{statusLabel(task.status)}</Badge>
         <span className="text-xs text-slate-500 dark:text-slate-400">
           Срок: {formatDate(task.planned_due_date)}
         </span>
       </div>
       {task.blocker_reason ? (
-        <p className="mt-2 rounded-md bg-rose-50 px-2 py-1.5 text-sm text-rose-800 dark:bg-rose-950/40 dark:text-rose-200">
+        <p className="mt-2 rounded-md bg-slate-50 px-2 py-1.5 text-sm leading-5 text-slate-600 dark:bg-slate-900 dark:text-slate-300">
           {task.blocker_reason}
         </p>
       ) : null}

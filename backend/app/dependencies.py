@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database.session import create_engine_from_env, create_session_factory
-
-
-engine = create_engine_from_env()
-SessionLocal = create_session_factory(engine)
+from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
 
 
-def get_session() -> Generator[Session, None, None]:
-    with SessionLocal() as session:
+async_engine = create_async_engine_from_env()
+AsyncSessionLocal = create_async_session_factory(async_engine)
+
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
         yield session

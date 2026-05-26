@@ -4,6 +4,7 @@ type MarkdownBlock =
   | { type: "paragraph"; text: string }
   | { type: "heading"; level: 1 | 2 | 3; text: string }
   | { type: "list"; ordered: boolean; items: string[] }
+  | { type: "table"; headers: string[]; rows: string[][] }
   | { type: "code"; language?: string; code: string }
   | { type: "quote"; text: string };
 
@@ -22,7 +23,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
 }
 
 function parseBlocks(content: string): MarkdownBlock[] {
-  const lines = content.replace(/\r\n/g, "\n").split("\n");
+  const lines = normalizeCompactTables(content).replace(/\r\n/g, "\n").split("\n");
   const blocks: MarkdownBlock[] = [];
   let index = 0;
 
@@ -63,6 +64,21 @@ function parseBlocks(content: string): MarkdownBlock[] {
       continue;
     }
 
+    if (isTableStart(lines, index)) {
+      const headers = splitTableRow(lines[index] ?? "");
+      const rows: string[][] = [];
+      index += 2;
+
+      while (index < lines.length && isTableRow(lines[index] ?? "")) {
+        const cells = splitTableRow(lines[index] ?? "");
+        rows.push(normalizeTableRow(cells, headers.length));
+        index += 1;
+      }
+
+      blocks.push({ type: "table", headers, rows });
+      continue;
+    }
+
     if (/^\s*[-*•]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line)) {
       const ordered = /^\s*\d+[.)]\s+/.test(line);
       const items: string[] = [];
@@ -97,7 +113,7 @@ function parseBlocks(content: string): MarkdownBlock[] {
     }
 
     const paragraphLines: string[] = [];
-    while (index < lines.length && !isBlockBoundary(lines[index] ?? "")) {
+    while (index < lines.length && !isBlockBoundary(lines, index)) {
       paragraphLines.push((lines[index] ?? "").trim());
       index += 1;
     }
@@ -107,7 +123,8 @@ function parseBlocks(content: string): MarkdownBlock[] {
   return blocks;
 }
 
-function isBlockBoundary(line: string) {
+function isBlockBoundary(lines: string[], index: number) {
+  const line = lines[index] ?? "";
   const trimmed = line.trim();
   return (
     !trimmed ||
@@ -115,6 +132,7 @@ function isBlockBoundary(line: string) {
     /^(#{1,3})\s+/.test(trimmed) ||
     /^\s*[-*•]\s+/.test(line) ||
     /^\s*\d+[.)]\s+/.test(line) ||
+    isTableStart(lines, index) ||
     trimmed.startsWith(">")
   );
 }
@@ -160,6 +178,58 @@ function renderBlock(block: MarkdownBlock, index: number) {
     );
   }
 
+  if (block.type === "table") {
+    const numericColumns = block.headers.map((_, columnIndex) =>
+      block.rows.length > 0 && block.rows.every((row) => isNumericCell(row[columnIndex] ?? "")),
+    );
+
+    return (
+      <div
+        key={index}
+        className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+      >
+        <table className="min-w-full border-collapse text-left text-[13px] leading-5">
+          <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+            <tr>
+              {block.headers.map((header, headerIndex) => (
+                <th
+                  key={`${index}-h-${headerIndex}`}
+                  scope="col"
+                  className={[
+                    "whitespace-nowrap border-b border-slate-200 px-3 py-2 dark:border-slate-800",
+                    numericColumns[headerIndex] ? "text-right" : "text-left",
+                  ].join(" ")}
+                >
+                  {renderInline(header, `${index}-h-${headerIndex}`)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, rowIndex) => (
+              <tr
+                key={`${index}-r-${rowIndex}`}
+                className="border-b border-slate-100 last:border-b-0 dark:border-slate-800/80"
+              >
+                {block.headers.map((_, cellIndex) => (
+                  <td
+                    key={`${index}-r-${rowIndex}-c-${cellIndex}`}
+                    className={[
+                      "max-w-72 px-3 py-2 align-top text-slate-800 dark:text-slate-200",
+                      numericColumns[cellIndex] ? "whitespace-nowrap text-right tabular-nums" : "",
+                    ].join(" ")}
+                  >
+                    {renderInline(row[cellIndex] ?? "", `${index}-${rowIndex}-${cellIndex}`)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   if (block.type === "code") {
     return (
       <div key={index} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
@@ -187,6 +257,162 @@ function renderBlock(block: MarkdownBlock, index: number) {
   }
 
   return <p key={index}>{renderInline(block.text, `p-${index}`)}</p>;
+}
+
+function normalizeCompactTables(content: string) {
+  return content
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .flatMap((line) => expandCompactTableLine(line))
+    .join("\n");
+}
+
+function expandCompactTableLine(line: string): string[] {
+  if (!/\|\s*:?-{3,}:?\s*\|/.test(line)) {
+    return [line];
+  }
+
+  const parts = line.split("|");
+  const separatorStart = parts.findIndex((part) => isTableSeparatorCell(part));
+  if (separatorStart < 0) {
+    return [line];
+  }
+
+  let separatorEnd = separatorStart;
+  while (separatorEnd < parts.length && isTableSeparatorCell(parts[separatorEnd] ?? "")) {
+    separatorEnd += 1;
+  }
+
+  const columnCount = separatorEnd - separatorStart;
+  if (columnCount < 2) {
+    return [line];
+  }
+
+  let headerEnd = separatorStart - 1;
+  while (headerEnd >= 0 && (parts[headerEnd] ?? "").trim() === "") {
+    headerEnd -= 1;
+  }
+
+  const headerStart = headerEnd - columnCount + 1;
+  if (headerStart < 0) {
+    return [line];
+  }
+
+  const prefixFromParts = parts.slice(0, headerStart).join("|").trim();
+  let headers = parts.slice(headerStart, headerEnd + 1).map((cell) => cell.trim());
+  const { prefix: prefixFromHeader, firstHeader } = splitPrefixFromFirstHeader(headers[0] ?? "");
+  if (prefixFromHeader) {
+    headers = [firstHeader, ...headers.slice(1)];
+  }
+  if (headers.some((header) => !header)) {
+    return [line];
+  }
+
+  const rows: string[][] = [];
+  let cursor = separatorEnd;
+  while (cursor < parts.length && (parts[cursor] ?? "").trim() === "") {
+    cursor += 1;
+  }
+
+  while (cursor + columnCount <= parts.length) {
+    const row = parts.slice(cursor, cursor + columnCount).map((cell) => cell.trim());
+    if (row.every((cell) => !cell)) {
+      break;
+    }
+    rows.push(row);
+    cursor += columnCount;
+    while (cursor < parts.length && (parts[cursor] ?? "").trim() === "") {
+      cursor += 1;
+    }
+  }
+
+  if (rows.length === 0) {
+    return [line];
+  }
+
+  const prefix = [prefixFromParts, prefixFromHeader].filter(Boolean).join(" ").trim();
+  const suffix = parts.slice(cursor).join("|").trim();
+  const expanded = [
+    prefix,
+    formatTableRow(headers),
+    formatTableRow(headers.map(() => "---")),
+    ...rows.map((row) => formatTableRow(row)),
+    ...expandCompactTableLine(suffix),
+  ];
+
+  return expanded.filter((part) => part.trim().length > 0);
+}
+
+function isTableSeparatorCell(value: string) {
+  return /^:?-{3,}:?$/.test(value.replace(/\s+/g, ""));
+}
+
+function formatTableRow(cells: string[]) {
+  return `| ${cells.join(" | ")} |`;
+}
+
+function splitPrefixFromFirstHeader(value: string) {
+  const separatorIndex = value.lastIndexOf(":");
+  if (separatorIndex < 0) {
+    return { prefix: "", firstHeader: value };
+  }
+
+  const prefix = value.slice(0, separatorIndex + 1).trim();
+  const firstHeader = value.slice(separatorIndex + 1).trim();
+  if (!prefix || !isLikelyTableHeader(firstHeader)) {
+    return { prefix: "", firstHeader: value };
+  }
+
+  return { prefix, firstHeader };
+}
+
+function isLikelyTableHeader(value: string) {
+  const normalized = value.trim().toLocaleLowerCase("ru-RU");
+  return [
+    "блокер",
+    "бюджет",
+    "владелец",
+    "дата",
+    "задача",
+    "приоритет",
+    "просрочка",
+    "риск",
+    "срок",
+    "статус",
+    "сумма",
+  ].includes(normalized);
+}
+
+function isTableStart(lines: string[], index: number) {
+  return isTableRow(lines[index] ?? "") && isTableSeparator(lines[index + 1] ?? "");
+}
+
+function isTableRow(line: string) {
+  const trimmed = line.trim();
+  return trimmed.includes("|") && splitTableRow(trimmed).length >= 2;
+}
+
+function isTableSeparator(line: string) {
+  const cells = splitTableRow(line);
+  return cells.length >= 2 && cells.every((cell) => isTableSeparatorCell(cell));
+}
+
+function splitTableRow(line: string) {
+  const trimmed = line.trim().replace(/^\|/, "").replace(/\|$/, "");
+  return trimmed.split("|").map((cell) => cell.trim());
+}
+
+function normalizeTableRow(cells: string[], size: number) {
+  const normalized = cells.slice(0, size);
+  while (normalized.length < size) {
+    normalized.push("");
+  }
+  return normalized;
+}
+
+function isNumericCell(value: string) {
+  const compact = value.replace(/\s+/g, "");
+  return /^[-+]?[\d.,]+(%|₽|млн₽|тыс\.?₽|дн\.?|день|дня|дней)?$/i.test(compact);
 }
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {

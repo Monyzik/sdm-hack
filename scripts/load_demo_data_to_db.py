@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -12,11 +13,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 import pandas as pd
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Connection, Engine, make_url
+from sqlalchemy import text
+from sqlalchemy.engine import Connection, make_url
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from backend.app.database.models import Base
-from backend.app.database.session import DatabaseUrl, resolve_database_url
+from backend.app.database.session import DatabaseUrl, resolve_async_database_url
 from generate_demo_data import CSV_BOOLEAN_COLUMNS, CSV_COLUMN_LABELS, TASK_HISTORY_FIELD_LABELS
 
 
@@ -120,20 +122,34 @@ def prepare_schema(connection: Connection, recreate: bool) -> None:
     Base.metadata.create_all(connection)
 
 
-def load_all_tables(
-    engine: Engine,
+async def load_all_tables(
+    engine: AsyncEngine,
+    data_dir: Path,
+    schema: str | None,
+    append: bool = False,
+) -> list[tuple[str, int]]:
+    async with engine.begin() as connection:
+        return await connection.run_sync(
+            load_all_tables_sync,
+            data_dir,
+            schema,
+            append,
+        )
+
+
+def load_all_tables_sync(
+    connection: Connection,
     data_dir: Path,
     schema: str | None,
     append: bool = False,
 ) -> list[tuple[str, int]]:
     loaded: list[tuple[str, int]] = []
     if_exists = "append" if schema is None or append else "replace"
-    with engine.begin() as connection:
-        if schema is None:
-            prepare_schema(connection, recreate=not append)
-        for table in TABLES:
-            row_count = write_table(connection, data_dir, table, schema, if_exists)
-            loaded.append((table.table_name, row_count))
+    if schema is None:
+        prepare_schema(connection, recreate=not append)
+    for table in TABLES:
+        row_count = write_table(connection, data_dir, table, schema, if_exists)
+        loaded.append((table.table_name, row_count))
     return loaded
 
 
@@ -143,7 +159,7 @@ def print_summary(items: Iterable[tuple[str, int]]) -> None:
         print(f"- {table_name}: {count} rows")
 
 
-def main() -> None:
+async def main_async() -> None:
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="Загрузить демо-CSV в базу данных.")
@@ -157,12 +173,19 @@ def main() -> None:
     if not data_dir.exists():
         raise FileNotFoundError(f"Не найдена директория с данными: {data_dir}")
 
-    database_url = resolve_database_url(args.database_url)
-    engine = create_engine(database_url)
+    database_url = resolve_async_database_url(args.database_url)
+    engine = create_async_engine(database_url)
 
-    loaded = load_all_tables(engine, data_dir, args.schema, append=args.append)
-    print_summary(loaded)
-    print(f"Database URL: {mask_database_url(database_url)}")
+    try:
+        loaded = await load_all_tables(engine, data_dir, args.schema, append=args.append)
+        print_summary(loaded)
+        print(f"Database URL: {mask_database_url(database_url)}")
+    finally:
+        await engine.dispose()
+
+
+def main() -> None:
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":

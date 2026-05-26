@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 from datetime import date
-from typing import Annotated, Any, Callable, TypedDict
+from typing import Annotated, Any, Awaitable, Callable, Literal, TypedDict
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
 
+import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from agents.yandex_client import get_yandex_client, get_yandex_model_uri
+from agents.infrastructure.llm import LLMAdapter, get_llm_adapter
+from backend.app.schemas.project_summary import ProjectMetricsFact, ProjectSummary
 
 try:
     from langgraph.graph import END, START, StateGraph
@@ -29,10 +30,16 @@ except ModuleNotFoundError:
 DEFAULT_AS_OF = "2026-06-19"
 
 
+class ProjectConversationMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1, max_length=800)
+
+
 class ProjectQuestionRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000)
     as_of: date | None = None
     max_depth: int = Field(default=2, ge=1, le=4)
+    conversation_context: list[ProjectConversationMessage] = Field(default_factory=list, max_length=8)
 
 
 class ProjectQuestionAnswer(BaseModel):
@@ -44,11 +51,20 @@ class ProjectQuestionAnswer(BaseModel):
     suggested_questions: list[str] = Field(default_factory=list)
 
 
+class RequestRoute(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    intent: Literal["small_talk", "project_question", "out_of_scope"] = "project_question"
+    needs_project_tools: bool = True
+    reason: str = ""
+
+
 class ProjectQuestionState(TypedDict, total=False):
     project_id: str
     question: str
     as_of: str
     max_depth: int
+    conversation_context: str
     request_intent: str | None
     needs_project_tools: bool
     messages: Annotated[list[Any], add_messages]
@@ -89,9 +105,22 @@ QA_SYSTEM_PROMPT = """
 - для small talk не используй project tools и не добавляй статус, бюджет, риски, задачи или evidence;
 - для общих вопросов сначала вызови get_project_summary и get_problem_context;
 - для уточнений используй search_tasks, search_risks, search_communications, search_decisions,
-  search_dependencies или get_budget;
+  search_dependencies, get_budget, get_resource_rates, get_task_dependency_graph или calculate_delay_cost;
+- для вопросов с расчетами используй calculate_delay_cost или другой подходящий tool; не считай арифметику в тексте самостоятельно;
 - финальный ответ верни только JSON-объектом ProjectQuestionAnswer;
 - answer пиши по-русски, коротко, с конкретными пунктами;
+- если сравниваешь несколько задач, рисков, ресурсов, сроков, сумм или вариантов, используй markdown-таблицу;
+- перед таблицей дай короткий вывод в 1-2 предложения, что важно увидеть руководителю;
+- таблицу всегда пиши отдельными строками: строка заголовков, строка `|---|---|`, затем строки данных;
+- не вставляй markdown-таблицу внутрь одного абзаца и не склеивай её в одну строку;
+- перед таблицей и после таблицы оставляй пустую строку;
+- первая строка таблицы должна начинаться с символа `|`, без текста перед ним;
+- таблицы делай компактными: до 5 колонок, короткие заголовки, без широких текстовых полотен;
+- деньги, дни и проценты в таблицах форматируй понятно: "30 млн ₽", "24 дня", "27,1%";
+- не называй передачу вопроса наверх отдельным процессом; пиши "вынести на комитет", "зафиксировать решение" или "назначить владельца и срок";
+- отвечай максимально русскими словами, но сохраняй общепринятые названия метрик, систем и команд из входных данных;
+- не используй английские статусы и служебные слова из входных данных; переводи их на русский;
+- избегай лишних англицизмов в обычном тексте: если это не название метрики, команды или системы, пиши по-русски;
 - evidence_ids заполняй id фактов, на которых основан ответ;
 - used_tools заполняй названиями реально использованных tools;
 - suggested_questions дай 2-4 релевантных продолжения;
@@ -163,16 +192,30 @@ class SearchDependenciesArgs(BaseModel):
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-def run_project_question(
+class CalculateDelayCostArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    delay_days: int = Field(ge=0, le=365)
+    include_resource_burn: bool = True
+
+
+async def run_project_question(
     *,
     project_id: str,
     question: str,
     as_of: date | None = None,
     max_depth: int = 2,
+    conversation_context: list[ProjectConversationMessage] | None = None,
     backend_api_url: str,
 ) -> ProjectQuestionAnswer:
     agent = ProjectQuestionAgent(backend_api_url=backend_api_url)
-    return agent.answer(project_id=project_id, question=question, as_of=as_of, max_depth=max_depth)
+    return await agent.answer(
+        project_id=project_id,
+        question=question,
+        as_of=as_of,
+        max_depth=max_depth,
+        conversation_context=conversation_context,
+    )
 
 
 class ProjectQuestionAgent:
@@ -180,17 +223,17 @@ class ProjectQuestionAgent:
 
     def __init__(self, *, backend_api_url: str, temperature: float = 0.1) -> None:
         self.backend_api_url = backend_api_url.rstrip("/")
-        self.model = get_yandex_model_uri()
-        self.client = get_yandex_client()
+        self.llm = get_llm_adapter()
         self.temperature = temperature
 
-    def answer(
+    async def answer(
         self,
         *,
         project_id: str,
         question: str,
         as_of: date | None,
         max_depth: int,
+        conversation_context: list[ProjectConversationMessage] | None = None,
     ) -> ProjectQuestionAnswer:
         as_of_value = as_of.isoformat() if as_of else DEFAULT_AS_OF
         tool_executor = ProjectFactToolExecutor(
@@ -200,16 +243,17 @@ class ProjectQuestionAgent:
             max_depth=max_depth,
         )
         graph = build_project_question_graph(
-            client=self.client,
-            model=self.model,
+            llm=self.llm,
             tool_executor=tool_executor,
             temperature=self.temperature,
         )
+        conversation_context_text = _format_conversation_context(conversation_context)
         messages = [
             SystemMessage(content=QA_SYSTEM_PROMPT),
             HumanMessage(
                 content=(
                     f"project_id={project_id}, as_of={as_of_value}\n"
+                    f"{conversation_context_text}"
                     f"Вопрос пользователя: {question}"
                 )
             ),
@@ -219,11 +263,12 @@ class ProjectQuestionAgent:
             "question": question,
             "as_of": as_of_value,
             "max_depth": max_depth,
+            "conversation_context": conversation_context_text,
             "messages": messages,
             "used_tools": [],
             "tool_rounds": 0,
         }
-        result = graph.invoke(state)
+        result = await graph.ainvoke(state)
         return _parse_agent_answer(
             _state_value(result, "final_content", "{}") or "{}",
             _state_value(result, "used_tools", []),
@@ -233,8 +278,7 @@ class ProjectQuestionAgent:
 
 def build_project_question_graph(
     *,
-    client: Any,
-    model: str,
+    llm: LLMAdapter,
     tool_executor: "ProjectFactToolExecutor",
     temperature: float,
     max_tool_rounds: int = 3,
@@ -253,15 +297,15 @@ def build_project_question_graph(
     tool_specs = [convert_to_openai_tool(tool) for tool in tools]
 
     graph = StateGraph(ProjectQuestionState)
-    graph.add_node("route_request", route_request_node(client=client, model=model))
+    graph.add_node("route_request", route_request_node(llm=llm))
     graph.add_node(
         "call_model",
-        call_model_node(client=client, model=model, tools=tool_specs, temperature=temperature),
+        call_model_node(llm=llm, tools=tool_specs, temperature=temperature),
     )
     graph.add_node("run_tools", run_tools_node(tools))
     graph.add_node(
         "finalize",
-        finalize_answer_node(client=client, model=model, tools=tool_specs, temperature=temperature),
+        finalize_answer_node(llm=llm, temperature=temperature),
     )
 
     graph.add_edge(START, "route_request")
@@ -278,7 +322,7 @@ def build_project_question_graph(
         route_after_model,
         {
             "tools": "run_tools",
-            "done": END,
+            "finalize": "finalize",
         },
     )
     graph.add_conditional_edges(
@@ -293,36 +337,53 @@ def build_project_question_graph(
     return graph.compile()
 
 
-def route_request_node(*, client: Any, model: str) -> Any:
-    def route_request(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": REQUEST_ROUTER_PROMPT},
-                {
-                    "role": "user",
-                    "content": (
-                        f"project_id={_state_value(state, 'project_id')}, "
-                        f"as_of={_state_value(state, 'as_of')}\n"
-                        f"Сообщение пользователя: {_state_value(state, 'question')}"
-                    ),
-                },
-            ],
-            temperature=0,
-            response_format={"type": "json_object"},
-        )
-        content = response.choices[0].message.content or "{}"
-        try:
-            payload = json.loads(content)
-        except json.JSONDecodeError:
-            payload = {}
+def _format_conversation_context(
+    conversation_context: list[ProjectConversationMessage] | None,
+) -> str:
+    if not conversation_context:
+        return ""
 
-        intent = str(payload.get("intent") or "project_question")
+    lines: list[str] = []
+    total_chars = 0
+    for message in conversation_context[-8:]:
+        content = _limit_text(message.content, 800)
+        if not content:
+            continue
+        role = "Пользователь" if message.role == "user" else "Агент"
+        line = f"{role}: {content}"
+        if total_chars + len(line) > 3000:
+            break
+        lines.append(line)
+        total_chars += len(line)
+
+    context = "\n".join(lines).strip()
+    if not context:
+        return ""
+    return (
+        "Короткий контекст предыдущих реплик. Используй его только для понимания уточнений, "
+        "но факты по проекту всё равно проверяй через tools:\n"
+        f"{context}\n\n"
+    )
+
+
+def route_request_node(*, llm: LLMAdapter) -> Any:
+    async def route_request(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
+        route = await llm.parse_pydantic(
+            response_model=RequestRoute,
+            system_prompt=REQUEST_ROUTER_PROMPT,
+            user_prompt=(
+                f"project_id={_state_value(state, 'project_id')}, "
+                f"as_of={_state_value(state, 'as_of')}\n"
+                f"{_state_value(state, 'conversation_context', '')}"
+                f"Сообщение пользователя: {_state_value(state, 'question')}"
+            ),
+            temperature=0,
+        )
+
+        intent = route.intent
         if intent not in {"small_talk", "project_question", "out_of_scope"}:
             intent = "project_question"
-        needs_project_tools = intent == "project_question" and bool(
-            payload.get("needs_project_tools", True)
-        )
+        needs_project_tools = intent == "project_question" and bool(route.needs_project_tools)
 
         return {
             "request_intent": intent,
@@ -332,12 +393,11 @@ def route_request_node(*, client: Any, model: str) -> Any:
     return route_request
 
 
-def call_model_node(*, client: Any, model: str, tools: list[dict[str, Any]], temperature: float) -> Any:
-    def call_model(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
+def call_model_node(*, llm: LLMAdapter, tools: list[dict[str, Any]], temperature: float) -> Any:
+    async def call_model(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
         needs_project_tools = _state_value(state, "needs_project_tools", True)
         used_tools = _state_value(state, "used_tools", [])
-        response = client.chat.completions.create(
-            model=model,
+        response = await llm.chat_completion(
             messages=_messages_to_openai(_state_value(state, "messages", [])),
             tools=tools,
             tool_choice="required" if needs_project_tools and not used_tools else "auto",
@@ -357,9 +417,9 @@ def call_model_node(*, client: Any, model: str, tools: list[dict[str, Any]], tem
 def run_tools_node(tools: list[Any]) -> Any:
     tool_node = ToolNode(tools)
 
-    def run_tools(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
+    async def run_tools(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
         used_tools = list(_state_value(state, "used_tools", []))
-        result = tool_node.invoke(state)
+        result = await tool_node.ainvoke(state)
         tool_messages = _state_value(result, "messages", [])
         used_tools.extend(_tool_names_from_messages(tool_messages))
 
@@ -372,8 +432,8 @@ def run_tools_node(tools: list[Any]) -> Any:
     return run_tools
 
 
-def finalize_answer_node(*, client: Any, model: str, tools: list[dict[str, Any]], temperature: float) -> Any:
-    def finalize_answer(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
+def finalize_answer_node(*, llm: LLMAdapter, temperature: float) -> Any:
+    async def finalize_answer(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
         if _state_value(state, "needs_project_tools", True):
             final_instruction = "Сформируй финальный JSON ProjectQuestionAnswer по уже полученным tool results."
         else:
@@ -385,18 +445,21 @@ def finalize_answer_node(*, client: Any, model: str, tools: list[dict[str, Any]]
             *_state_value(state, "messages", []),
             HumanMessage(content=final_instruction),
         ]
-        response = client.chat.completions.create(
-            model=model,
-            messages=_messages_to_openai(messages),
-            tools=tools,
-            tool_choice="none",
-            temperature=temperature,
-            response_format={"type": "json_object"},
+        final_prompt = (
+            f"{final_instruction}\n\n"
+            "История сообщений и результатов инструментов:\n"
+            f"{json.dumps(_messages_to_openai(messages), ensure_ascii=False, default=str)}"
         )
-        message = response.choices[0].message
+        answer = await llm.parse_pydantic(
+            response_model=ProjectQuestionAnswer,
+            system_prompt=QA_SYSTEM_PROMPT,
+            user_prompt=final_prompt,
+            temperature=temperature,
+        )
+        content = answer.model_dump_json()
         return {
-            "messages": [HumanMessage(content=final_instruction), _ai_message_from_openai(message)],
-            "final_content": message.content or "{}",
+            "messages": [HumanMessage(content=final_instruction), AIMessage(content=content)],
+            "final_content": content,
         }
 
     return finalize_answer
@@ -412,7 +475,7 @@ def route_after_model(state: ProjectQuestionState | dict[str, Any]) -> str:
     last_message = _last_message(_state_value(state, "messages", []))
     if getattr(last_message, "tool_calls", None):
         return "tools"
-    return "done"
+    return "finalize"
 
 
 def route_after_tools(max_tool_rounds: int) -> Any:
@@ -425,23 +488,23 @@ def route_after_tools(max_tool_rounds: int) -> Any:
 
 
 def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTool]:
-    """Create request-scoped LangChain tools for LangGraph ToolNode."""
+    """Создает инструменты LangChain на время одного запроса."""
 
-    def get_project_summary() -> dict[str, Any]:
-        return _compact_project_summary(tool_executor.project_summary())
+    async def get_project_summary() -> dict[str, Any]:
+        return _compact_project_summary(await tool_executor.project_summary())
 
-    def get_problem_context(max_depth: int | None = None) -> dict[str, Any]:
+    async def get_problem_context(max_depth: int | None = None) -> dict[str, Any]:
         depth = _bounded_limit(max_depth, default=tool_executor.max_depth, maximum=4)
-        return _compact_problem_context(tool_executor.problem_context(max_depth=depth))
+        return _compact_problem_context(await tool_executor.problem_context(max_depth=depth))
 
-    def search_tasks(
+    async def search_tasks(
         query: str | None = None,
         status: str | None = None,
         priority: str | None = None,
         assignee: str | None = None,
         limit: int | None = None,
     ) -> dict[str, Any]:
-        result = tool_executor.search_tasks(
+        result = await tool_executor.search_tasks(
             {
                 "query": query,
                 "status": status,
@@ -452,13 +515,13 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         )
         return _compact_search_result(result, TASK_FIELDS)
 
-    def search_risks(
+    async def search_risks(
         query: str | None = None,
         status: str | None = None,
         min_score: int | None = None,
         limit: int | None = None,
     ) -> dict[str, Any]:
-        result = tool_executor.search_risks(
+        result = await tool_executor.search_risks(
             {
                 "query": query,
                 "status": status,
@@ -468,13 +531,13 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         )
         return _compact_search_result(result, RISK_FIELDS)
 
-    def search_communications(
+    async def search_communications(
         query: str | None = None,
         status: str | None = None,
         team: str | None = None,
         limit: int | None = None,
     ) -> dict[str, Any]:
-        result = tool_executor.search_communications(
+        result = await tool_executor.search_communications(
             {
                 "query": query,
                 "status": status,
@@ -484,13 +547,13 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         )
         return _compact_search_result(result, COMMUNICATION_FIELDS)
 
-    def search_decisions(
+    async def search_decisions(
         query: str | None = None,
         status: str | None = None,
         owner: str | None = None,
         limit: int | None = None,
     ) -> dict[str, Any]:
-        result = tool_executor.search_decisions(
+        result = await tool_executor.search_decisions(
             {
                 "query": query,
                 "status": status,
@@ -500,13 +563,13 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         )
         return _compact_search_result(result, DECISION_FIELDS + CHANGE_REQUEST_FIELDS)
 
-    def search_dependencies(
+    async def search_dependencies(
         query: str | None = None,
         status: str | None = None,
         criticality: str | None = None,
         limit: int | None = None,
     ) -> dict[str, Any]:
-        result = tool_executor.search_dependencies(
+        result = await tool_executor.search_dependencies(
             {
                 "query": query,
                 "status": status,
@@ -516,18 +579,40 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         )
         return _compact_search_result(result, DEPENDENCY_FIELDS)
 
-    def get_budget() -> dict[str, Any]:
-        return _compact_budget_result(tool_executor.budget())
+    async def get_budget() -> dict[str, Any]:
+        return _compact_budget_result(await tool_executor.budget())
+
+    async def get_resource_rates() -> dict[str, Any]:
+        context = await tool_executor.problem_context()
+        resources = context.get("project_resources", [])
+        return {
+            "count": len(resources) if isinstance(resources, list) else 0,
+            "items": _compact_items(resources, RESOURCE_COST_FIELDS, limit=20),
+        }
+
+    async def get_task_dependency_graph() -> dict[str, Any]:
+        context = await tool_executor.problem_context()
+        graph = context.get("task_dependency_graph", [])
+        return {
+            "count": len(graph) if isinstance(graph, list) else 0,
+            "items": _compact_items(graph, TASK_GRAPH_FIELDS, limit=60),
+        }
+
+    async def calculate_delay_cost(delay_days: int, include_resource_burn: bool = True) -> dict[str, Any]:
+        return await tool_executor.calculate_delay_cost(
+            delay_days=delay_days,
+            include_resource_burn=include_resource_burn,
+        )
 
     def make_tool(
         *,
         name: str,
         description: str,
         args_schema: type[BaseModel],
-        func: Callable[..., dict[str, Any]],
+        func: Callable[..., Awaitable[dict[str, Any]]],
     ) -> BaseTool:
         return StructuredTool.from_function(
-            func=func,
+            coroutine=func,
             name=name,
             description=description,
             args_schema=args_schema,
@@ -551,39 +636,60 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         ),
         make_tool(
             name="search_tasks",
-            description="Найти проблемные, заблокированные и просроченные задачи по query/status/priority/assignee.",
+            description="Найти проблемные, заблокированные и просроченные задачи по тексту, статусу, приоритету или исполнителю.",
             args_schema=SearchTasksArgs,
             func=search_tasks,
         ),
         make_tool(
             name="search_risks",
-            description="Найти связанные и топовые риски проекта по query/status/min_score.",
+            description="Найти связанные и топовые риски проекта по тексту, статусу или минимальному баллу.",
             args_schema=SearchRisksArgs,
             func=search_risks,
         ),
         make_tool(
             name="search_communications",
-            description="Найти просроченные или эскалированные коммуникации проекта по query/status/team.",
+            description="Найти просроченные коммуникации и темы, требующие решения, по тексту, статусу или команде.",
             args_schema=SearchCommunicationsArgs,
             func=search_communications,
         ),
         make_tool(
             name="search_decisions",
-            description="Найти ожидающие решения и открытые change requests.",
+            description="Найти ожидающие решения и открытые запросы на изменение.",
             args_schema=SearchDecisionsArgs,
             func=search_decisions,
         ),
         make_tool(
             name="search_dependencies",
-            description="Найти проектные зависимости по query/status/criticality.",
+            description="Найти проектные зависимости по тексту, статусу или критичности.",
             args_schema=SearchDependenciesArgs,
             func=search_dependencies,
         ),
         make_tool(
             name="get_budget",
-            description="Получить бюджет проекта и влияние открытых change requests.",
+            description="Получить бюджет проекта и влияние открытых запросов на изменение.",
             args_schema=NoArgs,
             func=get_budget,
+        ),
+        make_tool(
+            name="get_resource_rates",
+            description="Получить ресурсы проекта, часовые ставки и недельную стоимость их работы на проекте.",
+            args_schema=NoArgs,
+            func=get_resource_rates,
+        ),
+        make_tool(
+            name="get_task_dependency_graph",
+            description="Получить граф зависимостей задач проекта: какая задача от какой зависит и что на критическом пути.",
+            args_schema=NoArgs,
+            func=get_task_dependency_graph,
+        ),
+        make_tool(
+            name="calculate_delay_cost",
+            description=(
+                "Посчитать стоимость сдвига срока на заданное число дней. "
+                "Возвращает стоимость задержки по бюджету и, опционально, стоимость ресурсо-дней."
+            ),
+            args_schema=CalculateDelayCostArgs,
+            func=calculate_delay_cost,
         ),
     ]
 
@@ -600,25 +706,25 @@ class ProjectFactToolExecutor:
         self._context: dict[str, Any] | None = None
         self._context_depth: int | None = None
 
-    def project_summary(self) -> dict[str, Any]:
+    async def project_summary(self) -> dict[str, Any]:
         if self._summary is None:
             query = urlencode({"as_of": self.as_of})
-            self._summary = self._fetch_json(f"/api/v1/summaries/projects/{self.project_id}?{query}")
+            self._summary = await self._fetch_json(f"/api/v1/summaries/projects/{self.project_id}?{query}")
         return self._summary
 
-    def problem_context(self, max_depth: int | None = None) -> dict[str, Any]:
+    async def problem_context(self, max_depth: int | None = None) -> dict[str, Any]:
         depth = max_depth or self.max_depth
         if self._context is None or depth != self._context_depth:
             query = urlencode({"as_of": self.as_of, "max_depth": depth})
-            self._context = self._fetch_json(
+            self._context = await self._fetch_json(
                 f"/api/v1/summaries/projects/{self.project_id}/problem-context?{query}"
             )
             self._context_depth = depth
         return self._context
 
-    def search_tasks(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        summary = self.project_summary()
-        context = self.problem_context()
+    async def search_tasks(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
         items = _dedupe_items(
             [
                 *context.get("problem_tasks", []),
@@ -638,9 +744,9 @@ class ProjectFactToolExecutor:
         )
         return _tool_result(items, arguments.get("limit"))
 
-    def search_risks(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        summary = self.project_summary()
-        context = self.problem_context()
+    async def search_risks(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
         items = _dedupe_items([*context.get("linked_risks", []), *summary.get("top_risks", [])])
         min_score = _optional_int(arguments.get("min_score"))
         items = _filter_items(
@@ -653,9 +759,9 @@ class ProjectFactToolExecutor:
             items = [item for item in items if int(item.get("score") or 0) >= min_score]
         return _tool_result(items, arguments.get("limit"))
 
-    def search_communications(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        summary = self.project_summary()
-        context = self.problem_context()
+    async def search_communications(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
         items = _dedupe_items(
             [
                 *context.get("linked_communications", []),
@@ -679,9 +785,9 @@ class ProjectFactToolExecutor:
             ]
         return _tool_result(items, arguments.get("limit"))
 
-    def search_decisions(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        summary = self.project_summary()
-        context = self.problem_context()
+    async def search_decisions(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
         items = _dedupe_items(
             [
                 *context.get("pending_decisions", []),
@@ -707,9 +813,9 @@ class ProjectFactToolExecutor:
             ]
         return _tool_result(items, arguments.get("limit"))
 
-    def search_dependencies(self, arguments: dict[str, Any]) -> dict[str, Any]:
-        summary = self.project_summary()
-        context = self.problem_context()
+    async def search_dependencies(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
         items = _dedupe_items(
             [
                 *context.get("linked_project_dependencies", []),
@@ -727,9 +833,9 @@ class ProjectFactToolExecutor:
         )
         return _tool_result(items, arguments.get("limit"))
 
-    def budget(self) -> dict[str, Any]:
-        summary = self.project_summary()
-        context = self.problem_context()
+    async def budget(self) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
         return {
             "budget": summary.get("budget"),
             "budget_metrics": {
@@ -747,10 +853,41 @@ class ProjectFactToolExecutor:
             "open_change_requests": context.get("open_change_requests", []),
         }
 
-    def _fetch_json(self, path: str) -> dict[str, Any]:
-        request = Request(f"{self.backend_api_url}{path}", headers={"Accept": "application/json"})
-        with urlopen(request, timeout=10) as response:
-            return json.loads(response.read().decode("utf-8"))
+    async def calculate_delay_cost(self, *, delay_days: int, include_resource_burn: bool = True) -> dict[str, Any]:
+        context = await self.problem_context()
+        budget = context.get("budget") or {}
+        resources = context.get("project_resources") or []
+        cost_of_delay_per_day = int(budget.get("cost_of_delay_per_day") or 0)
+        delay_cost = delay_days * cost_of_delay_per_day
+
+        daily_resource_cost = 0
+        if include_resource_burn and isinstance(resources, list):
+            daily_resource_cost = sum(int(resource.get("daily_project_cost") or 0) for resource in resources)
+
+        resource_burn_cost = delay_days * daily_resource_cost
+        return {
+            "delay_days": delay_days,
+            "cost_of_delay_per_day": cost_of_delay_per_day,
+            "delay_opportunity_cost": delay_cost,
+            "daily_resource_cost": daily_resource_cost if include_resource_burn else None,
+            "resource_burn_cost": resource_burn_cost if include_resource_burn else None,
+            "total_cost": delay_cost + resource_burn_cost,
+            "currency": budget.get("currency"),
+            "formula": {
+                "delay_opportunity_cost": "дни сдвига * цена задержки за день",
+                "resource_burn_cost": "дни сдвига * сумма дневной стоимости ресурсов проекта",
+            },
+            "assumption": (
+                "resource_burn_cost считает текущую дневную стоимость ресурсов проекта по фактическим часам в неделю / 5; "
+                "это оценка текущего сдвига, а не новая смета после перепланирования."
+            ),
+        }
+
+    async def _fetch_json(self, path: str) -> dict[str, Any]:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(f"{self.backend_api_url}{path}", headers={"Accept": "application/json"})
+            response.raise_for_status()
+            return response.json()
 
 
 def _state_value(state: ProjectQuestionState | dict[str, Any], key: str, default: Any = None) -> Any:
@@ -870,9 +1007,12 @@ def _parse_agent_answer(
     except ValidationError as error:
         raise ValueError("Модель вернула JSON не по контракту ProjectQuestionAnswer.") from error
 
+    answer.answer = _humanize_agent_text(answer.answer)
     answer.used_tools = actual_tools
     answer.evidence_ids = _unique(answer.evidence_ids)[:20]
-    answer.suggested_questions = _unique(answer.suggested_questions)[:4]
+    answer.suggested_questions = _unique(
+        [_humanize_agent_text(question) for question in answer.suggested_questions]
+    )[:4]
     return answer
 
 
@@ -923,48 +1063,51 @@ def _tool_result(items: list[dict[str, Any]], limit: Any) -> dict[str, Any]:
     }
 
 
-SUMMARY_FIELDS = (
-    "project_id",
-    "project_name",
-    "owner_name",
-    "status",
-    "priority",
-    "as_of_date",
-    "completion_percent",
-    "total_tasks_count",
-    "completed_tasks_count",
-    "overdue_tasks_count",
-    "delayed_milestones_count",
-    "blocked_tasks_count",
-    "high_risk_count",
-    "dependency_risk_count",
-    "pending_decision_count",
-    "open_change_request_count",
-    "dependency_sla_breach_count",
-    "milestone_slip_days",
-    "critical_path_delay_days",
-    "blocked_age_days",
-    "decision_age_days",
-    "net_change_request_impact_days",
-    "net_change_request_impact_budget",
-    "scope_churn_rate",
-    "burn_rate_percent",
-    "schedule_variance_percent",
-    "stale_tasks_count",
-    "max_status_age_days",
-    "estimate_overrun_percent",
-    "workload_imbalance_index",
-    "key_person_dependency_percent",
-    "critical_task_silence_days",
-    "communication_silence_days",
-    "data_freshness_days",
-    "cost_of_delay_exposure",
-    "risk_trend",
-    "resource_overload_percent",
-    "max_communication_delay_days",
-    "project_health_score",
-    "risk_level",
-    "executive_summary",
+HUMAN_VALUE_LABELS = {
+    "active": "активен",
+    "approved": "согласовано",
+    "blocked": "заблокировано",
+    "closed": "закрыто",
+    "completed": "завершено",
+    "critical": "критичный",
+    "delayed": "задержано",
+    "done": "готово",
+    "escalated": "требует решения",
+    "green": "зелёная зона",
+    "high": "высокий",
+    "in_progress": "в работе",
+    "low": "низкий",
+    "medium": "средний",
+    "mitigating": "снижается",
+    "open": "открыто",
+    "pending": "ожидает решения",
+    "proposed": "предложено",
+    "red": "красная зона",
+    "resolved": "решено",
+    "under_review": "на рассмотрении",
+    "warning": "важно",
+    "yellow": "жёлтая зона",
+}
+
+
+SUMMARY_NESTED_FIELDS = {
+    "budget",
+    "key_signals",
+    "blocked_tasks",
+    "overdue_tasks",
+    "delayed_milestones",
+    "top_risks",
+    "delayed_communications",
+    "overloaded_resources",
+    "risky_dependencies",
+    "pending_decisions",
+    "open_change_requests",
+    "owner_action_load",
+}
+SUMMARY_FIELDS = tuple(
+    field
+    for field in ProjectSummary.model_fields
+    if field not in SUMMARY_NESTED_FIELDS
 )
 PROJECT_FIELDS = (
     "id",
@@ -978,20 +1121,7 @@ PROJECT_FIELDS = (
     "expected_result",
     "business_value",
 )
-METRIC_FIELDS = tuple(
-    field
-    for field in SUMMARY_FIELDS
-    if field
-    not in {
-        "project_id",
-        "project_name",
-        "owner_name",
-        "status",
-        "priority",
-        "as_of_date",
-        "executive_summary",
-    }
-)
+METRIC_FIELDS = tuple(ProjectMetricsFact.model_fields)
 BUDGET_FIELDS = (
     "planned_budget",
     "actual_spent",
@@ -1073,11 +1203,36 @@ RESOURCE_FIELDS = (
     "full_name",
     "role",
     "team",
+    "hour_rate",
     "available_hours_per_week",
     "project_actual_hours_per_week",
     "total_actual_hours_per_week",
     "total_allocation_percent",
     "overload_percent",
+)
+RESOURCE_COST_FIELDS = (
+    "resource_id",
+    "full_name",
+    "role",
+    "team",
+    "seniority",
+    "hour_rate",
+    "available_hours_per_week",
+    "project_planned_hours_per_week",
+    "project_actual_hours_per_week",
+    "weekly_project_cost",
+    "daily_project_cost",
+)
+TASK_GRAPH_FIELDS = (
+    "id",
+    "task_id",
+    "task_title",
+    "depends_on_task_id",
+    "depends_on_task_title",
+    "dependency_type",
+    "is_critical_path",
+    "lag_days",
+    "reason",
 )
 HISTORY_FIELDS = ("id", "task_id", "changed_at", "field_changed", "old_value", "new_value", "changed_by")
 COMMENT_FIELDS = ("id", "task_id", "author_name", "created_at", "channel", "text", "mentions_count")
@@ -1149,6 +1304,16 @@ def _compact_problem_context(context: dict[str, Any]) -> dict[str, Any]:
             CHANGE_REQUEST_FIELDS,
             limit=8,
         ),
+        "project_resources": _compact_items(
+            context.get("project_resources", []),
+            RESOURCE_COST_FIELDS,
+            limit=12,
+        ),
+        "task_dependency_graph": _compact_items(
+            context.get("task_dependency_graph", []),
+            TASK_GRAPH_FIELDS,
+            limit=30,
+        ),
         "overloaded_resources": _compact_items(
             context.get("overloaded_resources", []),
             RESOURCE_FIELDS,
@@ -1203,7 +1368,8 @@ def _compact_list(items: Any, *, limit: int) -> list[Any]:
 
 def _compact_value(value: Any) -> Any:
     if isinstance(value, str):
-        return _limit_text(value, 260)
+        normalized = value.strip().casefold()
+        return HUMAN_VALUE_LABELS.get(normalized, _humanize_agent_text(_limit_text(value, 260)))
     if isinstance(value, list):
         return [_compact_value(item) for item in value[:12]]
     if isinstance(value, dict):
@@ -1216,6 +1382,37 @@ def _limit_text(value: str, limit: int) -> str:
     if len(text) <= limit:
         return text
     return text[: max(0, limit - 3)].rstrip() + "..."
+
+
+def _humanize_agent_text(value: str) -> str:
+    replacements = {
+        "pending change request": "запрос на изменение, ожидающий решения",
+        "open change request": "открытый запрос на изменение",
+        "blocked task": "заблокированная задача",
+        "pending": "ожидает решения",
+        "open": "открыт",
+        "blocked": "заблокирован",
+        "critical path": "критический путь",
+        "critical": "критичный",
+        "high": "высокий",
+        "medium": "средний",
+        "low": "низкий",
+        "change request": "запрос на изменение",
+        "follow-up": "последующая проверка",
+        "status": "статус",
+    }
+    value = re_sub(r"\bпакет\s+эскалаци[ия]\b", "набор материалов для решения", value)
+    value = re_sub(r"\bэскалаци\w*\b", "решение на уровне комитета", value)
+    value = re_sub(r"\bescalat\w*\b", "решение на уровне комитета", value)
+    for source, replacement in replacements.items():
+        value = re_sub(rf"\b{source}\b", replacement, value)
+    return " ".join(value.split())
+
+
+def re_sub(pattern: str, replacement: str, value: str) -> str:
+    import re
+
+    return re.sub(pattern, replacement, value, flags=re.IGNORECASE)
 
 
 def _bounded_limit(value: Any, default: int, minimum: int = 1, maximum: int = 20) -> int:

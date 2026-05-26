@@ -4,7 +4,7 @@ import { fetchNotifications } from "../api/client";
 import { queryKeys } from "./queryKeys";
 
 export function useNotifications(
-  asOfDate: string,
+  asOfDate: string | null,
   projectId: string | null = null,
   unreadOnly = false,
   enabled = true,
@@ -15,7 +15,7 @@ export function useNotifications(
       fetchNotifications(
         {
           projectId: projectId ?? undefined,
-          asOfDate,
+          asOfDate: asOfDate ?? undefined,
           unreadOnly,
         },
         signal,

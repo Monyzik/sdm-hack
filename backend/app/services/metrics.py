@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
 from datetime import date
 from math import sqrt
-from typing import Iterable, Protocol
+from typing import Iterable
 
 from backend.app.database.models import (
     Budget,
@@ -18,13 +17,18 @@ from backend.app.schemas.project_summary import (
     DecisionSignal,
     DependencySignal,
     MilestoneSignal,
+    ProjectMetricsFact,
     OwnerActionLoadSignal,
     ProjectSummary,
     ResourceLoadSignal,
     RiskSignal,
     TaskSignal,
 )
-from backend.app.services.project_summary_repository import ProjectSummarySource
+from backend.app.services.data_classes import (
+    ProjectMetricContext,
+    ProjectMetrics,
+    ProjectSummarySource,
+)
 
 
 DONE_TASK_STATUSES = {"done", "closed", "resolved", "completed"}
@@ -35,7 +39,19 @@ OPEN_DEPENDENCY_STATUSES = {"pending", "delayed", "blocked"}
 OPEN_DECISION_STATUSES = {"pending", "under_review"}
 OPEN_CHANGE_REQUEST_STATUSES = {"pending", "under_review", "proposed"}
 BUDGET_FORECAST_CHANGE_REQUEST_STATUSES = OPEN_CHANGE_REQUEST_STATUSES | {"approved"}
-RISK_OPEN_STATUSES = {"active", "escalated", "mitigating", "open"}
+RISK_OPEN_STATUSES = {
+    "active",
+    "escalated",
+    "mitigating",
+    "open",
+    "активен",
+    "активно",
+    "открыт",
+    "открыто",
+    "эскалировано",
+    "требует решения",
+    "снижается",
+}
 PRIORITY_WEIGHT = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 CRITICALITY_WEIGHT = {"critical": 3, "high": 2, "medium": 1, "low": 0}
 
@@ -91,91 +107,6 @@ def normalize_status(value: str) -> str:
 def normalize_priority(value: str) -> str:
     normalized = value.strip().casefold()
     return PRIORITY_ALIASES.get(normalized, normalized)
-
-
-@dataclass(frozen=True)
-class ProjectMetricContext:
-    source: ProjectSummarySource
-    as_of: date
-
-
-@dataclass(frozen=True)
-class ProjectMetrics:
-    as_of_date: date
-    total_tasks_count: int
-    completed_tasks_count: int
-    completion_percent: float
-    blocked_tasks_count: int
-    overdue_tasks_count: int
-    delayed_milestones_count: int
-    high_risk_count: int
-    dependency_risk_count: int
-    pending_decision_count: int
-    open_change_request_count: int
-    dependency_sla_breach_count: int
-    budget: BudgetSummary | None
-    milestone_slip_days: int
-    critical_path_delay_days: int
-    blocked_age_days: int
-    decision_age_days: int
-    net_change_request_impact_days: int
-    net_change_request_impact_budget: int
-    scope_churn_rate: float
-    burn_rate_percent: float
-    schedule_variance_percent: float
-    stale_tasks_count: int
-    max_status_age_days: int
-    estimate_overrun_percent: float
-    workload_imbalance_index: float
-    key_person_dependency_percent: float
-    critical_task_silence_days: int
-    communication_silence_days: int
-    data_freshness_days: int
-    cost_of_delay_exposure: int
-    risk_trend: str
-    resource_overload_percent: float
-    max_communication_delay_days: int
-    project_health_score: int
-    risk_level: str
-    blocked_tasks: list[TaskSignal]
-    overdue_tasks: list[TaskSignal]
-    delayed_milestones: list[MilestoneSignal]
-    top_risks: list[RiskSignal]
-    delayed_communications: list[CommunicationSignal]
-    overloaded_resources: list[ResourceLoadSignal]
-    risky_dependencies: list[DependencySignal]
-    pending_decisions: list[DecisionSignal]
-    open_change_requests: list[ChangeRequestSignal]
-    owner_action_load: list[OwnerActionLoadSignal]
-    key_signals: list[str]
-    executive_summary: str
-
-
-class MetricCalculator(Protocol):
-    def __call__(self, context: ProjectMetricContext) -> object:
-        ...
-
-
-class ProjectMetric(Protocol):
-    key: str
-    title: str
-    source_tables: tuple[str, ...]
-
-    def calculate(self, context: ProjectMetricContext) -> object:
-        ...
-
-
-@dataclass(frozen=True)
-class FunctionMetric:
-    key: str
-    title: str
-    source_tables: tuple[str, ...]
-    calculator: MetricCalculator
-    description: str
-    owner_action: str
-
-    def calculate(self, context: ProjectMetricContext) -> object:
-        return self.calculator(context)
 
 
 def calculate_project_metrics(source: ProjectSummarySource, as_of: date | None = None) -> ProjectMetrics:
@@ -370,6 +301,43 @@ def calculate_project_metrics(source: ProjectSummarySource, as_of: date | None =
 
 def infer_as_of_date(source: ProjectSummarySource) -> date:
     return _latest_activity_date(source)
+
+
+PROJECT_SUMMARY_SIGNAL_FIELDS = (
+    "blocked_tasks",
+    "overdue_tasks",
+    "delayed_milestones",
+    "top_risks",
+    "delayed_communications",
+    "overloaded_resources",
+    "risky_dependencies",
+    "pending_decisions",
+    "open_change_requests",
+    "owner_action_load",
+)
+
+
+def project_summary_payload(metrics: ProjectMetrics, *, signal_limit: int = 7) -> dict[str, object]:
+    payload = {
+        field: getattr(metrics, field)
+        for field in ProjectSummary.model_fields
+        if hasattr(metrics, field) and field not in PROJECT_SUMMARY_SIGNAL_FIELDS
+    }
+    for field in PROJECT_SUMMARY_SIGNAL_FIELDS:
+        payload[field] = getattr(metrics, field)[:signal_limit]
+    return payload
+
+
+def project_metrics_fact_payload(metrics: ProjectMetrics) -> dict[str, object]:
+    payload = {
+        field: getattr(metrics, field)
+        for field in ProjectMetricsFact.model_fields
+        if hasattr(metrics, field)
+    }
+    payload["budget_deviation_percent"] = (
+        metrics.budget.budget_deviation_percent if metrics.budget else None
+    )
+    return payload
 
 
 def _latest_activity_date(source: ProjectSummarySource) -> date:
@@ -587,6 +555,7 @@ def calculate_resource_load_signals(
                 full_name=resource.full_name,
                 role=resource.role,
                 team=resource.team,
+                hour_rate=resource.hour_rate,
                 available_hours_per_week=resource.available_hours_per_week,
                 project_actual_hours_per_week=project_hours,
                 total_actual_hours_per_week=total_hours,
@@ -1085,6 +1054,7 @@ def calculate_project_health_score(
 
     overdue_ratio = overdue_count / max(total_tasks, 1)
     blocked_ratio = blocked_count / max(total_tasks, 1)
+
     penalty = 0.0
     penalty += min(14.0, overdue_ratio * 70)
     penalty += min(18.0, blocked_ratio * 110)
@@ -1105,6 +1075,7 @@ def calculate_project_health_score(
     penalty += min(4.0, max(0.0, workload_imbalance - 0.5) * 8.0)
     penalty += min(4.0, max(0.0, key_person_dependency - 40.0) * 0.15)
     penalty += min(4.0, max(0, critical_silence - 2) * 0.5)
+
     return max(0, min(100, round(100 - penalty)))
 
 
@@ -1390,321 +1361,3 @@ def _status_weight(status: str) -> int:
     if status_value == "mitigating":
         return 1
     return 0
-
-
-PROJECT_METRIC_PROTOCOL = (
-    FunctionMetric(
-        key="completion_percent",
-        title="Готовность проекта",
-        source_tables=("tasks",),
-        calculator=calculate_completion_percent,
-        description="Доля завершенных задач от общего числа задач проекта.",
-        owner_action="Сверять прогресс с ближайшими вехами и просрочками.",
-    ),
-    FunctionMetric(
-        key="overdue_tasks_count",
-        title="Просроченные задачи",
-        source_tables=("tasks",),
-        calculator=calculate_overdue_tasks_count,
-        description="Количество незавершенных задач с плановой датой раньше даты среза.",
-        owner_action="Выбрать задачи для recovery plan и weekly status.",
-    ),
-    FunctionMetric(
-        key="delayed_milestones_count",
-        title="Задержанные вехи",
-        source_tables=("milestones",),
-        calculator=calculate_delayed_milestones_count,
-        description="Количество незавершенных вех с плановой датой завершения раньше даты среза.",
-        owner_action="Проверить влияние на финальную дату проекта и обновить recovery plan.",
-    ),
-    FunctionMetric(
-        key="blocked_tasks_count",
-        title="Заблокированные задачи",
-        source_tables=("tasks",),
-        calculator=calculate_blocked_tasks_count,
-        description="Количество задач в blocked-состоянии или с явным blocked-флагом.",
-        owner_action="Найти владельца блокера и запустить эскалацию.",
-    ),
-    FunctionMetric(
-        key="high_risk_count",
-        title="Критичные риски",
-        source_tables=("risks",),
-        calculator=calculate_high_risk_count,
-        description="Количество открытых рисков со score 15 и выше.",
-        owner_action="Проверить mitigation plan и владельца риска.",
-    ),
-    FunctionMetric(
-        key="budget_deviation_percent",
-        title="Отклонение бюджета",
-        source_tables=("budgets", "budget_line_items", "change_requests"),
-        calculator=calculate_budget_deviation_percent,
-        description="Отклонение расчетного forecast_total_spent от planned_budget в процентах.",
-        owner_action="Подготовить решение по резерву, scope cut или reforecast.",
-    ),
-    FunctionMetric(
-        key="roi_percent",
-        title="ROI проекта",
-        source_tables=("budgets", "budget_line_items", "change_requests"),
-        calculator=calculate_roi_percent,
-        description="Ожидаемый экономический эффект относительно расчетного forecast_total_spent.",
-        owner_action="Проверить, сохраняет ли проект экономический смысл.",
-    ),
-    FunctionMetric(
-        key="risk_adjusted_roi_percent",
-        title="Risk-adjusted ROI",
-        source_tables=("budgets", "budget_line_items", "change_requests", "risks"),
-        calculator=calculate_risk_adjusted_roi_percent,
-        description="ROI после дисконта эффекта на давление критичных рисков.",
-        owner_action="Использовать для разговора с PMO и заказчиком при высоких рисках.",
-    ),
-    FunctionMetric(
-        key="resource_overload_percent",
-        title="Перегруз ресурсов",
-        source_tables=("resources", "resource_allocations"),
-        calculator=calculate_resource_overload_percent,
-        description="Максимальный перегруз ресурса сверх доступной недельной емкости.",
-        owner_action="Перераспределить capacity или снизить WIP.",
-    ),
-    FunctionMetric(
-        key="max_communication_delay_days",
-        title="Задержка коммуникаций",
-        source_tables=("communications",),
-        calculator=calculate_max_communication_delay_days,
-        description="Максимальная просрочка ответа по открытым коммуникациям.",
-        owner_action="Запустить follow-up или эскалацию в команду-владельца.",
-    ),
-    FunctionMetric(
-        key="dependency_risk_count",
-        title="Рискованные зависимости",
-        source_tables=("dependencies",),
-        calculator=calculate_dependency_risk_count,
-        description="Количество critical/high зависимостей в открытых проблемных статусах.",
-        owner_action="Согласовать дату, владельца и план снятия зависимости.",
-    ),
-    FunctionMetric(
-        key="pending_decision_count",
-        title="Ожидающие решения",
-        source_tables=("decisions",),
-        calculator=calculate_pending_decision_count,
-        description="Количество управленческих решений, которые ждут владельца.",
-        owner_action="Вынести решения на steering committee или к РП.",
-    ),
-    FunctionMetric(
-        key="open_change_request_count",
-        title="Открытые change requests",
-        source_tables=("change_requests",),
-        calculator=calculate_open_change_request_count,
-        description="Количество CR, которые еще не согласованы окончательно.",
-        owner_action="Оценить impact по бюджету, срокам и scope.",
-    ),
-    FunctionMetric(
-        key="milestone_slip_days",
-        title="Сдвиг вех",
-        source_tables=("milestones",),
-        calculator=calculate_milestone_slip_days,
-        description="Максимальный сдвиг вехи относительно planned_end_date.",
-        owner_action="Проверить влияние сдвига на ближайший weekly status и финальную дату.",
-    ),
-    FunctionMetric(
-        key="critical_path_delay_days",
-        title="Задержка critical path",
-        source_tables=("task_dependencies", "tasks"),
-        calculator=calculate_critical_path_delay_days,
-        description="Максимальная задержка по task dependencies, отмеченным как critical path.",
-        owner_action="Снять блокер с upstream-задачи или пересобрать план критического пути.",
-    ),
-    FunctionMetric(
-        key="blocked_age_days",
-        title="Возраст блокера",
-        source_tables=("task_history", "tasks"),
-        calculator=calculate_blocked_age_days,
-        description="Сколько дней висит самый старый текущий блокер.",
-        owner_action="Эскалировать блокеры, которые живут дольше SLA.",
-    ),
-    FunctionMetric(
-        key="decision_age_days",
-        title="Возраст ожидающего решения",
-        source_tables=("decisions",),
-        calculator=calculate_decision_age_days,
-        description="Максимальный возраст pending/under_review управленческого решения.",
-        owner_action="Вынести старое решение на steering committee или к владельцу.",
-    ),
-    FunctionMetric(
-        key="net_change_request_impact_days",
-        title="Net impact CR по срокам",
-        source_tables=("change_requests",),
-        calculator=calculate_net_change_request_impact_days,
-        description="Суммарная запрошенная дельта срока по открытым change requests.",
-        owner_action="Согласовать, принимается ли изменение срока или нужен scope cut.",
-    ),
-    FunctionMetric(
-        key="net_change_request_impact_budget",
-        title="Net impact CR по бюджету",
-        source_tables=("change_requests",),
-        calculator=calculate_net_change_request_impact_budget,
-        description="Суммарная запрошенная дельта бюджета по открытым change requests.",
-        owner_action="Подготовить бюджетное решение или компенсирующий scope cut.",
-    ),
-    FunctionMetric(
-        key="dependency_sla_breach_count",
-        title="SLA breach зависимостей",
-        source_tables=("dependencies",),
-        calculator=calculate_dependency_sla_breach_count,
-        description="Количество открытых зависимостей с expected_date раньше даты среза.",
-        owner_action="Эскалировать владельцам команд или вендорам, нарушившим дату.",
-    ),
-    FunctionMetric(
-        key="scope_churn_rate",
-        title="Scope churn",
-        source_tables=("change_requests", "task_history", "tasks"),
-        calculator=calculate_scope_churn_rate,
-        description="Доля изменений scope/сроков/оценок относительно размера backlog.",
-        owner_action="Зафиксировать scope freeze или вынести изменения в отдельный CR.",
-    ),
-    FunctionMetric(
-        key="burn_rate_percent",
-        title="Burn rate",
-        source_tables=("budgets",),
-        calculator=calculate_burn_rate_percent,
-        description="Доля фактически потраченного бюджета от planned_budget.",
-        owner_action="Сравнить burn rate с готовностью и бюджетным forecast.",
-    ),
-    FunctionMetric(
-        key="schedule_variance_percent",
-        title="Schedule variance",
-        source_tables=("tasks",),
-        calculator=calculate_schedule_variance_percent,
-        description="Разница между фактической готовностью и плановой готовностью по due dates.",
-        owner_action="Понять, насколько проект отстает от календарного плана.",
-    ),
-    FunctionMetric(
-        key="stale_tasks_count",
-        title="Зависшие задачи",
-        source_tables=("task_history", "tasks"),
-        calculator=calculate_stale_tasks_count,
-        description="Количество открытых задач, которые находятся в текущем статусе дольше 5 дней.",
-        owner_action="Проверить задачи без движения и снять причины зависания.",
-    ),
-    FunctionMetric(
-        key="estimate_overrun_percent",
-        title="Отклонение от оценки",
-        source_tables=("tasks",),
-        calculator=calculate_estimate_overrun_percent,
-        description="Отклонение spent_hours от estimated_hours по задачам проекта.",
-        owner_action="Проверить перерасход трудозатрат и скорректировать forecast.",
-    ),
-    FunctionMetric(
-        key="workload_imbalance_index",
-        title="Дисбаланс нагрузки",
-        source_tables=("tasks",),
-        calculator=calculate_workload_imbalance_index,
-        description="Коэффициент вариации открытых задач по исполнителям.",
-        owner_action="Перераспределить задачи, если нагрузка сконцентрирована у нескольких людей.",
-    ),
-    FunctionMetric(
-        key="key_person_dependency_percent",
-        title="Риск ключевого сотрудника",
-        source_tables=("tasks",),
-        calculator=calculate_key_person_dependency_percent,
-        description="Максимальная доля открытых задач на одном исполнителе.",
-        owner_action="Снизить bus factor и распределить критичные задачи.",
-    ),
-    FunctionMetric(
-        key="critical_task_silence_days",
-        title="Молчание по критичным задачам",
-        source_tables=("tasks", "task_comments"),
-        calculator=calculate_critical_task_silence_days,
-        description="Максимальное число дней без комментариев по открытым critical/high задачам.",
-        owner_action="Запустить follow-up по критичным задачам без коммуникации.",
-    ),
-    FunctionMetric(
-        key="risk_trend",
-        title="Risk trend proxy",
-        source_tables=("risks",),
-        calculator=calculate_risk_trend,
-        description="Прокси-тренд рисков по текущим статусам high-risk записей.",
-        owner_action="Для настоящего тренда добавить weekly snapshots рисков.",
-    ),
-    FunctionMetric(
-        key="communication_silence_days",
-        title="Communication silence",
-        source_tables=("communications",),
-        calculator=calculate_communication_silence_days,
-        description="Максимальное число дней без сообщения по открытым коммуникациям.",
-        owner_action="Запустить follow-up по зависшим темам.",
-    ),
-    FunctionMetric(
-        key="data_freshness_days",
-        title="Свежесть данных",
-        source_tables=(
-            "task_history",
-            "task_comments",
-            "communications",
-            "communication_messages",
-            "decisions",
-            "change_requests",
-            "milestones",
-        ),
-        calculator=calculate_data_freshness_days,
-        description="Сколько дней прошло с последнего наблюдаемого события в source layer.",
-        owner_action="Проверить качество summary, если данные давно не обновлялись.",
-    ),
-    FunctionMetric(
-        key="owner_action_load",
-        title="Нагрузка действий на владельцев",
-        source_tables=("tasks", "dependencies", "decisions", "change_requests", "communications"),
-        calculator=calculate_owner_action_load,
-        description="Список владельцев и команд с количеством открытых действий.",
-        owner_action="Назначить владельцев recovery actions и снять концентрацию блокеров.",
-    ),
-    FunctionMetric(
-        key="cost_of_delay_exposure",
-        title="Cost of delay exposure",
-        source_tables=("budgets", "milestones", "task_dependencies", "dependencies", "communications"),
-        calculator=calculate_cost_of_delay_exposure,
-        description="Оценка денежного ущерба от текущей максимальной задержки.",
-        owner_action="Использовать для разговора с заказчиком и PMO о цене бездействия.",
-    ),
-    FunctionMetric(
-        key="project_health_score",
-        title="Health score проекта",
-        source_tables=(
-            "tasks",
-            "milestones",
-            "budgets",
-            "risks",
-            "communications",
-            "resource_allocations",
-            "task_dependencies",
-            "task_history",
-            "task_comments",
-            "dependencies",
-            "decisions",
-            "change_requests",
-        ),
-        calculator=calculate_project_health_score,
-        description="Сводный score 0-100 после штрафов за ключевые отклонения.",
-        owner_action="Использовать для сортировки инициатив и выбора зоны внимания.",
-    ),
-    FunctionMetric(
-        key="risk_level",
-        title="Зона риска",
-        source_tables=(
-            "tasks",
-            "milestones",
-            "budgets",
-            "risks",
-            "communications",
-            "resource_allocations",
-            "task_dependencies",
-            "task_history",
-            "task_comments",
-            "dependencies",
-            "decisions",
-            "change_requests",
-        ),
-        calculator=calculate_risk_level,
-        description="Green/yellow/red зона проекта на основе health score.",
-        owner_action="Определить формат контроля: штатный, внимание РП или эскалация.",
-    ),
-)

@@ -139,8 +139,8 @@ function BriefContent({
               value={`${brief.draft_message.subject}. ${brief.draft_message.body}`}
             />
             <BriefBox
-              title={`Follow-up: ${brief.follow_up_check.check_after}`}
-              value={`${brief.follow_up_check.success_condition} Если нет: ${brief.follow_up_check.escalation_condition}`}
+              title={`Проверка: ${brief.follow_up_check.check_after}`}
+              value={`${brief.follow_up_check.success_condition} Если не сработало: ${brief.follow_up_check.escalation_condition}`}
             />
           </div>
 
@@ -156,15 +156,15 @@ function BriefImpact({ brief }: { brief: ProjectManagerBrief }) {
   const items = [
     impact.delay_days !== null
       ? impact.delay_days < 0
-        ? { label: "Сокращение задержки", value: formatDays(Math.abs(impact.delay_days)) }
-        : { label: "Задержка", value: formatDays(impact.delay_days) }
+        ? { label: "Срок улучшается на", value: formatDays(Math.abs(impact.delay_days)) }
+        : { label: "Сдвиг срока", value: formatDays(impact.delay_days) }
       : null,
     impact.cost_of_delay !== null
-      ? { label: "Потери от задержки", value: formatMoney(impact.cost_of_delay) }
+      ? { label: "Цена задержки", value: formatMoney(impact.cost_of_delay) }
       : null,
     impact.budget_delta !== null
       ? {
-          label: impact.budget_delta < 0 ? "Экономия бюджета" : "Бюджетный эффект",
+          label: impact.budget_delta < 0 ? "Экономия бюджета" : "Влияние на бюджет",
           value: formatMoney(Math.abs(impact.budget_delta)),
         }
       : null,
@@ -173,7 +173,7 @@ function BriefImpact({ brief }: { brief: ProjectManagerBrief }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-3 dark:border-slate-800 dark:bg-slate-950/40">
       <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-        Impact
+        Влияние на проект
       </div>
       {items.length ? (
         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -228,22 +228,6 @@ function NextActionCard({
         <div>Результат: {action.success_signal}</div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled
-          title="Действие будет подключено после появления workflow согласований"
-          className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white opacity-50 dark:bg-slate-100 dark:text-slate-950"
-        >
-          Утвердить рекомендацию
-        </button>
-        <button
-          type="button"
-          disabled
-          title="Действие будет подключено после интеграции календаря или коммуникаций"
-          className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 opacity-50 dark:border-slate-800 dark:text-slate-200"
-        >
-          Запросить обсуждение
-        </button>
         <button
           type="button"
           onClick={onOpenTasks}

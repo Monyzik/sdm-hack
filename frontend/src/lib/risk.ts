@@ -95,7 +95,7 @@ const STATUS_LABELS: Record<string, string> = {
   critical: "критичный",
   delayed: "задержано",
   done: "готово",
-  escalated: "эскалировано",
+  escalated: "требует решения",
   high: "высокий",
   in_progress: "в работе",
   low: "низкий",

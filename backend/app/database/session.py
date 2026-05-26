@@ -3,9 +3,9 @@ from __future__ import annotations
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import URL, create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import URL
+from sqlalchemy.engine import make_url
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 
 DatabaseUrl = str | URL
@@ -27,7 +27,7 @@ def resolve_database_url(cli_value: str | None = None) -> DatabaseUrl:
     user = os.getenv("POSTGRES_USER", "sdm_hack")
     password = os.getenv("POSTGRES_PASSWORD", "sdm_hack_password")
     return URL.create(
-        "postgresql+psycopg2",
+        "postgresql",
         username=user,
         password=password,
         host=host,
@@ -36,9 +36,22 @@ def resolve_database_url(cli_value: str | None = None) -> DatabaseUrl:
     )
 
 
-def create_engine_from_env(database_url: str | None = None, echo: bool = False) -> Engine:
-    return create_engine(resolve_database_url(database_url), echo=echo)
+def resolve_async_database_url(cli_value: str | None = None) -> DatabaseUrl:
+    return _async_driver_url(resolve_database_url(cli_value))
 
 
-def create_session_factory(engine: Engine) -> sessionmaker[Session]:
-    return sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+def create_async_engine_from_env(database_url: str | None = None, echo: bool = False) -> AsyncEngine:
+    return create_async_engine(resolve_async_database_url(database_url), echo=echo)
+
+
+def create_async_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+    return async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+
+def _async_driver_url(database_url: DatabaseUrl) -> DatabaseUrl:
+    url = database_url if isinstance(database_url, URL) else make_url(database_url)
+    if url.drivername in {"postgresql", "postgresql+psycopg2", "postgresql+psycopg"}:
+        return url.set(drivername="postgresql+asyncpg")
+    if url.drivername == "sqlite":
+        return url.set(drivername="sqlite+aiosqlite")
+    return url

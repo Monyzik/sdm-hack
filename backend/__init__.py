@@ -1,1 +1,1 @@
-"""Backend package for AI Project Control Tower."""
+"""Пакет бэкенда AI Project Control Tower."""

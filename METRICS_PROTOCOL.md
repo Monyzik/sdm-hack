@@ -23,13 +23,11 @@
 Программный контракт лежит в `backend/app/services/metrics.py`:
 
 - `ProjectMetricContext` — вход расчета метрик: source-данные проекта и дата среза;
-- `ProjectMetric` — protocol интерфейса метрики;
-- `FunctionMetric` — реализация protocol для метрик на функциях;
-- `PROJECT_METRIC_PROTOCOL` — реестр доступных метрик с источниками, описанием и action для РП;
 - `calculate_<metric>()` — отдельная функция расчета для каждой метрики;
 - `calculate_project_metrics()` — сборка полного snapshot метрик для summary API.
+- `project_summary_payload()` и `project_metrics_fact_payload()` — сборка API/LLM payload из Pydantic-контрактов без повторного ручного перечисления всех скалярных метрик.
 
-Агентский граф `agents/project_monitor_graph.py` также должен использовать этот слой: граф может адаптировать названия полей под промпты и алерты, но не должен повторно реализовывать формулы метрик.
+Агентский граф `agents/workflows/project_monitor.py` также должен использовать этот слой: граф может адаптировать названия полей под промпты и алерты, но не должен повторно реализовывать формулы метрик.
 
 ## Текущие метрики
 
@@ -68,7 +66,7 @@
 
 ## Реализованные дополнительные метрики
 
-Эти метрики больше не являются roadmap: они реализованы в `backend/app/services/metrics.py`, включены в `PROJECT_METRIC_PROTOCOL`, возвращаются через `ProjectSummary` и используются агентским графом `agents/project_monitor_graph.py`.
+Эти метрики больше не являются roadmap: они реализованы в `backend/app/services/metrics.py`, возвращаются через `ProjectSummary` / `ProjectMetricsFact` и используются агентским графом `agents/workflows/project_monitor.py`.
 
 | Метрика | Источник | Как помогает РП |
 |---|---|---|

@@ -6,13 +6,14 @@ from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from backend.app.database.models import Notification
 
 
-def upsert_notification_from_draft(
-    session: Session,
+async def upsert_notification_from_draft(
+    session: AsyncSession,
     *,
     project_id: str,
     draft: Mapping[str, Any] | None,
@@ -21,16 +22,8 @@ def upsert_notification_from_draft(
     if not draft or not bool(draft.get("should_create")):
         return None
 
-    deduplication_key = _string_value(draft.get("deduplication_key"))
-    if not deduplication_key:
-        severity = _string_value(draft.get("severity"))
-        title = _string_value(draft.get("title"))
-        deduplication_key = f"{project_id}:{severity}:{title}"
-    as_of_date = _optional_string_value(draft.get("as_of_date"))
-    if as_of_date and not deduplication_key.endswith(f":{as_of_date}"):
-        deduplication_key = f"{deduplication_key}:{as_of_date}"
-
-    notification = session.scalar(
+    deduplication_key = _notification_deduplication_key(project_id=project_id, draft=draft)
+    notification = await session.scalar(
         select(Notification).where(
             Notification.project_id == project_id,
             Notification.deduplication_key == deduplication_key,
@@ -47,28 +40,19 @@ def upsert_notification_from_draft(
         )
         session.add(notification)
 
-    payload = dict(draft)
-    payload["project_id"] = project_id
-
-    notification.updated_at = datetime.utcnow()
-    notification.source = source
-    notification.target_role = _string_value(draft.get("target_role"))
-    notification.recipient_hint = _optional_string_value(draft.get("recipient_hint"))
-    notification.severity = _string_value(draft.get("severity"))
-    notification.title = _string_value(draft.get("title"))
-    notification.body = _string_value(draft.get("body"))
-    notification.reason = _string_value(draft.get("reason"))
-    notification.action_items = _string_list(draft.get("action_items"))
-    notification.requires_acknowledgement = bool(draft.get("requires_acknowledgement"))
-    notification.deduplication_key = deduplication_key
-    notification.payload = payload
-
-    session.flush()
+    _apply_notification_draft(
+        notification,
+        project_id=project_id,
+        draft=draft,
+        source=source,
+        deduplication_key=deduplication_key,
+    )
+    await session.flush()
     return notification
 
 
-def list_notifications(
-    session: Session,
+async def list_notifications(
+    session: AsyncSession,
     *,
     project_id: str | None = None,
     severity: str | None = None,
@@ -89,7 +73,8 @@ def list_notifications(
         .order_by(Notification.created_at.desc())
         .limit(statement_limit)
     )
-    notifications = list(session.scalars(statement))
+    result = await session.scalars(statement)
+    notifications = list(result.all())
     if as_of_date is not None:
         notifications = [
             notification
@@ -99,8 +84,8 @@ def list_notifications(
     return notifications[:limit]
 
 
-def mark_notification_read(session: Session, notification_id: str) -> Notification | None:
-    notification = session.scalar(
+async def mark_notification_read(session: AsyncSession, notification_id: str) -> Notification | None:
+    notification = await session.scalar(
         select(Notification)
         .options(joinedload(Notification.project))
         .where(Notification.id == notification_id)
@@ -114,12 +99,12 @@ def mark_notification_read(session: Session, notification_id: str) -> Notificati
         notification.read_at = now
         notification.updated_at = now
 
-    session.flush()
+    await session.flush()
     return notification
 
 
-def count_notifications(
-    session: Session,
+async def count_notifications(
+    session: AsyncSession,
     *,
     project_id: str | None = None,
     severity: str | None = None,
@@ -128,7 +113,7 @@ def count_notifications(
 ) -> int:
     if as_of_date is not None:
         return len(
-            list_notifications(
+            await list_notifications(
                 session,
                 project_id=project_id,
                 severity=severity,
@@ -144,7 +129,7 @@ def count_notifications(
         unread_only=unread_only,
     )
     statement = select(func.count()).select_from(Notification).where(*conditions)
-    return int(session.scalar(statement) or 0)
+    return int(await session.scalar(statement) or 0)
 
 
 def _notification_conditions(
@@ -161,6 +146,43 @@ def _notification_conditions(
     if unread_only:
         conditions.append(Notification.is_read.is_(False))
     return conditions
+
+
+def _notification_deduplication_key(*, project_id: str, draft: Mapping[str, Any]) -> str:
+    deduplication_key = _string_value(draft.get("deduplication_key"))
+    if not deduplication_key:
+        severity = _string_value(draft.get("severity"))
+        title = _string_value(draft.get("title"))
+        deduplication_key = f"{project_id}:{severity}:{title}"
+    as_of_date = _optional_string_value(draft.get("as_of_date"))
+    if as_of_date and not deduplication_key.endswith(f":{as_of_date}"):
+        deduplication_key = f"{deduplication_key}:{as_of_date}"
+    return deduplication_key
+
+
+def _apply_notification_draft(
+    notification: Notification,
+    *,
+    project_id: str,
+    draft: Mapping[str, Any],
+    source: str,
+    deduplication_key: str,
+) -> None:
+    payload = dict(draft)
+    payload["project_id"] = project_id
+
+    notification.updated_at = datetime.utcnow()
+    notification.source = source
+    notification.target_role = _string_value(draft.get("target_role"))
+    notification.recipient_hint = _optional_string_value(draft.get("recipient_hint"))
+    notification.severity = _string_value(draft.get("severity"))
+    notification.title = _string_value(draft.get("title"))
+    notification.body = _string_value(draft.get("body"))
+    notification.reason = _string_value(draft.get("reason"))
+    notification.action_items = _string_list(draft.get("action_items"))
+    notification.requires_acknowledgement = bool(draft.get("requires_acknowledgement"))
+    notification.deduplication_key = deduplication_key
+    notification.payload = payload
 
 
 def _notification_id() -> str:

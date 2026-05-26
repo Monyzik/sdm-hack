@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ApiError } from "../../api/client";
 import type { ProjectSummary } from "../../api/types";
 import { useProjectBrief } from "../../hooks/useProjectBrief";
+import { useProjectProblemContext } from "../../hooks/useProjectProblemContext";
+import { useProjectTrends } from "../../hooks/useProjectTrends";
 import { ProjectHeader } from "./ProjectHeader";
 import { AgentBriefPanel } from "./panels/AgentBriefPanel";
 import { BudgetPanel } from "./panels/BudgetPanel";
@@ -12,8 +14,10 @@ import { CommunicationsPanel } from "./panels/CommunicationsPanel";
 import { DecisionsPanel } from "./panels/DecisionsPanel";
 import { DependenciesPanel } from "./panels/DependenciesPanel";
 import { KeySignalsPanel } from "./panels/KeySignalsPanel";
+import { ProjectTrendsPanel } from "./panels/ProjectTrendsPanel";
 import { ResourcesPanel } from "./panels/ResourcesPanel";
 import { RisksPanel } from "./panels/RisksPanel";
+import { TaskDependencyGraphPanel } from "./panels/TaskDependencyGraphPanel";
 import { TasksPanel } from "./panels/TasksPanel";
 
 /**
@@ -36,6 +40,18 @@ export function ProjectView({
     asOfDate,
     activeTab === "summary" && isBriefRequested,
   );
+  const problemContextQuery = useProjectProblemContext(
+    project.project_id,
+    asOfDate,
+    2,
+    activeTab === "work",
+  );
+  const trendsQuery = useProjectTrends(
+    project.project_id,
+    asOfDate,
+    8,
+    activeTab === "summary",
+  );
 
   useEffect(() => {
     setIsBriefRequested(true);
@@ -51,6 +67,31 @@ export function ProjectView({
     return "Агент сейчас недоступен или вернул некорректный ответ";
   }, [briefQuery.error, briefQuery.isError, isBriefRequested]);
 
+  const problemContextErrorMessage = useMemo(() => {
+    if (!problemContextQuery.isError) {
+      return null;
+    }
+    if (
+      problemContextQuery.error instanceof ApiError &&
+      problemContextQuery.error.message
+    ) {
+      return problemContextQuery.error.message;
+    }
+    return "Не удалось загрузить граф зависимостей";
+  }, [problemContextQuery.error, problemContextQuery.isError]);
+
+  const workTasks = useMemo(() => {
+    const blockedTaskIds = new Set(project.blocked_tasks.map((task) => task.id));
+    const overdueOnlyTasks = project.overdue_tasks.filter(
+      (task) => !blockedTaskIds.has(task.id),
+    );
+    return {
+      blocked: project.blocked_tasks,
+      overdueOnly: overdueOnlyTasks,
+      uniqueCount: project.blocked_tasks.length + overdueOnlyTasks.length,
+    };
+  }, [project.blocked_tasks, project.overdue_tasks]);
+
   const tabs = useMemo(
     () => [
       { id: "summary" as const, label: "Обзор" },
@@ -58,7 +99,7 @@ export function ProjectView({
         id: "work" as const,
         label: "Работа",
         counterLabel: "задач",
-        count: project.blocked_tasks_count + project.overdue_tasks_count,
+        count: workTasks.uniqueCount,
       },
       {
         id: "coordination" as const,
@@ -72,7 +113,7 @@ export function ProjectView({
           project.overloaded_resources.length,
       },
     ],
-    [project],
+    [project, workTasks.uniqueCount],
   );
 
   return (
@@ -124,6 +165,10 @@ export function ProjectView({
             onOpenTasks={() => setActiveTab("work")}
           />
           <KeySignalsPanel signals={project.key_signals.slice(0, 5)} />
+          <ProjectTrendsPanel
+            trends={trendsQuery.data}
+            isLoading={trendsQuery.isFetching}
+          />
           <BudgetPanel budget={project.budget} />
           <RisksPanel risks={project.top_risks.slice(0, 5)} />
         </div>
@@ -131,16 +176,21 @@ export function ProjectView({
 
       {activeTab === "work" ? (
         <div className="flex flex-col gap-4">
+          <TaskDependencyGraphPanel
+            context={problemContextQuery.data}
+            isLoading={problemContextQuery.isFetching}
+            errorMessage={problemContextErrorMessage}
+          />
           <TasksPanel
             title="Блокируют"
             icon={<AlertTriangle className="size-4" />}
-            tasks={project.blocked_tasks}
+            tasks={workTasks.blocked}
             emptyMessage="Заблокированных задач нет"
           />
           <TasksPanel
             title="Просрочены"
             icon={<Clock3 className="size-4" />}
-            tasks={project.overdue_tasks}
+            tasks={workTasks.overdueOnly}
             emptyMessage="Просроченных задач нет"
           />
         </div>

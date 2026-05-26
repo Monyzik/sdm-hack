@@ -54,33 +54,25 @@ export function BudgetPanel({ budget }: { budget: BudgetSummary | null }) {
           hint="Прогноз минус план"
           danger={isOverrun}
         />
+        <BudgetFact label="Исполнено" value={formatPercent(burnRate)} />
+        <BudgetFact label="Прогноз / план" value={formatPercent(forecastRate)} />
+        <BudgetFact
+          label="ROI"
+          value={formatPercent(budget.roi_percent, true)}
+          danger={budget.roi_percent < 0}
+        />
+        <BudgetFact
+          label="ROI с учетом рисков"
+          value={formatPercent(budget.risk_adjusted_roi_percent, true)}
+          danger={budget.risk_adjusted_roi_percent < 0}
+        />
       </div>
 
       <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
         {isOverrun
-          ? `Прогноз выше плана на ${formatPercent(budget.budget_deviation_percent)}. Сверить причину с открытыми change requests и рисками.`
+          ? `Прогноз выше плана на ${formatPercent(budget.budget_deviation_percent)}. Сверить причину с открытыми запросами на изменение и рисками.`
           : "Прогноз бюджета укладывается в текущий лимит."}
       </p>
-
-      <details className="mt-3 rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40">
-        <summary className="cursor-pointer list-none px-3 py-2 text-sm font-semibold text-slate-700 outline-none transition hover:bg-white focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-900">
-          Детали бюджета
-        </summary>
-        <div className="grid grid-cols-1 gap-2 border-t border-slate-200 p-3 text-sm dark:border-slate-800 md:grid-cols-4">
-          <BudgetFact label="Исполнено" value={formatPercent(burnRate)} />
-          <BudgetFact label="Прогноз / план" value={formatPercent(forecastRate)} />
-          <BudgetFact
-            label="ROI"
-            value={formatPercent(budget.roi_percent, true)}
-            danger={budget.roi_percent < 0}
-          />
-          <BudgetFact
-            label="ROI с учетом рисков"
-            value={formatPercent(budget.risk_adjusted_roi_percent, true)}
-            danger={budget.risk_adjusted_roi_percent < 0}
-          />
-        </div>
-      </details>
     </Panel>
   );
 }

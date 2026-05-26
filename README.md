@@ -99,7 +99,7 @@ curl "http://localhost:8000/api/v1/summaries/projects/P001/problem-context?as_of
 14. Протестировать LLM-агента для brief:
 
 ```bash
-python -m agents.llm
+python -m agents.cli.project_brief
 ```
 
 15. Получить AI brief через agents API:
@@ -118,7 +118,7 @@ docker compose down
 
 Root `main.py` имитирует поток событий по DOCX-файлам из `data/project_documents`.
 
-Если для файла уже есть JSON в `data/per_file_json`, событие считается `docx_changed`. Если JSON еще нет, событие считается `docx_added`. Затем событие передается в LangGraph workflow `agents/project_control_graph.py`.
+Если для файла уже есть JSON в `data/per_file_json`, событие считается `docx_changed`. Если JSON еще нет, событие считается `docx_added`. Затем событие передается в LangGraph workflow `agents/workflows/project_control.py`.
 
 `ProjectControlGraph` начинается с узла `route_event`. Он выбирает ветку обработки:
 
@@ -298,7 +298,7 @@ Endpoint забирает `problem-context` из backend, сжимает его 
 
 ## LangGraph monitoring
 
-Основной workflow цифрового руководителя лежит в `agents/project_control_graph.py`. Отдельный граф мониторинга лежит в `agents/project_monitor_graph.py`.
+Основной workflow цифрового руководителя лежит в `agents/workflows/project_control.py`. Отдельный граф мониторинга лежит в `agents/workflows/project_monitor.py`.
 
 1. загружает проект и связанные сущности из `projects`, `tasks`, `milestones`, `risks`, `communications`, `dependencies`, `decisions`, `budgets`;
 2. детерминированно считает базовые метрики;
@@ -309,18 +309,18 @@ Endpoint забирает `problem-context` из backend, сжимает его 
 
 
 В основном пайплайне этот граф вызывает главный оркестратор
-`agents/project_control_graph.py`, а полный запуск проекта остается через `python main.py`.
+`agents/workflows/project_control.py`, а полный запуск проекта остается через `python main.py`.
 
 Для изолированной проверки мониторинга одного проекта можно запустить подграф напрямую:
 
 ```bash
-python -m agents.project_monitor_graph P001
+python -m agents.workflows.project_monitor P001
 ```
 
 Запуск на конкретную дату:
 
 ```bash
-python -m agents.project_monitor_graph P001 --as-of 2026-06-15
+python -m agents.workflows.project_monitor P001 --as-of 2026-06-15
 ```
 
 Базовые метрики и алерты считаются обычным кодом. LLM-узлы получают уже посчитанный контекст и формируют управленческую сводку, вопросы, рекомендации и draft уведомления.
