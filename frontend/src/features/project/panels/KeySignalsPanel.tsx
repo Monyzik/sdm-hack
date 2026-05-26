@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+import { Activity, CheckCircle2 } from "lucide-react";
 
 import { EmptyState, Panel } from "../../../components/ui";
 
@@ -7,7 +7,10 @@ export function KeySignalsPanel({ signals }: { signals: string[] }) {
   return (
     <Panel title="Почему это критично" icon={<Activity className="size-4" />}>
       {signals.length === 0 ? (
-        <EmptyState message="Сигналов нет" />
+        <EmptyState
+          message="Критичных сигналов нет — проект в норме"
+          icon={<CheckCircle2 className="size-6 text-emerald-400" />}
+        />
       ) : (
         <ul className="space-y-1.5">
           {signals.map((signal, index) => (
@@ -17,7 +20,7 @@ export function KeySignalsPanel({ signals }: { signals: string[] }) {
             >
               <span
                 aria-hidden
-                className="mt-2 size-1.5 shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"
+                className="mt-2 size-1.5 shrink-0 rounded-full bg-indigo-400 dark:bg-indigo-500"
               />
               <span>{signal}</span>
             </li>

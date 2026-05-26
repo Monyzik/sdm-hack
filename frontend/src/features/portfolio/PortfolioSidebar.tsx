@@ -29,7 +29,7 @@ export function PortfolioSidebar({
           const isActive = project.project_id === selectedProjectId;
           const rowClasses = `w-full px-4 py-3 text-left transition ${
             isActive
-              ? "bg-slate-100 dark:bg-slate-800/70"
+              ? "bg-indigo-50 dark:bg-indigo-950/30"
               : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
           }`;
 
@@ -64,6 +64,7 @@ function ProjectRow({ project }: { project: PortfolioProjectSummary }) {
   const totalSignals =
     project.overdue_tasks_count + project.blocked_tasks_count + project.high_risk_count;
   const problem = getProjectProblem(project);
+  const completion = Math.round(project.completion_percent);
 
   return (
     <div className="min-w-0 space-y-2">
@@ -74,6 +75,17 @@ function ProjectRow({ project }: { project: PortfolioProjectSummary }) {
         <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
           {project.priority}
         </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+          <div
+            className="h-full rounded-full bg-indigo-500 transition-all duration-500"
+            style={{ width: `${completion}%` }}
+          />
+        </div>
+        <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-slate-400">
+          {completion}%
+        </span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
         <RiskBadge level={project.risk_level} />

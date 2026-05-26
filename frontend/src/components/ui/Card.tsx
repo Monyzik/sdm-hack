@@ -35,7 +35,7 @@ export function Panel({ title, icon, action, children }: PanelProps) {
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
           {icon ? (
-            <span aria-hidden className="text-slate-400 dark:text-slate-500">
+            <span aria-hidden className="text-indigo-400 dark:text-indigo-400">
               {icon}
             </span>
           ) : null}

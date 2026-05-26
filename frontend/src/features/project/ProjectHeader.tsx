@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, Clock3, ShieldAlert } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, Clock3, ShieldAlert } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { ProjectSummary } from "../../api/types";
@@ -39,10 +39,11 @@ export function ProjectHeader({ project }: { project: ProjectSummary }) {
 
         <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
           <ProjectKpi
-            label="Статус"
-            value={status.value}
-            hint={`health ${project.project_health_score}/100`}
+            label="Health Score"
+            value={`${project.project_health_score}/100`}
+            hint={status.label}
             tone={status.tone}
+            icon={<Activity className="size-4" />}
           />
           <ProjectKpi
             label="Готовность"

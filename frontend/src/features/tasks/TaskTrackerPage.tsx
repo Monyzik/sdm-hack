@@ -1,11 +1,11 @@
 import { useQueries } from "@tanstack/react-query";
 import {
-  AlertCircle,
-  ArrowDown,
-  ArrowUp,
-  CircleDashed,
+  Ban,
+  Clock,
   Filter,
+  ListFilter,
   Search,
+  ShieldAlert,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -105,31 +105,32 @@ export function TaskTrackerPage({
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
         <MetricTile
-          label="В фокусе"
+          label="Показано задач"
           value={filteredTasks.length}
           tone={filteredTasks.length ? "danger" : "success"}
-          icon={<AlertCircle className="size-4" />}
-          hint={isFetching ? "Обновление…" : `${tasks.length} задач в датасете`}
+          icon={<ListFilter className="size-4" />}
+          hint={isFetching ? "Обновление…" : `из ${tasks.length} проблемных`}
         />
         <MetricTile
           label="Блокируют"
           value={totalBlocked}
           tone={totalBlocked ? "danger" : "success"}
-          icon={<CircleDashed className="size-4" />}
+          icon={<Ban className="size-4" />}
+          hint={totalBlocked ? "задач остановлены" : "блокировок нет"}
         />
         <MetricTile
           label="Просрочены"
           value={totalOverdue}
           tone={totalOverdue ? "warning" : "success"}
-          icon={<ArrowDown className="size-4" />}
-          hint={maxOverdue ? `макс. ${formatDays(maxOverdue)}` : "нет просроченных"}
+          icon={<Clock className="size-4" />}
+          hint={maxOverdue ? `макс. просрочка ${formatDays(maxOverdue)}` : "все в срок"}
         />
         <MetricTile
-          label="Критичность"
+          label="Высокий риск"
           value={criticalTasks}
           tone={criticalTasks ? "danger" : "neutral"}
-          icon={<ArrowUp className="size-4" />}
-          hint="critical priority или red проект"
+          icon={<ShieldAlert className="size-4" />}
+          hint={criticalTasks ? "красная зона" : "критичных нет"}
         />
       </div>
 
@@ -259,7 +260,6 @@ export function TaskTrackerPage({
                   <Badge tone={severityTone(task.status)}>
                     {statusLabel(task.status)}
                   </Badge>
-                  <Badge tone="neutral">score {task.attention_score}</Badge>
                 </div>
               </li>
             ))}
@@ -289,7 +289,7 @@ function SegmentButton({
       onClick={onClick}
       className={`h-9 rounded-lg px-3 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
         active
-          ? "bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950"
+          ? "bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white"
           : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
       }`}
     >

@@ -370,7 +370,7 @@ function InterventionItem({
           <button
             type="button"
             onClick={() => onSelectProject(project.project_id)}
-            className="rounded-lg bg-slate-950 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
+            className="rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 transition hover:bg-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
           >
             Открыть проект
           </button>

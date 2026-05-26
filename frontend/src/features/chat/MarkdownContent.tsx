@@ -16,7 +16,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
   const blocks = parseBlocks(content);
 
   return (
-    <div className="space-y-3 text-sm leading-7 text-slate-800 dark:text-slate-200">
+    <div className="space-y-3 text-base leading-7 text-slate-800 dark:text-slate-200">
       {blocks.map((block, index) => renderBlock(block, index))}
     </div>
   );

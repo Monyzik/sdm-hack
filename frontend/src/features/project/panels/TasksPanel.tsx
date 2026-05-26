@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { TaskSignal } from "../../../api/types";
@@ -71,7 +72,7 @@ export function TasksPanel({
       }
     >
       {tasks.length === 0 ? (
-        <EmptyState message={emptyMessage} />
+        <EmptyState message={emptyMessage} icon={<CheckCircle2 className="size-6 text-emerald-400" />} />
       ) : (
         <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2">
           {tasks.map((task) => (

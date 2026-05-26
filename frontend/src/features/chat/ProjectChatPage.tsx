@@ -1,4 +1,4 @@
-import { ArrowUp, Bot, Copy, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUp, Bot, Copy, Sparkles } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 import type {
@@ -150,12 +150,12 @@ export function ProjectChatPage({
             }}
             placeholder="Задайте вопрос о проекте"
             rows={1}
-            className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-3 py-2 text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
+            className="max-h-32 min-h-10 flex-1 resize-none bg-transparent px-3 py-2 text-base leading-6 text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500"
           />
           <button
             type="submit"
             disabled={!canSubmit || questionMutation.isPending}
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-slate-950 text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:bg-slate-300 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white dark:disabled:bg-slate-700"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-indigo-600 text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-300 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:disabled:bg-slate-700"
           >
             <ArrowUp aria-hidden className="size-4" />
             <span className="sr-only">Отправить</span>
@@ -215,7 +215,7 @@ function ChatBubble({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[76%] rounded-3xl bg-slate-950 px-4 py-2.5 text-sm leading-6 text-white dark:bg-slate-100 dark:text-slate-950">
+        <div className="max-w-[76%] rounded-3xl bg-slate-200 px-4 py-2.5 text-base leading-6 text-slate-800 dark:bg-slate-700 dark:text-slate-100">
           {message.content}
         </div>
       </div>
@@ -249,9 +249,10 @@ function ChatBubble({
                 type="button"
                 disabled={disabled}
                 onClick={() => onAsk(question)}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 hover:border-indigo-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-950/70"
               >
                 {question}
+                <ArrowRight aria-hidden className="size-3 shrink-0" />
               </button>
             ))}
           </div>

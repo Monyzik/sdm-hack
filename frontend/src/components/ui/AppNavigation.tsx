@@ -163,7 +163,7 @@ export function AppNavigation<T extends string>({
                 type="button"
                 title="Показать меню"
                 onClick={() => onCollapsedChange(false)}
-                className="hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:text-slate-100 lg:grid"
+                className="hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:text-slate-400 dark:hover:text-slate-100 lg:grid"
               >
                 <ChevronRight
                   aria-hidden
@@ -173,12 +173,14 @@ export function AppNavigation<T extends string>({
                 <span className="sr-only">Показать меню</span>
               </button>
             ) : (
-              <div className="grid size-8 shrink-0 place-items-center text-slate-800 dark:text-slate-100">
-                <LayoutDashboard
-                  aria-hidden
-                  strokeWidth={2.25}
-                  className="size-6"
-                />
+              <div className="flex min-w-0 items-center gap-2.5">
+                <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-indigo-600 text-white shadow-sm">
+                  <LayoutDashboard aria-hidden strokeWidth={2.25} className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold leading-tight text-slate-950 dark:text-slate-50">Control Tower</div>
+                  <div className="text-xs leading-tight text-slate-400 dark:text-slate-500">SDM</div>
+                </div>
               </div>
             )}
           </div>
@@ -301,13 +303,13 @@ function NavigationItems<T extends string>({
             aria-current={isActive ? "page" : undefined}
             title={page.label}
             onClick={() => onPageChange(page.id)}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
               forceLight && isActive
-                ? "bg-slate-100 text-slate-950"
+                ? "bg-indigo-50 text-indigo-700"
                 : forceLight
                   ? "text-slate-600 hover:bg-slate-50"
                   : isActive
-                    ? "bg-slate-100 text-slate-950 dark:bg-slate-800 dark:text-slate-50"
+                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
                     : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900/60"
             } ${isCollapsed ? "lg:grid lg:size-12 lg:place-items-center lg:justify-items-center lg:p-0" : ""}`}
           >
