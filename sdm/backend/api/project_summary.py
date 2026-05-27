@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.dependencies import get_session
-from backend.app.schemas.project_summary import (
+from sdm.backend.dependencies import get_session
+from sdm.backend.schemas.project_summary import (
     PortfolioAttentionSummary,
     PortfolioSummary,
     ProjectProblemContext,
@@ -16,11 +16,11 @@ from backend.app.schemas.project_summary import (
     ProjectSummary,
     ProjectTrends,
 )
-from backend.app.services.data_classes import ProjectSummarySource
-from backend.app.services.project_summary_repository import ProjectSummaryRepository
-from backend.app.services.project_summary_service import ProjectSummaryService
-from backend.app.services.retrieval import reindex_project_rag, search_project_rag
-from backend.app.services.yandex_embeddings import YandexEmbeddingClient, get_yandex_embedding_client
+from sdm.backend.services.data_classes import ProjectSummarySource
+from sdm.backend.services.project_summary_repository import ProjectSummaryRepository
+from sdm.backend.services.project_summary_service import ProjectSummaryService
+from sdm.backend.services.retrieval import reindex_project_rag, search_project_rag
+from sdm.backend.services.yandex_embeddings import YandexEmbeddingClient, get_yandex_embedding_client
 
 
 router = APIRouter(prefix="/summaries", tags=["summaries"])

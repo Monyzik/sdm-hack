@@ -5,10 +5,10 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database.models import Notification
-from backend.app.dependencies import get_session
-from backend.app.schemas.notifications import NotificationItem, NotificationList
-from backend.app.services.notifications import (
+from sdm.backend.database.models import Notification
+from sdm.backend.dependencies import get_session
+from sdm.backend.schemas.notifications import NotificationItem, NotificationList
+from sdm.backend.services.notifications import (
     count_notifications,
     list_notifications,
     mark_notification_read,

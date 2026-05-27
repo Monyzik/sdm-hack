@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from backend.app.database.models import Notification
+from sdm.backend.database.models import Notification
 
 
 async def upsert_notification_from_draft(

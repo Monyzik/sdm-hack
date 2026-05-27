@@ -13,8 +13,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from agents.agents.project_control import ProjectControlData, build_project_control_graph
-from backend.app.database.models import Base
-from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
+from sdm.backend.database.models import Base
+from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 
 
 EVENTS_FILE = PROJECT_ROOT / "data/control_events.jsonl"

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from agents.domain.project_document import ProjectData
 from agents.agents.project_parser import ProjectParser
-from backend.app.database.project_import import update_project_from_schema_async
+from sdm.backend.database.project_import import update_project_from_schema_async
 
 from ..state import ProjectControlData, state_value
 

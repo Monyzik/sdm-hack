@@ -4,8 +4,8 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 from typing import Iterable
 
-from backend.app.database.models import Task, TaskDependency
-from backend.app.schemas.project_summary import (
+from sdm.backend.database.models import Task, TaskDependency
+from sdm.backend.schemas.project_summary import (
     PortfolioAttentionProject,
     PortfolioAttentionSignal,
     PortfolioAttentionSummary,
@@ -24,7 +24,7 @@ from backend.app.schemas.project_summary import (
     TaskDependencyEdgeFact,
     TaskHistoryFact,
 )
-from backend.app.services.metrics import (
+from sdm.backend.services.metrics import (
     build_portfolio_signals,
     calculate_portfolio_health_score,
     calculate_project_metrics,
@@ -34,8 +34,8 @@ from backend.app.services.metrics import (
     project_metrics_fact_payload,
     project_summary_payload,
 )
-from backend.app.services.data_classes import ProjectSummarySource
-from backend.app.services.protocols import ProjectSummaryReader
+from sdm.backend.services.data_classes import ProjectSummarySource
+from sdm.backend.services.protocols import ProjectSummaryReader
 
 
 OPEN_COMMUNICATION_STATUSES = {"pending", "delayed", "escalated"}

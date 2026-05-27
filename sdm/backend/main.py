@@ -6,10 +6,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.api.notifications import router as notifications_router
-from backend.app.api.project_summary import router as project_summary_router
-from backend.app.core.config import get_settings
-from backend.app.dependencies import async_engine
+from sdm.backend.api.notifications import router as notifications_router
+from sdm.backend.api.project_summary import router as project_summary_router
+from sdm.backend.core.config import get_settings
+from sdm.backend.dependencies import async_engine
 
 
 settings = get_settings()

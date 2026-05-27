@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from agents.core.text import humanize_agent_text, limit_text
-from backend.app.schemas.project_summary import ProjectMetricsFact, ProjectSummary
+from sdm.backend.schemas.project_summary import ProjectMetricsFact, ProjectSummary
 
 HUMAN_VALUE_LABELS = {
     "active": "активен",

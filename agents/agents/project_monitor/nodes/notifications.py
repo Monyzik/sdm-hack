@@ -5,7 +5,7 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from agents.agents.internal_notifications import ProjectInternalNotificationAgent
-from backend.app.services.notifications import upsert_notification_from_draft
+from sdm.backend.services.notifications import upsert_notification_from_draft
 
 from ..state import ProjectMonitorData, state_value
 

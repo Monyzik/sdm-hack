@@ -6,8 +6,8 @@ import asyncio
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
 
-from backend.app.database.models import Base
-from backend.app.database.session import DatabaseUrl, create_async_engine_from_env, resolve_async_database_url
+from sdm.backend.database.models import Base
+from sdm.backend.database.session import DatabaseUrl, create_async_engine_from_env, resolve_async_database_url
 
 LEGACY_TABLES: tuple[str, ...] = ("project_events", "project_rag_chunks")
 

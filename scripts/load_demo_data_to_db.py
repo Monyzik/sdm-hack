@@ -17,8 +17,8 @@ from sqlalchemy import text
 from sqlalchemy.engine import Connection, make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
-from backend.app.database.models import Base
-from backend.app.database.session import DatabaseUrl, resolve_async_database_url
+from sdm.backend.database.models import Base
+from sdm.backend.database.session import DatabaseUrl, resolve_async_database_url
 from scripts.generate_demo_data import CSV_BOOLEAN_COLUMNS, CSV_COLUMN_LABELS, TASK_HISTORY_FIELD_LABELS
 
 

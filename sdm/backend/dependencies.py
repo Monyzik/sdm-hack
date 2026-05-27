@@ -4,7 +4,7 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
+from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 
 
 async_engine = create_async_engine_from_env()

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from backend.app.database.models import Project
-from backend.app.services.data_classes import ProjectSummarySource
+from sdm.backend.database.models import Project
+from sdm.backend.services.data_classes import ProjectSummarySource
 
 
 class ProjectSummaryReader(Protocol):

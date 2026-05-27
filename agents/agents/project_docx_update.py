@@ -9,8 +9,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from agents.agents.project_parser import ProjectParser
 from agents.domain.project_document import ProjectData
-from backend.app.database.models import Project
-from backend.app.database.session import (
+from sdm.backend.database.models import Project
+from sdm.backend.database.session import (
     create_async_engine_from_env,
     create_async_session_factory,
 )

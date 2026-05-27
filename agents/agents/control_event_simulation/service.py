@@ -12,8 +12,8 @@ from uuid import uuid4
 from sqlalchemy import select
 
 from agents.agents.project_control import EVENT_LABELS, ProjectControlData, build_project_control_graph
-from backend.app.database.models import Base, Notification
-from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
+from sdm.backend.database.models import Base, Notification
+from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 from scripts.simulate_control_events import EVENTS_FILE, OUTPUT_FILE, load_events, save_json
 
 from .schemas import SimulationClearResult, SimulationEventResult, SimulationJob, SimulationStage, SimulationStageStatus

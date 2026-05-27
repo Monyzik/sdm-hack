@@ -4,8 +4,8 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from backend.app.services.data_classes import ProjectSummarySource
-from backend.app.services.project_summary_repository import ProjectSummaryRepository
+from sdm.backend.services.data_classes import ProjectSummarySource
+from sdm.backend.services.project_summary_repository import ProjectSummaryRepository
 
 from ..state import ProjectMonitorData, state_value
 

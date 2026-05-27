@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from agents.agents.internal_notifications import ProjectInternalNotificationAgent
 from agents.agents.project_analysis import ProjectAnalystAgent
-from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
+from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 
 from .nodes import (
     analyze_project_node,

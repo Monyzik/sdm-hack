@@ -9,13 +9,13 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.schemas.project_summary import (
+from sdm.backend.schemas.project_summary import (
     ProjectEvidenceChunk,
     ProjectRetrievalContext,
     ProjectRetrievalIndexResult,
 )
-from backend.app.services.data_classes import ProjectSummarySource
-from backend.app.services.yandex_embeddings import YandexEmbeddingClient
+from sdm.backend.services.data_classes import ProjectSummarySource
+from sdm.backend.services.yandex_embeddings import YandexEmbeddingClient
 
 
 DEFAULT_LIMIT = 8

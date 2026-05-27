@@ -5,12 +5,12 @@ from datetime import date
 from math import sqrt
 from typing import Iterable
 
-from backend.app.database.models import (
+from sdm.backend.database.models import (
     Budget,
     Milestone,
     Task,
 )
-from backend.app.schemas.project_summary import (
+from sdm.backend.schemas.project_summary import (
     BudgetSummary,
     ChangeRequestSignal,
     CommunicationSignal,
@@ -24,7 +24,7 @@ from backend.app.schemas.project_summary import (
     RiskSignal,
     TaskSignal,
 )
-from backend.app.services.data_classes import (
+from sdm.backend.services.data_classes import (
     ProjectMetricContext,
     ProjectMetrics,
     ProjectSummarySource,

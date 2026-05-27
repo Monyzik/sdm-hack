@@ -11,8 +11,8 @@ from agents.agents.project_control import (
     ProjectControlData,
     build_project_control_graph,
 )
-from backend.app.database.models import Base
-from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
+from sdm.backend.database.models import Base
+from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 
 
 DOCX_DIR = Path("data/project_documents")

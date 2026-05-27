@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 
-from backend.app.database.models import (
+from sdm.backend.database.models import (
     Budget,
     BudgetLineItem,
     ChangeRequest,
@@ -21,7 +21,7 @@ from backend.app.database.models import (
     TaskDependency,
     TaskHistory,
 )
-from backend.app.schemas.project_summary import (
+from sdm.backend.schemas.project_summary import (
     BudgetSummary,
     ChangeRequestSignal,
     CommunicationSignal,

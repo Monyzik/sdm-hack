@@ -5,7 +5,7 @@ from typing import Any, TypeVar, cast
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database.models import (
+from sdm.backend.database.models import (
     Budget,
     BudgetLineItem,
     ChangeRequest,
@@ -23,7 +23,7 @@ from backend.app.database.models import (
     TaskDependency,
     TaskHistory,
 )
-from backend.app.services.data_classes import ProjectSummarySource
+from sdm.backend.services.data_classes import ProjectSummarySource
 
 
 _ModelT = TypeVar("_ModelT")

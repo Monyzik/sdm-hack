@@ -7,7 +7,7 @@ from typing import Protocol, Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.database.models import Project
+from sdm.backend.database.models import Project
 
 
 class ProjectGoalData(Protocol):
