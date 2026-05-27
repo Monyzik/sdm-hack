@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from agents.core.text import humanize_agent_text, unique
 
 from .runtime import AIMessage, HumanMessage, SystemMessage, ToolMessage
-from .schemas import ProjectQuestionAnswer
+from .schemas import ProjectQuestionAnswer, ProjectQuestionLLMAnswer
 from .state import ProjectQuestionState
 
 def _state_value(state: ProjectQuestionState | dict[str, Any], key: str, default: Any = None) -> Any:
@@ -124,7 +124,8 @@ def _parse_agent_answer(
             raise ValueError("Модель вернула пустой ответ для Q&A.") from error
         return ProjectQuestionAnswer(answer=text, used_tools=actual_tools)
     try:
-        answer = ProjectQuestionAnswer.model_validate(payload)
+        llm_answer = ProjectQuestionLLMAnswer.model_validate(payload)
+        answer = ProjectQuestionAnswer.model_validate(llm_answer.model_dump())
     except ValidationError as error:
         raise ValueError("Модель вернула JSON не по контракту ProjectQuestionAnswer.") from error
 

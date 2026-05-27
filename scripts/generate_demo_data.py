@@ -11,7 +11,7 @@ import pandas as pd
 SEED = 42
 random.seed(SEED)
 
-DATA_DIR = Path("data")
+DATA_DIR = Path("../data")
 LATEST_SNAPSHOT_DATE = date(2026, 6, 19)
 PROJECT_COLUMNS = [
     "id",

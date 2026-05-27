@@ -287,11 +287,14 @@ def _compact_search_result(result: dict[str, Any], fields: tuple[str, ...]) -> d
 
 
 def _compact_retrieval_result(result: dict[str, Any]) -> dict[str, Any]:
-    return {
+    compacted = {
         "query": _compact_value(result.get("query", "")),
         "count": result.get("count", 0),
         "items": _compact_items(result.get("items", []), EVIDENCE_FIELDS, limit=10),
     }
+    if result.get("warning"):
+        compacted["warning"] = _compact_value(result["warning"])
+    return compacted
 
 
 def _compact_budget_result(result: dict[str, Any]) -> dict[str, Any]:

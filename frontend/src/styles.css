@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-mobile-nav-height: 3.5rem;
+}
+
+.app-chat-shell {
+  height: calc(100svh - var(--app-mobile-nav-height));
+  max-height: calc(100svh - var(--app-mobile-nav-height));
+}
+
+.chat-composer-shell {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@supports (height: 100dvh) {
+  .app-chat-shell {
+    height: calc(100dvh - var(--app-mobile-nav-height));
+    max-height: calc(100dvh - var(--app-mobile-nav-height));
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-chat-shell {
+    height: 100vh;
+    max-height: 100vh;
+  }
+}
+
 html {
   background: #f4f6f8;
   overscroll-behavior-y: none;
@@ -10,8 +37,10 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  max-width: 100%;
   color: #18212f;
   background: #f4f6f8;
+  overscroll-behavior-x: none;
   overscroll-behavior-y: none;
   overflow-x: hidden;
 }
@@ -19,7 +48,18 @@ body {
 html,
 body,
 #root {
+  width: 100%;
+  max-width: 100%;
   min-height: 100%;
+  overflow-x: hidden;
+}
+
+@supports (overflow: clip) {
+  html,
+  body,
+  #root {
+    overflow-x: clip;
+  }
 }
 
 button,

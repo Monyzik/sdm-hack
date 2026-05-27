@@ -8,17 +8,17 @@ from agents.infrastructure.llm import LLMAdapter
 from ..message_utils import _messages_to_openai, _state_value
 from ..prompts import QA_SYSTEM_PROMPT
 from ..runtime import AIMessage, HumanMessage
-from ..schemas import ProjectQuestionAnswer
+from ..schemas import ProjectQuestionLLMAnswer
 from ..state import ProjectQuestionState
 
 
 def finalize_answer_node(*, llm: LLMAdapter, temperature: float) -> Any:
     async def finalize_answer(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
         if _state_value(state, "needs_project_tools", True):
-            final_instruction = "Сформируй финальный JSON ProjectQuestionAnswer по уже полученным tool results."
+            final_instruction = "Сформируй финальный JSON ProjectQuestionLLMAnswer по уже полученным tool results."
         else:
             final_instruction = (
-                "Сформируй финальный JSON ProjectQuestionAnswer без проектных фактов, "
+                "Сформируй финальный JSON ProjectQuestionLLMAnswer без проектных фактов, "
                 "evidence_ids и рекомендаций по проекту."
             )
         messages = [
@@ -31,7 +31,7 @@ def finalize_answer_node(*, llm: LLMAdapter, temperature: float) -> Any:
             f"{json.dumps(_messages_to_openai(messages), ensure_ascii=False, default=str)}"
         )
         answer = await llm.parse_pydantic(
-            response_model=ProjectQuestionAnswer,
+            response_model=ProjectQuestionLLMAnswer,
             system_prompt=QA_SYSTEM_PROMPT,
             user_prompt=final_prompt,
             temperature=temperature,

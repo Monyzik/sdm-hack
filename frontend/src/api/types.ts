@@ -361,6 +361,61 @@ export interface SimulationClearResult {
   output_file_removed: boolean;
 }
 
+export interface ProjectDocxEditableUpdate {
+  project_name: string;
+  start_date: string | null;
+  planned_end_date: string | null;
+  business_goal: string;
+  expected_result: string;
+}
+
+export interface ProjectDocxFieldChange {
+  field: keyof ProjectDocxEditableUpdate;
+  label: string;
+  current_value: string | null;
+  proposed_value: string | null;
+  changed: boolean;
+}
+
+export interface ParsedProjectGoal {
+  goal: string;
+  confidence: number;
+}
+
+export interface ParsedProjectResult {
+  result: string;
+  confidence: number;
+  measurable: boolean;
+}
+
+export interface ParsedProjectTimeline {
+  start_date: string | null;
+  end_date: string | null;
+  duration: string | null;
+  confidence: number;
+}
+
+export interface ParsedProjectData {
+  project_name: string;
+  goals: ParsedProjectGoal[];
+  results: ParsedProjectResult[];
+  timeline: ParsedProjectTimeline | null;
+}
+
+export interface ProjectDocxPreview {
+  project_id: string;
+  file_name: string;
+  parsed_project: ParsedProjectData;
+  editable_update: ProjectDocxEditableUpdate;
+  changes: ProjectDocxFieldChange[];
+}
+
+export interface ProjectDocxApplyResult {
+  project_id: string;
+  updated_project: ProjectDocxEditableUpdate;
+  changes: ProjectDocxFieldChange[];
+}
+
 export type AgentBriefStatus = "в норме" | "под наблюдением" | "критично";
 
 export interface DecisionOption {
@@ -416,8 +471,19 @@ export interface ProjectManagerBrief {
 export interface ProjectQuestionAnswer {
   answer: string;
   evidence_ids: string[];
+  evidence_sources: ProjectEvidenceSource[];
   used_tools: string[];
   suggested_questions: string[];
+}
+
+export interface ProjectEvidenceSource {
+  id: string;
+  tool: string;
+  source_type: string;
+  title: string;
+  reference: string | null;
+  excerpt: string | null;
+  data: Record<string, unknown>;
 }
 
 export interface ProjectChatContextMessage {

@@ -1,343 +1,284 @@
 # AI Project Control Tower
 
-MVP для контроля портфеля банковских проектов. Система собирает данные из проектного контура, tasktracker, бюджета, risk register, коммуникаций и ресурсного плана, а затем считает проектные метрики и готовит объяснения для руководителя проекта.
+AI Project Control Tower — продукт для руководителей проектов и портфельных менеджеров, которым нужно быстро понимать, что происходит с проектами, где уже назревает проблема и какое действие стоит принять следующим.
 
-## Архитектура
+Система собирает проектные данные из задач, рисков, бюджета, коммуникаций, зависимостей, ресурсов и документов, превращает их в управленческую картину и помогает разбирать причины проблем через AI-агентов.
 
-- `frontend/`: web-интерфейс на React, Vite, TailwindCSS и daisyUI.
-- `backend/`: FastAPI, ORM-модели и бизнес-логика платформы.
-- `backend/app/`: слоистая архитектура backend.
-- `agents/`: AI-агенты, DOCX parser и LangGraph-сценарии анализа.
-- `infra/`: локальная инфраструктура.
-- `data/`: синтетические CSV-данные и demo inputs для агентов.
-- `docs/`: исходные материалы по кейсу.
-- `scripts/`: утилиты для генерации и загрузки данных.
-- `docker-compose.yml`: общий compose-файл.
+## Какую боль решает
 
-В compose подключены PostgreSQL, backend API, agents API и frontend. Схема БД создается из SQLAlchemy-моделей в `backend/app/database/`. CSV загружаются через `scripts/load_demo_data_to_db.py`.
+В проектном управлении проблема редко лежит в одном месте. Задача может быть заблокирована в трекере, причина обсуждаться в переписке, бюджетное влияние жить в отдельной таблице, а актуальные цели проекта быть записаны в DOCX. Руководитель тратит время не на решение, а на сбор контекста.
 
-## Запуск платформы
+AI Project Control Tower закрывает этот разрыв:
 
-1. При необходимости переопределить параметры в `.env`.
+- показывает здоровье портфеля и каждого проекта без ручной сборки статусов;
+- связывает сроки, блокеры, риски, бюджет, зависимости, решения и коммуникации в одну картину;
+- объясняет, почему проект попал в красную зону;
+- помогает найти первопричину, а не только симптом;
+- показывает, какие действия нужно вынести руководителю, команде или комитету;
+- сохраняет проверяемость ответа через источники данных.
+
+## Для кого
+
+- Руководитель проекта: быстро понять статус, блокеры, критический путь и ближайшие действия.
+- Портфельный менеджер: видеть, какие проекты требуют внимания сегодня.
+- Тимлид или владелец направления: проверить перегруз команды, открытые решения и зависимые задачи.
+- Управляющий комитет: получить сжатую управленческую выжимку с вариантами решения и бизнес-влиянием.
+
+## Что умеет
+
+### Портфельный обзор
+
+Показывает состояние всех проектов на выбранную дату:
+
+- health score;
+- зона риска;
+- процент готовности;
+- просрочки и блокировки;
+- бюджетное отклонение;
+- перегруз ресурсов;
+- топ-сигналы, которые требуют внимания.
+
+### Командный центр проекта
+
+Для выбранного проекта система показывает:
+
+- ключевые метрики;
+- проблемные задачи;
+- риски;
+- зависимости и критический путь;
+- коммуникации с задержками;
+- ожидающие решения;
+- открытые запросы на изменение;
+- ресурсную загрузку;
+- динамику по датам.
+
+### Управленческая сводка от агента
+
+Агент формирует короткую управленческую сводку:
+
+- текущий статус проекта;
+- главный управленческий вопрос;
+- диагноз проблемы;
+- узкое место;
+- варианты решения;
+- бизнес-влияние;
+- следующие действия;
+- черновик сообщения ответственным;
+- правило последующей проверки.
+
+Сводка нужна не как “текст ради текста”, а как готовый материал для управленческого решения.
+
+### Вопросы к проекту
+
+В чате можно спрашивать:
+
+- “Почему задача заблокирована?”
+- “Что обсуждали по безопасности?”
+- “Кто просил согласование?”
+- “Какие решения ожидают владельца?”
+- “Какая стоимость сдвига срока на 10 дней?”
+- “Какие задачи сейчас на критическом пути?”
+
+Агент использует инструменты поиска и расчета, а также поиск по проектному следу: комментариям задач, сообщениям, решениям, рискам, запросам на изменение и истории изменений.
+
+Для проверки ответа фронтенд показывает источники: можно открыть модалку и посмотреть кусок данных, из которого агент взял факт.
+
+### Уведомления
+
+Система формирует внутренний inbox для руководителя проекта:
+
+- новые блокировки;
+- сдвиги сроков;
+- рост риска;
+- бюджетные отклонения;
+- просроченные коммуникации;
+- зависшие решения;
+- события, требующие реакции.
+
+Уведомления привязаны к проекту, дате среза и событию-триггеру.
+
+### Симуляция событий
+
+Можно запустить демонстрационный поток событий и посмотреть, как система реагирует на изменения:
+
+- изменение задачи;
+- изменение риска;
+- изменение бюджета;
+- изменение зависимости;
+- изменение коммуникации;
+- обновление DOCX-документа.
+
+Это показывает продуктовый сценарий “не просто дашборд, а мониторинг изменений”.
+
+### Обработка DOCX
+
+Система умеет читать проектные документы без единого шаблона и извлекать из них базовые управленческие поля:
+
+- цели проекта;
+- ожидаемые результаты;
+- сроки;
+- название проекта.
+
+После разбора данные могут обновлять карточку проекта в базе.
+
+## Какие данные использует
+
+В демо-контуре используются синтетические данные:
+
+- проекты;
+- задачи;
+- история задач;
+- комментарии;
+- контрольные точки;
+- риски;
+- коммуникации и сообщения;
+- зависимости;
+- решения;
+- запросы на изменение;
+- бюджет;
+- ресурсы и загрузка;
+- DOCX-документы проекта.
+
+Производные показатели не хранятся как исходные данные. Health score, risk level, просрочки, бюджетные отклонения, risk pressure, resource overload и другие метрики рассчитываются платформой.
+
+## Главные пользовательские сценарии
+
+1. Открыть портфель и увидеть проекты, которые требуют внимания.
+2. Перейти в проект и понять, что именно ухудшает статус.
+3. Посмотреть управленческую сводку и получить рекомендацию.
+4. Задать уточняющий вопрос в чате.
+5. Открыть источники ответа и проверить фактическую основу.
+6. Запустить симуляцию событий и увидеть новые уведомления.
+7. Принять решение: назначить владельца, вынести вопрос на комитет, сократить scope, согласовать бюджет или снять блокировку.
+
+## Из чего состоит система
+
+- `frontend/` — веб-интерфейс: портфель, проект, чат, уведомления, графики.
+- `backend/` — API, база, расчет метрик, слой сводок, поиск по источникам.
+- `agents/` — AI-агенты, управленческая сводка, чат, мониторинг, уведомления, обработка DOCX, маршрутизация событий.
+- `data/` — демо-данные и документы.
+- `scripts/` — загрузка данных и симуляция событий.
+- `infra/` — локальная инфраструктура.
+- `docs/` — материалы, схема архитектуры и презентационные артефакты.
+
+## AI-агенты
+
+- `project_brief` — управленческая сводка по проекту.
+- `project_qa` — чат по проектным фактам, расчетам и истории.
+- `project_monitor` — мониторинг метрик и алертов.
+- `project_control` — маршрутизация событий управления.
+- `internal_notifications` — генерация внутренних уведомлений.
+- `project_parser` — извлечение данных из DOCX.
+- `project_analysis` — аналитическая сводка по состоянию проекта.
+- `control_event_simulation` — демонстрационный запуск событий.
+
+## Технологический стек
+
+- Frontend: React, Vite, TypeScript, TailwindCSS.
+- Backend: FastAPI, SQLAlchemy, Pydantic.
+- Agents: LangGraph, LangChain Core tools/messages, Pydantic contracts.
+- Storage: PostgreSQL, pgvector.
+- LLM/Embeddings: провайдер, совместимый с YandexGPT, и Yandex text-search embeddings.
+- Runtime: Docker Compose.
+
+## Быстрый запуск демо
+
+1. Создать `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Сгенерировать актуальные CSV:
-
-```bash
-python generate_demo_data.py
-```
-
-3. Поднять PostgreSQL:
+2. Поднять PostgreSQL:
 
 ```bash
 docker compose up -d postgres
 ```
 
-4. Создать ORM-таблицы вручную, если нужно только подготовить схему:
+3. Создать таблицы:
 
 ```bash
 python -m backend.app.database.init_db --drop-existing
 ```
 
-5. Загрузить CSV в PostgreSQL:
+4. Загрузить демо-данные:
 
 ```bash
 python scripts/load_demo_data_to_db.py
 ```
 
-6. Поднять backend API, agents API и frontend:
+5. Поднять backend, agents API и frontend:
 
 ```bash
 docker compose up -d backend agents frontend
 ```
 
-7. Проверить статус:
+6. Открыть интерфейс:
 
-```bash
-docker compose ps
-```
-
-8. Проверить health endpoint:
-
-```bash
-curl http://localhost:8000/health
-```
-
-9. Открыть frontend:
-
-```bash
+```text
 http://localhost:5180
 ```
 
-10. Получить portfolio summary:
+Health checks:
 
-```bash
-curl "http://localhost:8000/api/v1/summaries/portfolio?as_of=2026-06-19"
+```text
+http://localhost:8000/health
+http://localhost:8010/health
 ```
 
-11. Получить портфельный inbox изменений:
+## Основные API
 
-```bash
-curl "http://localhost:8000/api/v1/summaries/portfolio/attention?as_of=2026-06-19&lookback_days=7"
+```text
+GET  /api/v1/summaries/portfolio
+GET  /api/v1/summaries/portfolio/attention
+GET  /api/v1/summaries/projects/{project_id}
+GET  /api/v1/summaries/projects/{project_id}/problem-context
+GET  /api/v1/summaries/projects/{project_id}/retrieval-context
+GET  /api/v1/notifications
+PATCH /api/v1/notifications/{notification_id}/read
+GET  /api/v1/agents/projects/{project_id}/brief
+POST /api/v1/agents/projects/{project_id}/ask
+POST /api/v1/agents/control-events/simulation
 ```
 
-12. Получить summary по одному проекту:
+## Симуляция событий
 
-```bash
-curl "http://localhost:8000/api/v1/summaries/projects/P001?as_of=2026-06-19"
-```
+События для демо лежат в `data/control_events.jsonl`.
 
-13. Получить fact context для LLM:
-
-```bash
-curl "http://localhost:8000/api/v1/summaries/projects/P001/problem-context?as_of=2026-06-19&max_depth=2"
-```
-
-14. Получить AI brief через agents API:
-
-```bash
-curl "http://localhost:8010/api/v1/agents/projects/P001/brief?as_of=2026-06-19&max_depth=2"
-```
-
-15. Остановить инфраструктуру:
-
-```bash
-docker compose down
-```
-
-## DOCX agent pipeline
-
-Root `main.py` имитирует поток событий по DOCX-файлам из `data/project_documents`.
-
-Если для файла уже есть JSON в `data/per_file_json`, событие считается `docx_changed`. Если JSON еще нет, событие считается `docx_added`. Затем событие передается в LangGraph-оркестратор `agents/agents/project_control/`.
-
-`ProjectControlGraph` начинается с узла `route_event`. Он выбирает ветку обработки:
-
-- `docx_added` / `docx_changed` -> `parse_docx` -> `update_project` -> `monitor_project`;
-- `task_changed`, `risk_changed`, `budget_changed`, `dependency_changed`, `communication_changed`, `manual_monitoring_requested` -> сразу `monitor_project`.
-
-Для DOCX-событий нужен `file_path`, для событий мониторинга нужен `project_id`.
-Любое событие может дополнительно передать `as_of` в формате `YYYY-MM-DD`; эта дата попадет в `ProjectMonitorGraph` и будет использована для расчета метрик и уведомлений.
-
-Основные шаги DOCX-ветки:
-
-1. `parse_docx`: запускает DOCX parsing agent и извлекает проектную JSON-схему.
-2. `update_project`: обновляет выбранные поля проекта в таблице `projects`.
-3. `monitor_project`: запускает мониторинг проекта и формирует метрики и алерты.
-
-Сначала проекты должны быть загружены из CSV, потому что DOCX-пайплайн не создает новые строки в `projects`, а только обновляет существующие проекты `P001`, `P002` и т.д.
-
-Из DOCX в таблицу `projects` записываются только поля:
-
-- `project_name` -> `projects.name`;
-- `timeline.start_date` -> `projects.start_date`;
-- `timeline.end_date` -> `projects.planned_end_date`;
-- `goals` -> `projects.business_goal`;
-- `results` -> `projects.expected_result`.
-
-Остальные поля проекта остаются из CSV.
-
-Запуск пайплайна:
-
-```bash
-python main.py
-```
-
-По умолчанию `main.py` запускает мониторинг на дату `2026-06-19`. Дату batch-среза можно поменять без аргументов командной строки:
-
-```bash
-AS_OF_DATE=2026-12-17 python main.py
-```
-
-Результаты сохраняются в:
-
-- `data/per_file_json/`: JSON после парсинга каждого DOCX;
-- `data/agents_json/batch_output.json`: общий результат пайплайна;
-- `data/agents_json/project_monitoring_output.json`: результат мониторинга.
-
-### Симуляция событий
-
-Для локальной симуляции события можно описать в `data/control_events.jsonl`.
-Каждая строка — отдельный JSON-объект:
-
-```json
-{"event_type":"docx_changed","file_path":"data/project_documents/project_summary_001.docx","as_of":"2026-06-19"}
-{"event_type":"task_changed","project_id":"P001","as_of":"2026-06-20"}
-{"event_type":"risk_changed","project_id":"P002","as_of":"2026-06-21"}
-```
-
-Запуск симуляции:
+Запуск:
 
 ```bash
 python scripts/simulate_control_events.py
 ```
 
-Скрипт читает события из `data/control_events.jsonl`, отправляет каждое событие в
-`ProjectControlGraph` и сохраняет результат в
-`data/agents_json/control_event_simulation_output.json`.
-Относительные `file_path` в JSONL считаются относительно корня проекта.
-Если в событии нет `as_of` или дата повторяется, симулятор автоматически назначит следующую свободную дату начиная с `2026-06-19`. Так уведомления в simulation output выглядят как поток за разные дни.
-
-## PostgreSQL
-
-Параметры по умолчанию лежат в `.env.example`:
-
-```env
-POSTGRES_DB=sdm_hack
-POSTGRES_USER=sdm_hack
-POSTGRES_PASSWORD=sdm_hack_password
-POSTGRES_HOST=localhost
-POSTGRES_INTERNAL_HOST=postgres
-POSTGRES_PORT=5432
-DATABASE_URL=postgresql://sdm_hack:sdm_hack_password@localhost:5432/sdm_hack
-DATABASE_URL_DOCKER=postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack
-BACKEND_PORT=8000
-BACKEND_CORS_ORIGINS=http://localhost:5180,http://127.0.0.1:5180
-FRONTEND_PORT=5180
-VITE_API_URL=http://localhost:8000
-VITE_AGENTS_API_URL=http://localhost:8010
-AGENTS_PORT=8010
-BACKEND_API_URL=http://backend:8000
-AGENTS_CORS_ORIGINS=http://localhost:5180,http://127.0.0.1:5180
-LOCAL_API_URL=http://localhost:8000
-YANDEX_CLOUD_FOLDER=
-YANDEX_CLOUD_API_KEY=
-YANDEX_CLOUD_MODEL=qwen3.6-35b-a3b/latest
-YANDEX_EMBEDDING_DOC_MODEL=text-search-doc/latest
-YANDEX_EMBEDDING_QUERY_MODEL=text-search-query/latest
-```
-
-Локальные файлы PostgreSQL хранятся в `infra/postgres/data` и не коммитятся.
-
-## Данные
-
-CSV в `data/` являются demo source layer. Производные сущности не должны храниться как исходные данные:
-
-- health score;
-- risk level;
-- overdue count;
-- delay days;
-- forecast total spent;
-- budget deviation;
-- risk score;
-- resource overload;
-- communication delay;
-- dependency risk count;
-- pending decision count;
-- change request impact;
-- metrics snapshots;
-- журнал изменений.
-
-Эти значения должна считать платформа.
-
-Журнал изменений не сидится в демо-данных. Его должен формировать backend при изменениях через frontend или importer diff.
-
-Подробное описание таблиц лежит в `DATA_DICTIONARY.md`.
-
-## Backend summary layer
-
-Первый слой бизнес-логики лежит в `backend/app/`:
-
-- `api/`: HTTP endpoints;
-- `core/`: конфигурация приложения;
-- `schemas/`: Pydantic-контракты для API, фронта и агентов;
-- `services/`: чтение source facts и расчет project summary;
-- `utils/`: вспомогательные функции;
-- `dependencies.py`: зависимости FastAPI;
-- `main.py`: точка входа backend.
-
-Summary считает completion, blocked и overdue задачи, high risks, расчетный forecast бюджета, бюджетное отклонение, ROI, risk-adjusted ROI, коммуникационные задержки, перегруз ресурсов, рискованные зависимости, pending decisions, change requests, health score и risk level.
-
-Главный сценарий для руководителя проекта лежит в портфельном inbox:
+Результат сохраняется в:
 
 ```text
-GET /api/v1/summaries/portfolio/attention
+data/agents_json/control_event_simulation_output.json
 ```
 
-Он показывает, что изменилось за период по всем проектам: новые блокировки, сдвиги сроков, эскалации, открытые change requests, просроченные коммуникации и зависшие решения. Это основной слой для проблемы "сложно смотреть за изменениями нескольких проектов".
+## DOCX pipeline
 
-Внутренние уведомления, которые создает monitoring pipeline, доступны через endpoint:
-
-```text
-GET /api/v1/notifications
-GET /api/v1/notifications?project_id=P001&unread_only=true
-GET /api/v1/notifications?project_id=P001&as_of_date=2026-06-19
-PATCH /api/v1/notifications/{notification_id}/read
-```
-
-Уведомления лежат в таблице `notifications`. Monitoring graph сохраняет их после `ProjectInternalNotificationAgent`, если `notification_draft.should_create=true`, и кладет дату среза и событие-триггер в payload уведомления. Frontend передает текущую дату в `as_of_date`, чтобы не смешивать уведомления разных срезов, и показывает в карточке, после какого события появилось уведомление.
-
-Если база уже была поднята до появления этой таблицы, создай недостающие ORM-таблицы без удаления данных:
+Запуск обработки проектных документов:
 
 ```bash
-python -m backend.app.database.init_db
+python main.py
 ```
 
-Для LLM используется отдельный fact endpoint:
-
-```text
-GET /api/v1/summaries/projects/{project_id}/problem-context
-```
-
-Он не возвращает готовый executive summary или ключевые выводы. В ответе только факты: проблемные задачи, граф зависимостей вокруг них, связанные риски, коммуникации, решения, бюджет и ресурсы. Выводы и рекомендации формирует агент.
-
-Agents API отдает результат агента для frontend:
-
-```text
-GET /api/v1/agents/projects/{project_id}/brief
-```
-
-Endpoint забирает `problem-context` из backend, сжимает его до компактного LLM-контекста с полными счетчиками в `metrics` и ограниченной evidence-выборкой, вызывает LLM через Yandex provider, валидирует ответ через Pydantic и возвращает строгий JSON. Для работы нужны `YANDEX_CLOUD_FOLDER`, `YANDEX_CLOUD_API_KEY` и `YANDEX_CLOUD_MODEL` в `.env`. `YANDEX_CLOUD_MODEL` можно задать коротко, например `qwen3.6-35b-a3b/latest`, или полным URI `gpt://folder_id/qwen3.6-35b-a3b/latest`.
-
-Для Q&A по причинам блокировок, обсуждениям, решениям и истории изменений используется RAG:
-
-```text
-POST /api/v1/summaries/projects/{project_id}/retrieval-index
-GET /api/v1/summaries/projects/{project_id}/retrieval-context?query=...
-```
-
-Backend собирает evidence chunks из задач, комментариев, истории, рисков, коммуникаций, зависимостей, решений, change requests и бюджета. Индекс хранится в `project_rag_chunks` с `pgvector`; эмбеддинги строятся через Yandex `text-search-doc/latest`, а запросы через `text-search-query/latest`.
-
-## LangGraph monitoring
-
-Основной оркестратор цифрового руководителя лежит в `agents/agents/project_control/`. Отдельный граф мониторинга лежит в `agents/agents/project_monitor/`.
-
-1. загружает проект и связанные сущности из `projects`, `tasks`, `milestones`, `risks`, `communications`, `dependencies`, `decisions`, `budgets`;
-2. детерминированно считает базовые метрики;
-3. классифицирует алерты;
-4. запускает `ProjectAnalystAgent`, который по метрикам и алертам готовит управленческую сводку, причины проблем, рекомендации, вопросы тимлиду и флаг эскалации;
-5. запускает `ProjectInternalNotificationAgent`, который готовит `notification_draft` для внутреннего push-уведомления в сервисе;
-6. сохраняет уведомление в `notifications`, если draft требует создать уведомление.
-
-
-В основном пайплайне этот граф вызывает главный оркестратор
-`agents/agents/project_control/`, а полный запуск проекта остается через `python main.py`.
-
-Для изолированной проверки мониторинга одного проекта можно запустить подграф напрямую:
+Дата среза задается через переменную окружения:
 
 ```bash
-python -m agents.agents.project_monitor.graph P001
+AS_OF_DATE=2026-06-19 python main.py
 ```
 
-Запуск на конкретную дату:
+Результаты:
 
-```bash
-python -m agents.agents.project_monitor.graph P001 --as-of 2026-06-15
-```
+- `data/per_file_json/` — JSON после разбора каждого DOCX;
+- `data/agents_json/batch_output.json` — общий результат пайплайна;
+- `data/agents_json/project_monitoring_output.json` — результат мониторинга.
 
-Базовые метрики и алерты считаются обычным кодом. LLM-узлы получают уже посчитанный контекст и формируют управленческую сводку, вопросы, рекомендации и draft уведомления.
+## Почему это не просто дашборд
 
-## Frontend
+Дашборд показывает, что метрика стала плохой. AI Project Control Tower связывает метрику с причинами, обсуждениями, задачами, решениями, бюджетом и следующим действием.
 
-Минимальный frontend лежит в `frontend/`:
-
-- React и Vite;
-- TailwindCSS и daisyUI;
-- проектный dashboard по endpoint `/api/v1/summaries/*`;
-- вкладка уведомлений по endpoint `/api/v1/notifications`;
-- выбор проекта из портфеля;
-- выбор даты среза: frontend передает выбранную дату как `as_of` в summary endpoints, Q&A agent и brief agent;
-- вывод health score, зоны риска, бюджета, блокеров, рисков, коммуникаций и перегрузки ресурсов.
+Главная ценность продукта — сократить путь от “у нас красный проект” до “понятно, кто должен что сделать и на основании каких фактов”.

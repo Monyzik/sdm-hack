@@ -7,6 +7,7 @@ import {
   MessageCircle,
   Moon,
   Sun,
+  Trash2,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -85,6 +86,8 @@ export default function App() {
   const queryClient = useQueryClient();
   const storedAppState = readStoredAppState();
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
+  const [chatClearRequest, setChatClearRequest] = useState(0);
+  const [isChatBusy, setIsChatBusy] = useState(false);
   const [activePage, setActivePage] = useState<AppPage>(
     storedAppState.activePage ?? "overview",
   );
@@ -168,16 +171,66 @@ export default function App() {
           onPageChange={setActivePage}
           onRefresh={handleRefresh}
           onThemeToggle={() => setTheme(theme === "dark" ? "light" : "dark")}
+          mobileContent={
+            activePage === "chat" ? (
+              <>
+                <label className="sr-only" htmlFor="mobile-project-select">
+                  Выбрать проект
+                </label>
+                <select
+                  id="mobile-project-select"
+                  value={selectedProjectId ?? ""}
+                  onChange={(event) => handleProjectSelect(event.target.value)}
+                  disabled={!portfolioQuery.data?.projects.length}
+                  className="h-9 min-w-0 flex-1 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-800 shadow-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-slate-600 dark:focus:ring-slate-800"
+                >
+                  {portfolioQuery.data?.projects.map((project) => (
+                    <option key={project.project_id} value={project.project_id}>
+                      {project.project_name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  title="Очистить чат"
+                  onClick={() => setChatClearRequest((value) => value + 1)}
+                  disabled={
+                    !selectedProjectId || portfolioQuery.isPending || isChatBusy
+                  }
+                  className="grid size-9 shrink-0 place-items-center rounded-md border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <Trash2 aria-hidden className="size-4" />
+                  <span className="sr-only">Очистить чат</span>
+                </button>
+              </>
+            ) : undefined
+          }
         />
 
-        <div className="min-w-0">
-          <div className="mx-auto flex w-full max-w-none flex-col gap-4 px-4 py-4 sm:px-6">
+        <div className="w-full max-w-full min-w-0 overflow-x-hidden">
+          <div
+            className={`mx-auto box-border flex w-full max-w-full min-w-0 flex-col overflow-x-hidden ${
+              activePage === "chat"
+                ? "app-chat-shell box-border gap-0 overflow-hidden px-2 py-0 sm:gap-4 sm:px-6 sm:py-4"
+                : "gap-4 px-4 py-4 sm:px-6"
+            }`}
+          >
             <header
               id="overview"
-              className="flex flex-col gap-3 border-b border-slate-200 pb-4 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between"
+              className={`min-w-0 shrink-0 flex-col border-b border-slate-200 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between ${
+                activePage === "chat"
+                  ? "hidden gap-1 pb-1 sm:flex sm:gap-3 sm:pb-4"
+                  : "flex gap-3 pb-4"
+              }`}
             >
-              <div>
-                <h1 className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
+              <div className="min-w-0">
+                <h1
+                  className={`font-semibold text-slate-950 dark:text-slate-50 ${
+                    activePage === "chat"
+                      ? "sr-only sm:not-sr-only sm:text-2xl"
+                      : "text-2xl"
+                  }`}
+                >
                   {activePage === "overview"
                     ? "Обзор портфеля проектов"
                     : activePage === "analysis"
@@ -189,7 +242,29 @@ export default function App() {
                           : "Уведомления"}
                 </h1>
               </div>
-              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+              <div
+                className={`w-full gap-2 sm:w-auto lg:w-auto lg:shrink-0 ${
+                  activePage === "chat"
+                    ? "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-1.5 lg:flex lg:flex-nowrap"
+                    : "flex flex-wrap items-center"
+                }`}
+              >
+                {activePage === "chat" ? (
+                  <button
+                    type="button"
+                    title="Очистить чат"
+                    onClick={() => setChatClearRequest((value) => value + 1)}
+                    disabled={
+                      !selectedProjectId ||
+                      portfolioQuery.isPending ||
+                      isChatBusy
+                    }
+                    className="col-start-2 row-start-1 inline-flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:h-10 sm:w-auto sm:gap-2 sm:px-3 lg:col-auto lg:row-auto"
+                  >
+                    <Trash2 aria-hidden className="size-4" />
+                    <span className="sr-only sm:not-sr-only">Очистить чат</span>
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   title={
@@ -219,7 +294,11 @@ export default function App() {
                         handleProjectSelect(event.target.value)
                       }
                       disabled={!portfolioQuery.data?.projects.length}
-                      className="h-10 min-w-0 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm outline-none transition hover:bg-slate-50 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus:border-slate-600 dark:focus:ring-slate-800 sm:min-w-72"
+                      className={`h-9 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 text-xs font-medium text-slate-800 shadow-sm outline-none transition hover:bg-slate-50 focus:border-slate-400 focus:ring-2 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:focus:border-slate-600 dark:focus:ring-slate-800 sm:h-10 sm:px-3 sm:text-sm ${
+                        activePage === "chat"
+                          ? "col-start-1 row-start-1 lg:col-auto lg:row-auto lg:w-auto lg:min-w-72"
+                          : "sm:w-auto sm:min-w-72"
+                      }`}
                     >
                       {portfolioQuery.data?.projects.map((project) => (
                         <option
@@ -235,7 +314,12 @@ export default function App() {
               </div>
             </header>
 
-            <main id="metrics" className="min-w-0">
+            <main
+              id="metrics"
+              className={`min-w-0 overflow-x-hidden ${
+                activePage === "chat" ? "min-h-0 flex-1 overflow-y-hidden" : ""
+              }`}
+            >
               {activePage === "overview" ? (
                 portfolioQuery.isPending ? (
                   <LoadingState label="Загрузка портфеля…" />
@@ -304,6 +388,8 @@ export default function App() {
                     projects={portfolioQuery.data.projects}
                     selectedProjectId={selectedProjectId}
                     asOfDate={AS_OF_DATE}
+                    clearRequest={chatClearRequest}
+                    onBusyChange={setIsChatBusy}
                   />
                 )
               ) : activePage === "notifications" ? (
@@ -378,10 +464,10 @@ export default function App() {
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Здоровье
+                  Индекс состояния
                 </p>
                 <p className="mt-1 text-xl font-semibold tabular-nums">
-                  {previewProject.project_health_score}
+                  {previewProject.project_health_score}/100
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">

@@ -16,7 +16,7 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
   const blocks = parseBlocks(content);
 
   return (
-    <div className="space-y-3 text-base leading-7 text-slate-800 dark:text-slate-200">
+    <div className="min-w-0 max-w-full space-y-3 break-words text-base leading-7 text-slate-800 [overflow-wrap:anywhere] dark:text-slate-200">
       {blocks.map((block, index) => renderBlock(block, index))}
     </div>
   );
@@ -196,7 +196,7 @@ function renderBlock(block: MarkdownBlock, index: number) {
     return (
       <div
         key={index}
-        className="overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+        className="max-w-full overflow-x-auto rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
       >
         <table className="min-w-full border-collapse text-left text-[13px] leading-5">
           <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500 dark:bg-slate-900 dark:text-slate-400">
@@ -249,14 +249,14 @@ function renderBlock(block: MarkdownBlock, index: number) {
     return (
       <div
         key={index}
-        className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800"
+        className="max-w-full overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800"
       >
         {block.language ? (
           <div className="border-b border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium uppercase text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
             {block.language}
           </div>
         ) : null}
-        <pre className="overflow-x-auto bg-slate-950 p-3 text-xs leading-6 text-slate-100">
+        <pre className="max-w-full overflow-x-auto bg-slate-950 p-3 text-xs leading-6 text-slate-100">
           <code>{block.code}</code>
         </pre>
       </div>
@@ -530,7 +530,7 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       nodes.push(
         <code
           key={key}
-          className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[0.86em] text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+          className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[0.86em] text-slate-900 [overflow-wrap:anywhere] dark:bg-slate-800 dark:text-slate-100"
         >
           {code}
         </code>,

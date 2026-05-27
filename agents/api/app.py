@@ -4,7 +4,7 @@ import os
 from datetime import date
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from agents.agents.control_event_simulation import (
@@ -13,6 +13,13 @@ from agents.agents.control_event_simulation import (
     clear_control_event_simulation,
     get_control_event_simulation,
     start_control_event_simulation,
+)
+from agents.agents.project_docx_update import (
+    ProjectDocxApplyResult,
+    ProjectDocxEditableUpdate,
+    ProjectDocxPreview,
+    apply_project_docx_update,
+    preview_project_docx_update,
 )
 from agents.agents.project_brief import ProjectManagerBrief, run_project_brief
 from agents.agents.project_qa import (
@@ -47,10 +54,16 @@ async def start_control_event_simulation_job() -> SimulationJob:
     try:
         return await start_control_event_simulation()
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Не удалось запустить симуляцию: {exc}") from exc
+        raise HTTPException(
+            status_code=502,
+            detail=f"Не удалось запустить симуляцию: {exc}",
+        ) from exc
 
 
-@app.get("/api/v1/agents/control-events/simulation/{job_id}", response_model=SimulationJob)
+@app.get(
+    "/api/v1/agents/control-events/simulation/{job_id}",
+    response_model=SimulationJob,
+)
 async def get_control_event_simulation_job(job_id: str) -> SimulationJob:
     try:
         return get_control_event_simulation(job_id)
@@ -58,12 +71,18 @@ async def get_control_event_simulation_job(job_id: str) -> SimulationJob:
         raise HTTPException(status_code=404, detail="Симуляция не найдена") from exc
 
 
-@app.delete("/api/v1/agents/control-events/simulation", response_model=SimulationClearResult)
+@app.delete(
+    "/api/v1/agents/control-events/simulation",
+    response_model=SimulationClearResult,
+)
 async def clear_control_event_simulation_job() -> SimulationClearResult:
     try:
         return await clear_control_event_simulation()
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Не удалось очистить симуляцию: {exc}") from exc
+        raise HTTPException(
+            status_code=502,
+            detail=f"Не удалось очистить симуляцию: {exc}",
+        ) from exc
 
 
 @app.get("/api/v1/agents/projects/{project_id}/brief", response_model=ProjectManagerBrief)
@@ -81,7 +100,10 @@ async def get_project_ai_brief(
             backend_api_url=backend_api_url,
         )
     except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=exc.response.status_code, detail="Backend не вернул problem context") from exc
+        raise HTTPException(
+            status_code=exc.response.status_code,
+            detail="Backend не вернул problem context",
+        ) from exc
     except httpx.RequestError as exc:
         raise HTTPException(status_code=503, detail=f"Backend недоступен: {exc}") from exc
     except ValueError as exc:
@@ -90,6 +112,56 @@ async def get_project_ai_brief(
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Ошибка LLM-агента: {exc}") from exc
+
+
+@app.post(
+    "/api/v1/agents/projects/{project_id}/docx-preview",
+    response_model=ProjectDocxPreview,
+)
+async def preview_project_docx(
+    project_id: str,
+    request: Request,
+) -> ProjectDocxPreview:
+    try:
+        return await preview_project_docx_update(
+            project_id=project_id,
+            file_name=request.headers.get("x-file-name"),
+            content=await request.body(),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Не удалось разобрать DOCX.",
+        ) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Не удалось разобрать DOCX.",
+        ) from exc
+
+
+@app.post(
+    "/api/v1/agents/projects/{project_id}/docx-apply",
+    response_model=ProjectDocxApplyResult,
+)
+async def apply_project_docx(
+    project_id: str,
+    payload: ProjectDocxEditableUpdate,
+) -> ProjectDocxApplyResult:
+    try:
+        return await apply_project_docx_update(
+            project_id=project_id,
+            update=payload,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="Не удалось обновить проект.",
+        ) from exc
 
 
 @app.post("/api/v1/agents/projects/{project_id}/ask", response_model=ProjectQuestionAnswer)
@@ -108,7 +180,10 @@ async def ask_project_agent(
             backend_api_url=backend_api_url,
         )
     except httpx.HTTPStatusError as exc:
-        raise HTTPException(status_code=exc.response.status_code, detail="Backend не вернул данные проекта") from exc
+        raise HTTPException(
+            status_code=exc.response.status_code,
+            detail="Backend не вернул данные проекта",
+        ) from exc
     except httpx.RequestError as exc:
         raise HTTPException(status_code=503, detail=f"Backend недоступен: {exc}") from exc
     except ValueError as exc:

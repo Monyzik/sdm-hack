@@ -12,6 +12,9 @@ import type {
   PortfolioAttentionSummary,
   PortfolioSummary,
   ProjectChatContextMessage,
+  ProjectDocxApplyResult,
+  ProjectDocxEditableUpdate,
+  ProjectDocxPreview,
   ProjectManagerBrief,
   ProjectProblemContext,
   ProjectQuestionAnswer,
@@ -234,6 +237,45 @@ export function fetchProjectBrief(
     AGENTS_API_URL,
     `/api/v1/agents/projects/${encodeURIComponent(projectId)}/brief?${query.toString()}`,
     signal,
+  );
+}
+
+export function previewProjectDocxUpdate(
+  projectId: string,
+  file: File,
+  signal?: AbortSignal,
+): Promise<ProjectDocxPreview> {
+  return requestFrom<ProjectDocxPreview>(
+    AGENTS_API_URL,
+    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/docx-preview`,
+    signal,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          file.type ||
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "X-File-Name": encodeURIComponent(file.name),
+      },
+      body: file,
+    },
+  );
+}
+
+export function applyProjectDocxUpdate(
+  projectId: string,
+  update: ProjectDocxEditableUpdate,
+  signal?: AbortSignal,
+): Promise<ProjectDocxApplyResult> {
+  return requestFrom<ProjectDocxApplyResult>(
+    AGENTS_API_URL,
+    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/docx-apply`,
+    signal,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(update),
+    },
   );
 }
 

@@ -38,6 +38,13 @@ frontend/tsconfig.tsbuildinfo
 # Generated DOCX dataset samples
 data/project_documents/project_summary_*.docx
 
+# Generated agent runs and design exports
+data/per_file_json/
+data/agents_json/batch_output.json
+data/agents_json/project_monitoring_output.json
+data/agents_json/control_event_simulation_output.json
+outputs/
+
 # Local PostgreSQL data volumes
 infra/postgres/data/
 infra/postgres/data/**

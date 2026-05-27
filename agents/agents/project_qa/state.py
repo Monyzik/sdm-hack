@@ -15,5 +15,6 @@ class ProjectQuestionState(TypedDict, total=False):
     needs_project_tools: bool
     messages: Annotated[list[Any], add_messages]
     used_tools: list[str]
+    tool_sources: list[dict[str, Any]]
     tool_rounds: int
     final_content: str | None

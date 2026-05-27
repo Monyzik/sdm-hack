@@ -231,7 +231,7 @@ export function TaskTrackerPage({
                     <ProgressBar
                       value={task.project_health_score}
                       tone={healthTone(task.project_health_score)}
-                      ariaLabel={`Здоровье ${task.project_name}`}
+                      ariaLabel={`Индекс состояния проекта ${task.project_name}`}
                     />
                   </div>
                   <div className="mt-2">

@@ -19,7 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from backend.app.database.models import Base
 from backend.app.database.session import DatabaseUrl, resolve_async_database_url
-from generate_demo_data import CSV_BOOLEAN_COLUMNS, CSV_COLUMN_LABELS, TASK_HISTORY_FIELD_LABELS
+from scripts.generate_demo_data import CSV_BOOLEAN_COLUMNS, CSV_COLUMN_LABELS, TASK_HISTORY_FIELD_LABELS
 
 
 @dataclass(frozen=True)

@@ -5,6 +5,7 @@ from datetime import date
 from agents.core.text import limit_text
 from agents.infrastructure.llm import get_llm_adapter
 from agents.tools.project_facts import ProjectFactToolExecutor
+from agents.tools.project_facts.sources import select_answer_sources
 
 from .graph import build_project_question_graph
 from .message_utils import _parse_agent_answer, _state_value
@@ -81,14 +82,20 @@ class ProjectQuestionAgent:
             "conversation_context": conversation_context_text,
             "messages": messages,
             "used_tools": [],
+            "tool_sources": [],
             "tool_rounds": 0,
         }
         result = await graph.ainvoke(state)
-        return _parse_agent_answer(
+        answer = _parse_agent_answer(
             _state_value(result, "final_content", "{}") or "{}",
             _state_value(result, "used_tools", []),
             needs_project_tools=_state_value(result, "needs_project_tools", True),
         )
+        answer.evidence_sources = select_answer_sources(
+            _state_value(result, "tool_sources", []),
+            answer.evidence_ids,
+        )
+        return answer
 
 
 def _format_conversation_context(

@@ -14,7 +14,7 @@ from pydantic import BaseModel
 load_dotenv()
 
 _ParsedModelT = TypeVar("_ParsedModelT", bound=BaseModel)
-_ProviderName = Literal["openai", "yandex"]
+_ProviderName = Literal["openai", "polza", "yandex"]
 
 
 class LLMAdapter(Protocol):
@@ -113,6 +113,24 @@ class OpenAILLMAdapter:
         )
 
 
+class PolzaLLMAdapter(OpenAILLMAdapter):
+    provider: _ProviderName = "polza"
+
+    def __init__(self) -> None:
+        api_key = os.getenv("POLZA_API_KEY")
+        if not api_key:
+            raise ValueError("Не задан POLZA_API_KEY в окружении.")
+
+        self.model = os.getenv("POLZA_MODEL") or os.getenv("LLM_MODEL")
+        if not self.model:
+            raise ValueError("Не задан POLZA_MODEL или LLM_MODEL в окружении.")
+
+        self.client = openai.AsyncOpenAI(
+            api_key=api_key,
+            base_url=os.getenv("POLZA_BASE_URL", "https://polza.ai/api/v1"),
+        )
+
+
 class YandexLLMAdapter:
     provider: _ProviderName = "yandex"
 
@@ -195,14 +213,16 @@ def get_llm_adapter() -> LLMAdapter:
     provider = _provider_name()
     if provider == "openai":
         return OpenAILLMAdapter()
+    if provider == "polza":
+        return PolzaLLMAdapter()
     return YandexLLMAdapter()
 
 
 def _provider_name() -> _ProviderName:
     provider = (os.getenv("LLM_PROVIDER") or "yandex").strip().casefold()
-    if provider in {"openai", "yandex"}:
+    if provider in {"openai", "polza", "yandex"}:
         return provider
-    raise ValueError("LLM_PROVIDER должен быть openai или yandex.")
+    raise ValueError("LLM_PROVIDER должен быть openai, polza или yandex.")
 
 
 def _chat_completion_kwargs(

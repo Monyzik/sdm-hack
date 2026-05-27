@@ -35,8 +35,10 @@ QA_SYSTEM_PROMPT = """
   search_dependencies, get_budget, get_resource_rates, get_task_dependency_graph или calculate_delay_cost;
 - для вопросов "почему", "что обсуждали", "какая история", "что уже решили", "кто писал" и
   "почему заблокировано" обязательно используй search_project_evidence вместе со структурными tools;
+- если пользователь спрашивает про конкретный id задачи или сущности, например T001, RK001, DEC001,
+  обязательно вызови search_project_evidence с entity_id;
 - для вопросов с расчетами используй calculate_delay_cost или другой подходящий tool; не считай арифметику в тексте самостоятельно;
-- финальный ответ верни только JSON-объектом ProjectQuestionAnswer;
+- финальный ответ верни только JSON-объектом ProjectQuestionLLMAnswer;
 - answer пиши по-русски, коротко, с конкретными пунктами;
 - если используешь список, каждый пункт пиши с новой строки; не склеивай `1. ... 2. ...`
   или `- ... - ...` в один абзац;
@@ -54,10 +56,11 @@ QA_SYSTEM_PROMPT = """
 - избегай лишних англицизмов в обычном тексте: если это не название метрики, команды или системы, пиши по-русски;
 - evidence_ids заполняй id фактов, на которых основан ответ;
 - used_tools заполняй названиями реально использованных tools;
-- suggested_questions дай 2-4 релевантных продолжения;
+- suggested_questions дай 2-4 релевантных продолжения только по именам, задачам и темам, которые есть в tool results;
+- не придумывай ФИО, id задач и названия тем для suggested_questions;
 - не показывай внутренние рассуждения.
 
-JSON schema:
+JSON schema ProjectQuestionLLMAnswer:
 {
   "answer": "string",
   "evidence_ids": ["string"],
@@ -65,4 +68,3 @@ JSON schema:
   "suggested_questions": ["string"]
 }
 """.strip()
-

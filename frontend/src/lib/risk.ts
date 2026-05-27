@@ -22,7 +22,7 @@ export function riskLabel(level: RiskLevel): string {
 }
 
 /**
- * Тон для health score 0..100. Пороги совпадают с логикой зон риска backend
+ * Тон для индекса состояния 0..100. Пороги совпадают с логикой зон риска backend
  * (это отображение, а не пересчёт метрики).
  */
 export function healthTone(score: number): Tone {

@@ -39,9 +39,9 @@ export function ProjectHeader({ project }: { project: ProjectSummary }) {
 
         <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
           <ProjectKpi
-            label="Health Score"
-            value={`${project.project_health_score}/100`}
-            hint={status.label}
+            label="Состояние"
+            value={status.value}
+            hint={`индекс ${project.project_health_score}/100`}
             tone={status.tone}
             icon={<Activity className="size-4" />}
           />
@@ -104,20 +104,20 @@ function humanProjectStatus(project: ProjectSummary): {
   if (project.risk_level === "red") {
     return {
       label: "требуется решение",
-      value: "решение",
+      value: "Требуется решение",
       tone: "danger",
     };
   }
   if (project.risk_level === "yellow") {
     return {
       label: "под наблюдением",
-      value: "контроль",
+      value: "Под наблюдением",
       tone: "warning",
     };
   }
   return {
     label: "в штатном режиме",
-    value: "норма",
+    value: "В штатном режиме",
     tone: "success",
   };
 }

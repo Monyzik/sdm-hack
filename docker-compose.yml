@@ -47,6 +47,13 @@ services:
       BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8000}
       DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack}
       AGENTS_CORS_ORIGINS: ${AGENTS_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
+      LLM_PROVIDER: ${LLM_PROVIDER:-yandex}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      POLZA_API_KEY: ${POLZA_API_KEY:-}
+      POLZA_BASE_URL: ${POLZA_BASE_URL:-https://polza.ai/api/v1}
+      POLZA_MODEL: ${POLZA_MODEL:-}
       YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-}
       YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}
       YANDEX_CLOUD_MODEL: ${YANDEX_CLOUD_MODEL:-}

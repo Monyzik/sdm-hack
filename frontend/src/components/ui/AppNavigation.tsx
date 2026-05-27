@@ -29,6 +29,7 @@ interface AppNavigationProps<T extends string> {
   onPageChange: (page: T) => void;
   onRefresh: () => void;
   onThemeToggle: () => void;
+  mobileContent?: ReactNode;
 }
 
 export function AppNavigation<T extends string>({
@@ -41,6 +42,7 @@ export function AppNavigation<T extends string>({
   onPageChange,
   onRefresh,
   onThemeToggle,
+  mobileContent,
 }: AppNavigationProps<T>) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const activePageLabel =
@@ -94,33 +96,39 @@ export function AppNavigation<T extends string>({
 
   return (
     <>
-      <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm shadow-slate-200/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-black/20 lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
-        <div className="flex items-center justify-between gap-3 lg:hidden">
-          <div className="flex min-w-0 items-center gap-3">
+      <nav className="sticky top-0 z-40 h-[var(--app-mobile-nav-height)] w-full max-w-full min-w-0 overflow-x-hidden border-b border-slate-200 bg-white/95 px-3 shadow-sm shadow-slate-200/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-black/20 lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
+        <div className="flex h-full w-full max-w-full min-w-0 flex-nowrap items-center justify-between gap-2 lg:hidden">
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
             <button
               type="button"
               aria-expanded={isMobileOpen}
               aria-controls="mobile-primary-nav"
               title={isMobileOpen ? "Свернуть меню" : "Открыть меню"}
               onClick={() => setIsMobileOpen((value) => !value)}
-              className="grid size-10 shrink-0 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+              className="grid size-9 shrink-0 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-slate-50"
             >
               <Menu aria-hidden strokeWidth={2.25} className="size-5" />
               <span className="sr-only">
                 {isMobileOpen ? "Свернуть меню" : "Открыть меню"}
               </span>
             </button>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-                {activePageLabel}
+            {mobileContent ? (
+              <div className="flex h-9 min-w-0 flex-1 items-center gap-1.5 overflow-hidden">
+                {mobileContent}
               </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">
-                SDM
+            ) : (
+              <div className="min-w-0">
+                <div className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+                  {activePageLabel}
+                </div>
+                <div className="hidden text-xs text-slate-500 dark:text-slate-400">
+                  SDM
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <IconButton
               title={
                 theme === "dark"
@@ -354,7 +362,7 @@ function IconButton({
       type="button"
       title={title}
       onClick={onClick}
-      className={`inline-grid size-10 place-items-center rounded-lg transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50 ${className}`}
+      className={`inline-grid size-9 shrink-0 place-items-center rounded-lg transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50 ${className}`}
     >
       {children}
     </button>

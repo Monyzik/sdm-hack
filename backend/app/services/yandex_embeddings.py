@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import os
+import random
 from functools import lru_cache
 from typing import Any, Literal
 
@@ -35,6 +37,14 @@ class YandexEmbeddingClient:
             self.timeout = float(os.getenv("YANDEX_EMBEDDING_TIMEOUT_SECONDS", "30"))
         except ValueError as exc:
             raise ValueError("YANDEX_EMBEDDING_TIMEOUT_SECONDS должен быть числом.") from exc
+        try:
+            self.max_retries = int(os.getenv("YANDEX_EMBEDDING_MAX_RETRIES", "6"))
+        except ValueError as exc:
+            raise ValueError("YANDEX_EMBEDDING_MAX_RETRIES должен быть целым числом.") from exc
+        try:
+            self.retry_base_delay = float(os.getenv("YANDEX_EMBEDDING_RETRY_BASE_DELAY_SECONDS", "1.5"))
+        except ValueError as exc:
+            raise ValueError("YANDEX_EMBEDDING_RETRY_BASE_DELAY_SECONDS должен быть числом.") from exc
 
     async def embed_document(self, text: str) -> list[float]:
         return await self._embed(text, kind="document")
@@ -51,15 +61,26 @@ class YandexEmbeddingClient:
             "x-folder-id": self.folder,
         }
         async with httpx.AsyncClient(timeout=self.timeout) as client:
-            try:
-                response = await client.post(EMBEDDING_ENDPOINT, json=payload, headers=headers)
-                response.raise_for_status()
-            except httpx.HTTPStatusError as exc:
-                raise RuntimeError(
-                    f"Сервис эмбеддингов Yandex вернул HTTP {exc.response.status_code}."
-                ) from exc
-            except httpx.RequestError as exc:
-                raise RuntimeError("Не удалось обратиться к сервису эмбеддингов Yandex.") from exc
+            for attempt in range(self.max_retries + 1):
+                try:
+                    response = await client.post(EMBEDDING_ENDPOINT, json=payload, headers=headers)
+                    response.raise_for_status()
+                    break
+                except httpx.HTTPStatusError as exc:
+                    status_code = exc.response.status_code
+                    if status_code != 429 and status_code < 500:
+                        raise RuntimeError(
+                            f"Сервис эмбеддингов Yandex вернул HTTP {status_code}."
+                        ) from exc
+                    if attempt >= self.max_retries:
+                        raise RuntimeError(
+                            f"Сервис эмбеддингов Yandex вернул HTTP {status_code} после {attempt + 1} попыток."
+                        ) from exc
+                    await asyncio.sleep(_retry_delay(exc.response, self.retry_base_delay, attempt))
+                except httpx.RequestError as exc:
+                    if attempt >= self.max_retries:
+                        raise RuntimeError("Не удалось обратиться к сервису эмбеддингов Yandex.") from exc
+                    await asyncio.sleep(_retry_delay(None, self.retry_base_delay, attempt))
         return _parse_embedding(response.json())
 
 
@@ -84,3 +105,14 @@ def _parse_embedding(payload: dict[str, Any]) -> list[float]:
         return [float(item) for item in raw_embedding]
     except (TypeError, ValueError) as exc:
         raise ValueError("API эмбеддингов Yandex вернул вектор в неожиданном формате.") from exc
+
+
+def _retry_delay(response: httpx.Response | None, base_delay: float, attempt: int) -> float:
+    if response is not None:
+        retry_after = response.headers.get("retry-after")
+        if retry_after:
+            try:
+                return max(0.0, float(retry_after))
+            except ValueError:
+                pass
+    return min(30.0, base_delay * (2**attempt)) + random.uniform(0.0, 0.5)

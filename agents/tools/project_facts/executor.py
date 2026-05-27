@@ -172,19 +172,9 @@ class ProjectFactToolExecutor:
                 **({"entity_id": arguments["entity_id"]} if arguments.get("entity_id") else {}),
             }
         )
-        try:
-            return await self._fetch_json(
-                f"/api/v1/summaries/projects/{self.project_id}/retrieval-context?{query}"
-            )
-        except httpx.HTTPStatusError as exc:
-            return {
-                "items": [],
-                "warning": (
-                    "RAG-поиск временно недоступен: "
-                    f"backend вернул HTTP {exc.response.status_code}. "
-                    "Используй project summary и problem context."
-                ),
-            }
+        return await self._fetch_json(
+            f"/api/v1/summaries/projects/{self.project_id}/retrieval-context?{query}"
+        )
 
     async def budget(self) -> dict[str, Any]:
         summary = await self.project_summary()
