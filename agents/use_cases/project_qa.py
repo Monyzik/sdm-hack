@@ -6,7 +6,7 @@ from typing import Annotated, Any, Awaitable, Callable, Literal, TypedDict
 from urllib.parse import urlencode
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from agents.infrastructure.llm import LLMAdapter, get_llm_adapter
 from backend.app.schemas.project_summary import ProjectMetricsFact, ProjectSummary
@@ -28,6 +28,16 @@ except ModuleNotFoundError:
 
 
 DEFAULT_AS_OF = "2026-06-19"
+TOOL_ARGUMENT_ALIASES = {
+    "assignee_in": "assignee",
+    "criticality_in": "criticality",
+    "limit_in": "limit",
+    "min_score_gte": "min_score",
+    "owner_in": "owner",
+    "priority_in": "priority",
+    "status_in": "status",
+    "team_in": "team",
+}
 
 
 class ProjectConversationMessage(BaseModel):
@@ -57,6 +67,23 @@ class RequestRoute(BaseModel):
     intent: Literal["small_talk", "project_question", "out_of_scope"] = "project_question"
     needs_project_tools: bool = True
     reason: str = ""
+
+
+class ToolArgsModel(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_tool_arguments(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+
+        normalized = dict(value)
+        for source, target in TOOL_ARGUMENT_ALIASES.items():
+            if target in normalized or source not in normalized:
+                continue
+            normalized[target] = _first_argument_value(normalized[source])
+        return normalized
 
 
 class ProjectQuestionState(TypedDict, total=False):
@@ -138,19 +165,19 @@ JSON schema:
 """.strip()
 
 
-class NoArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class NoArgs(ToolArgsModel):
+    pass
 
 
-class ProblemContextArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class ProblemContextArgs(ToolArgsModel):
     max_depth: int | None = Field(default=None, ge=1, le=4)
 
 
-class SearchTasksArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class CriticalTasksArgs(ToolArgsModel):
+    limit: int | None = Field(default=None, ge=1, le=20)
 
+
+class SearchTasksArgs(ToolArgsModel):
     query: str | None = None
     status: str | None = None
     priority: str | None = None
@@ -158,53 +185,41 @@ class SearchTasksArgs(BaseModel):
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-class SearchRisksArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class SearchRisksArgs(ToolArgsModel):
     query: str | None = None
     status: str | None = None
     min_score: int | None = Field(default=None, ge=0, le=25)
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-class SearchCommunicationsArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class SearchCommunicationsArgs(ToolArgsModel):
     query: str | None = None
     status: str | None = None
     team: str | None = None
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-class SearchDecisionsArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class SearchDecisionsArgs(ToolArgsModel):
     query: str | None = None
     status: str | None = None
     owner: str | None = None
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-class SearchDependenciesArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class SearchDependenciesArgs(ToolArgsModel):
     query: str | None = None
     status: str | None = None
     criticality: str | None = None
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-class EvidenceSearchArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class EvidenceSearchArgs(ToolArgsModel):
     query: str = Field(min_length=1, max_length=500)
     entity_id: str | None = Field(default=None, max_length=64)
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
-class CalculateDelayCostArgs(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class CalculateDelayCostArgs(ToolArgsModel):
     delay_days: int = Field(ge=0, le=365)
     include_resource_burn: bool = True
 
@@ -507,6 +522,10 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         depth = _bounded_limit(max_depth, default=tool_executor.max_depth, maximum=4)
         return _compact_problem_context(await tool_executor.problem_context(max_depth=depth))
 
+    async def get_critical_tasks(limit: int | None = None) -> dict[str, Any]:
+        result = await tool_executor.critical_tasks({"limit": limit})
+        return _compact_search_result(result, TASK_FIELDS)
+
     async def search_tasks(
         query: str | None = None,
         status: str | None = None,
@@ -659,6 +678,15 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
             func=get_problem_context,
         ),
         make_tool(
+            name="get_critical_tasks",
+            description=(
+                "Получить задачи, которые сильнее всего мешают проекту: заблокированные, "
+                "просроченные и задачи критического пути."
+            ),
+            args_schema=CriticalTasksArgs,
+            func=get_critical_tasks,
+        ),
+        make_tool(
             name="search_tasks",
             description="Найти проблемные, заблокированные и просроченные задачи по тексту, статусу, приоритету или исполнителю.",
             args_schema=SearchTasksArgs,
@@ -755,6 +783,19 @@ class ProjectFactToolExecutor:
             )
             self._context_depth = depth
         return self._context
+
+    async def critical_tasks(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        summary = await self.project_summary()
+        context = await self.problem_context()
+        items = _dedupe_items(
+            [
+                *context.get("problem_tasks", []),
+                *summary.get("blocked_tasks", []),
+                *summary.get("overdue_tasks", []),
+            ]
+        )
+        items = sorted(items, key=_task_criticality_key, reverse=True)
+        return _tool_result(items, arguments.get("limit"))
 
     async def search_tasks(self, arguments: dict[str, Any]) -> dict[str, Any]:
         summary = await self.project_summary()
@@ -1101,6 +1142,34 @@ def _filter_items(
         needle = str(expected).casefold()
         filtered = [item for item in filtered if needle in str(item.get(field, "")).casefold()]
     return filtered
+
+
+def _first_argument_value(value: Any) -> Any:
+    if isinstance(value, list):
+        for item in value:
+            if item is not None and item != "":
+                return item
+        return None
+    return value
+
+
+def _task_criticality_key(item: dict[str, Any]) -> tuple[int, int, str]:
+    status = str(item.get("status") or "").casefold()
+    priority = str(item.get("priority") or "").casefold()
+    blocker_reason = str(item.get("blocker_reason") or "").strip()
+    problem_flags = item.get("problem_flags") if isinstance(item.get("problem_flags"), list) else []
+    flags_text = " ".join(str(flag).casefold() for flag in problem_flags)
+    overdue_days = max(0, _optional_int(item.get("overdue_days")) or 0)
+
+    score = overdue_days
+    if item.get("is_blocked") or blocker_reason or "blocked" in status or "заблок" in status:
+        score += 1000
+    if "critical" in priority or "крит" in priority:
+        score += 200
+    if "critical" in flags_text or "крит" in flags_text:
+        score += 100
+    score += len(problem_flags) * 10
+    return score, overdue_days, str(item.get("id") or "")
 
 
 def _tool_result(items: list[dict[str, Any]], limit: Any) -> dict[str, Any]:
