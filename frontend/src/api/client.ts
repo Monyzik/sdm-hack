@@ -12,6 +12,7 @@ import type {
   PortfolioAttentionSummary,
   PortfolioSummary,
   ProjectChatContextMessage,
+  ProjectDocxUploadResult,
   ProjectManagerBrief,
   ProjectProblemContext,
   ProjectQuestionAnswer,
@@ -221,6 +222,27 @@ export function clearControlEventSimulation(
     "/api/v1/agents/control-events/simulation",
     signal,
     { method: "DELETE" },
+  );
+}
+
+export function uploadProjectDocx(
+  projectId: string,
+  file: File,
+  asOf: string,
+  signal?: AbortSignal,
+): Promise<ProjectDocxUploadResult> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const query = new URLSearchParams({ as_of: asOf });
+
+  return requestFrom<ProjectDocxUploadResult>(
+    AGENTS_API_URL,
+    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/docx-upload?${query.toString()}`,
+    signal,
+    {
+      method: "POST",
+      body: formData,
+    },
   );
 }
 

@@ -3,6 +3,7 @@ import {
   BarChart3,
   Bell,
   ClipboardList,
+  FileUp,
   Gauge,
   MessageCircle,
   Moon,
@@ -20,6 +21,7 @@ import {
   type NavigationPage,
 } from "./components/ui";
 import { ProjectChatPage } from "./features/chat/ProjectChatPage";
+import { ProjectDocumentUploadPage } from "./features/documents/ProjectDocumentUploadPage";
 import { NotificationsPage } from "./features/notifications/NotificationsPage";
 import { PortfolioCommandCenter } from "./features/portfolio/PortfolioCommandCenter";
 import { PortfolioSidebar } from "./features/portfolio/PortfolioSidebar";
@@ -39,7 +41,13 @@ function describeError(error: unknown): string {
   return "Не удалось загрузить данные.";
 }
 
-type AppPage = "overview" | "analysis" | "tasks" | "chat" | "notifications";
+type AppPage =
+  | "overview"
+  | "analysis"
+  | "documents"
+  | "tasks"
+  | "chat"
+  | "notifications";
 
 const appPages: NavigationPage<AppPage>[] = [
   {
@@ -53,6 +61,12 @@ const appPages: NavigationPage<AppPage>[] = [
     label: "Анализ",
     description: "Выбранный проект",
     icon: BarChart3,
+  },
+  {
+    id: "documents" as const,
+    label: "DOCX",
+    description: "Паспорт проекта",
+    icon: FileUp,
   },
   {
     id: "tasks" as const,
@@ -73,6 +87,15 @@ const appPages: NavigationPage<AppPage>[] = [
     icon: Bell,
   },
 ];
+
+const pageTitles: Record<AppPage, string> = {
+  overview: "Обзор портфеля проектов",
+  analysis: "Анализ проекта",
+  documents: "Загрузка DOCX",
+  tasks: "Задачи",
+  chat: "Чат по проекту",
+  notifications: "Уведомления",
+};
 
 export default function App() {
   const queryClient = useQueryClient();
@@ -159,15 +182,7 @@ export default function App() {
             >
               <div>
                 <h1 className="text-2xl font-semibold text-slate-950 dark:text-slate-50">
-                  {activePage === "overview"
-                    ? "Обзор портфеля проектов"
-                    : activePage === "analysis"
-                      ? "Анализ проекта"
-                      : activePage === "tasks"
-                        ? "Задачи"
-                        : activePage === "chat"
-                          ? "Чат по проекту"
-                          : "Уведомления"}
+                  {pageTitles[activePage]}
                 </h1>
               </div>
               <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
@@ -188,7 +203,9 @@ export default function App() {
                   )}
                   <span className="sr-only">Переключить тему</span>
                 </button>
-                {activePage === "chat" || activePage === "analysis" ? (
+                {activePage === "chat" ||
+                activePage === "analysis" ||
+                activePage === "documents" ? (
                   <>
                     <label className="sr-only" htmlFor="project-select">
                       Выбрать проект
@@ -252,6 +269,22 @@ export default function App() {
                       onSelect={setPreviewProjectId}
                     />
                   </div>
+                )
+              ) : activePage === "documents" ? (
+                portfolioQuery.isPending ? (
+                  <LoadingState label="Загрузка проектов…" />
+                ) : portfolioQuery.isError ? (
+                  <ErrorState
+                    message={describeError(portfolioQuery.error)}
+                    onRetry={() => portfolioQuery.refetch()}
+                  />
+                ) : (
+                  <ProjectDocumentUploadPage
+                    projects={portfolioQuery.data.projects}
+                    selectedProjectId={selectedProjectId}
+                    asOfDate={AS_OF_DATE}
+                    onSelectProject={setSelectedProjectId}
+                  />
                 )
               ) : activePage === "tasks" ? (
                 portfolioQuery.isPending ? (

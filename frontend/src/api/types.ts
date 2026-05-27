@@ -153,9 +153,29 @@ export interface TaskDependencyGraphEdge {
   reason: string;
 }
 
+export interface TaskDependencyEdgeFact extends TaskDependencyGraphEdge {
+  root_task_id: string;
+  direction: string;
+  depth: number;
+}
+
+export interface ProjectFact {
+  id: string;
+  name: string;
+  lifecycle_status: string;
+  priority: string;
+  start_date: string;
+  planned_end_date: string;
+  business_goal: string;
+  expected_result: string;
+  business_value: string;
+}
+
 export interface ProjectProblemContext {
+  project: ProjectFact;
   as_of_date: string;
   problem_tasks: ProblemTaskFact[];
+  task_dependency_edges: TaskDependencyEdgeFact[];
   task_dependency_graph: TaskDependencyGraphEdge[];
 }
 
@@ -359,6 +379,27 @@ export interface SimulationJob {
 export interface SimulationClearResult {
   deleted_notifications: number;
   output_file_removed: boolean;
+}
+
+export type ProjectDocxEventType = "docx_added" | "docx_changed";
+
+export interface ProjectKeyFields {
+  project_name: string;
+  start_date: string | null;
+  planned_end_date: string | null;
+  business_goal: string;
+  expected_result: string;
+}
+
+export interface ProjectDocxUploadResult {
+  project_id: string;
+  original_file_name: string;
+  stored_file_name: string;
+  event_type: ProjectDocxEventType;
+  updated_fields: ProjectKeyFields;
+  parsed_project: Record<string, unknown>;
+  alerts_count: number;
+  notification_id: string | null;
 }
 
 export type AgentBriefStatus = "в норме" | "под наблюдением" | "критично";

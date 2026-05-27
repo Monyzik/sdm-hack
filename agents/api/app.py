@@ -4,7 +4,7 @@ import os
 from datetime import date
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from agents.use_cases.control_event_simulation import (
@@ -15,6 +15,10 @@ from agents.use_cases.control_event_simulation import (
     start_control_event_simulation,
 )
 from agents.use_cases.project_brief import ProjectManagerBrief, run_project_brief
+from agents.use_cases.project_docx_upload import (
+    ProjectDocxUploadResult,
+    upload_project_docx,
+)
 from agents.use_cases.project_qa import (
     ProjectQuestionAnswer,
     ProjectQuestionRequest,
@@ -64,6 +68,28 @@ async def clear_control_event_simulation_job() -> SimulationClearResult:
         return await clear_control_event_simulation()
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Не удалось очистить симуляцию: {exc}") from exc
+
+
+@app.post("/api/v1/agents/projects/{project_id}/docx-upload", response_model=ProjectDocxUploadResult)
+async def upload_project_docx_document(
+    project_id: str,
+    file: UploadFile = File(...),
+    as_of: date | None = Query(default=None),
+) -> ProjectDocxUploadResult:
+    try:
+        return await upload_project_docx(
+            project_id=project_id,
+            original_file_name=file.filename or "project.docx",
+            content=await file.read(),
+            as_of=as_of,
+        )
+    except ValueError as exc:
+        status_code = 404 if "не найден" in str(exc).lower() else 400
+        raise HTTPException(status_code=status_code, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Не удалось обработать DOCX: {exc}") from exc
 
 
 @app.get("/api/v1/agents/projects/{project_id}/brief", response_model=ProjectManagerBrief)
