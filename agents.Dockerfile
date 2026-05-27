@@ -9,6 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY sdm /app/sdm
+COPY data /app/data
 
 EXPOSE 8010
 
