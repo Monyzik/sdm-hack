@@ -15,4 +15,4 @@ COPY data /app/data
 
 EXPOSE 8010
 
-CMD ["uvicorn", "agents.api.app:app", "--host", "0.0.0.0", "--port", "8010"]
+CMD ["uvicorn", "sdm.agents.api:app", "--host", "0.0.0.0", "--port", "8010"]
