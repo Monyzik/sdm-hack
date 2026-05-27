@@ -42,7 +42,7 @@ class ProjectSummaryRepository:
     async def get_project_source(self, project_id: str) -> ProjectSummarySource:
         project = await self._session.get(Project, project_id)
         if project is None:
-            raise ValueError(f"Project not found: {project_id}")
+            raise ValueError(f"Проект не найден: {project_id}")
 
         tasks = await self._project_items(Task, project_id, Task.planned_due_date, Task.id)
         task_history = await self._project_items(

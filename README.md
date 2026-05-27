@@ -212,6 +212,8 @@ LOCAL_API_URL=http://localhost:8000
 YANDEX_CLOUD_FOLDER=
 YANDEX_CLOUD_API_KEY=
 YANDEX_CLOUD_MODEL=qwen3.6-35b-a3b/latest
+YANDEX_EMBEDDING_DOC_MODEL=text-search-doc/latest
+YANDEX_EMBEDDING_QUERY_MODEL=text-search-query/latest
 ```
 
 Локальные файлы PostgreSQL хранятся в `infra/postgres/data` и не коммитятся.
@@ -295,6 +297,15 @@ GET /api/v1/agents/projects/{project_id}/brief
 ```
 
 Endpoint забирает `problem-context` из backend, сжимает его до компактного LLM-контекста с полными счетчиками в `metrics` и ограниченной evidence-выборкой, вызывает LLM через Yandex provider, валидирует ответ через Pydantic и возвращает строгий JSON. Для работы нужны `YANDEX_CLOUD_FOLDER`, `YANDEX_CLOUD_API_KEY` и `YANDEX_CLOUD_MODEL` в `.env`. `YANDEX_CLOUD_MODEL` можно задать коротко, например `qwen3.6-35b-a3b/latest`, или полным URI `gpt://folder_id/qwen3.6-35b-a3b/latest`.
+
+Для Q&A по причинам блокировок, обсуждениям, решениям и истории изменений используется RAG:
+
+```text
+POST /api/v1/summaries/projects/{project_id}/retrieval-index
+GET /api/v1/summaries/projects/{project_id}/retrieval-context?query=...
+```
+
+Backend собирает evidence chunks из задач, комментариев, истории, рисков, коммуникаций, зависимостей, решений, change requests и бюджета. Индекс хранится в `project_rag_chunks` с `pgvector`; эмбеддинги строятся через Yandex `text-search-doc/latest`, а запросы через `text-search-query/latest`.
 
 ## LangGraph monitoring
 

@@ -106,6 +106,8 @@ QA_SYSTEM_PROMPT = """
 - для общих вопросов сначала вызови get_project_summary и get_problem_context;
 - для уточнений используй search_tasks, search_risks, search_communications, search_decisions,
   search_dependencies, get_budget, get_resource_rates, get_task_dependency_graph или calculate_delay_cost;
+- для вопросов "почему", "что обсуждали", "какая история", "что уже решили", "кто писал" и
+  "почему заблокировано" обязательно используй search_project_evidence вместе со структурными tools;
 - для вопросов с расчетами используй calculate_delay_cost или другой подходящий tool; не считай арифметику в тексте самостоятельно;
 - финальный ответ верни только JSON-объектом ProjectQuestionAnswer;
 - answer пиши по-русски, коротко, с конкретными пунктами;
@@ -189,6 +191,14 @@ class SearchDependenciesArgs(BaseModel):
     query: str | None = None
     status: str | None = None
     criticality: str | None = None
+    limit: int | None = Field(default=None, ge=1, le=20)
+
+
+class EvidenceSearchArgs(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str = Field(min_length=1, max_length=500)
+    entity_id: str | None = Field(default=None, max_length=64)
     limit: int | None = Field(default=None, ge=1, le=20)
 
 
@@ -579,6 +589,20 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
         )
         return _compact_search_result(result, DEPENDENCY_FIELDS)
 
+    async def search_project_evidence(
+        query: str,
+        entity_id: str | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        result = await tool_executor.search_project_evidence(
+            {
+                "query": query,
+                "entity_id": entity_id,
+                "limit": limit,
+            }
+        )
+        return _compact_retrieval_result(result)
+
     async def get_budget() -> dict[str, Any]:
         return _compact_budget_result(await tool_executor.budget())
 
@@ -663,6 +687,16 @@ def build_project_tools(tool_executor: "ProjectFactToolExecutor") -> list[BaseTo
             description="Найти проектные зависимости по тексту, статусу или критичности.",
             args_schema=SearchDependenciesArgs,
             func=search_dependencies,
+        ),
+        make_tool(
+            name="search_project_evidence",
+            description=(
+                "RAG-поиск по текстовому следу проекта: комментарии задач, сообщения коммуникаций, "
+                "риски, решения, запросы на изменение, причины зависимостей и историю изменений. "
+                "Используй для вопросов о причинах, истории обсуждения и уже согласованных действиях."
+            ),
+            args_schema=EvidenceSearchArgs,
+            func=search_project_evidence,
         ),
         make_tool(
             name="get_budget",
@@ -833,6 +867,20 @@ class ProjectFactToolExecutor:
         )
         return _tool_result(items, arguments.get("limit"))
 
+    async def search_project_evidence(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        limit_value = _bounded_limit(arguments.get("limit"), default=8, maximum=20)
+        query = urlencode(
+            {
+                "query": arguments.get("query") or "",
+                "as_of": self.as_of,
+                "limit": limit_value,
+                **({"entity_id": arguments["entity_id"]} if arguments.get("entity_id") else {}),
+            }
+        )
+        return await self._fetch_json(
+            f"/api/v1/summaries/projects/{self.project_id}/retrieval-context?{query}"
+        )
+
     async def budget(self) -> dict[str, Any]:
         summary = await self.project_summary()
         context = await self.problem_context()
@@ -994,7 +1042,7 @@ def _parse_agent_answer(
 ) -> ProjectQuestionAnswer:
     actual_tools = _unique(used_tools)
     if needs_project_tools and not actual_tools:
-        raise ValueError("Q&A-агент ответил по проектному вопросу без вызова tools.")
+        raise ValueError("Q&A-агент ответил по проектному вопросу без вызова инструментов.")
     try:
         payload = json.loads(content)
     except json.JSONDecodeError as error:
@@ -1196,6 +1244,19 @@ DEPENDENCY_FIELDS = (
     "linked_task_id",
     "delay_days",
 )
+EVIDENCE_FIELDS = (
+    "id",
+    "source_table",
+    "source_id",
+    "entity_type",
+    "entity_id",
+    "title",
+    "text",
+    "occurred_at",
+    "linked_task_id",
+    "score",
+    "metadata",
+)
 DECISION_FIELDS = ("id", "decision_type", "description", "decision_owner", "status", "decision_date")
 CHANGE_REQUEST_FIELDS = ("id", "change_type", "requested_by", "status", "impact_budget", "impact_days", "description")
 RESOURCE_FIELDS = (
@@ -1328,6 +1389,14 @@ def _compact_search_result(result: dict[str, Any], fields: tuple[str, ...]) -> d
     return {
         "count": result.get("count", 0),
         "items": _compact_items(result.get("items", []), fields, limit=10),
+    }
+
+
+def _compact_retrieval_result(result: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "query": _compact_value(result.get("query", "")),
+        "count": result.get("count", 0),
+        "items": _compact_items(result.get("items", []), EVIDENCE_FIELDS, limit=10),
     }
 
 

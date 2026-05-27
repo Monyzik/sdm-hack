@@ -56,7 +56,7 @@ TABLES: tuple[TableSpec, ...] = (
     TableSpec("change_requests.csv", "change_requests", ("request_date",)),
 )
 
-LEGACY_TABLES: tuple[str, ...] = ("project_events",)
+LEGACY_TABLES: tuple[str, ...] = ("project_events", "project_rag_chunks")
 REVERSE_CSV_COLUMN_LABELS = {label: column for column, label in CSV_COLUMN_LABELS.items()}
 REVERSE_TASK_HISTORY_FIELD_LABELS = {
     label: field for field, label in TASK_HISTORY_FIELD_LABELS.items()

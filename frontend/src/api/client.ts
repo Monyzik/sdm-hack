@@ -48,7 +48,7 @@ async function requestFrom<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${baseUrl}${path}`, { ...init, signal });
+    response = await fetch(apiUrl(baseUrl, path), { ...init, signal });
   } catch {
     throw new ApiError(
       "Не удалось связаться с сервером. Проверьте, что сервис запущен.",
@@ -69,6 +69,17 @@ async function requestFrom<T>(
   }
 
   return (await response.json()) as T;
+}
+
+function apiUrl(baseUrl: string, path: string): string {
+  const base = baseUrl.replace(/\/+$/, "");
+  if (!base) {
+    return path;
+  }
+  if (base.endsWith("/api") && path.startsWith("/api/")) {
+    return `${base}${path.slice("/api".length)}`;
+  }
+  return `${base}${path}`;
 }
 
 export function fetchPortfolioSummary(

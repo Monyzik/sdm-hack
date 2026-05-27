@@ -66,7 +66,7 @@ export function ProjectChatPage({
         id: `welcome-${selectedProjectId ?? "none"}`,
         role: "assistant",
         content: selectedProjectName
-          ? `Выбран проект «${selectedProjectName}». Дата среза: ${asOfDate}. Задайте вопрос по статусу, срокам, рискам, бюджету или блокерам.`
+          ? `Выбран проект «${selectedProjectName}». Задайте вопрос по статусу, срокам, рискам, бюджету или блокерам.`
           : "Выберите проект, чтобы задать вопрос.",
       },
     ]);

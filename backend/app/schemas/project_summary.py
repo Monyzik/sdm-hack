@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -341,6 +342,36 @@ class ProjectProblemContext(BaseModel):
     overloaded_resources: list[ResourceLoadSignal]
     recent_task_history: list[TaskHistoryFact]
     recent_task_comments: list[TaskCommentFact]
+
+
+class ProjectEvidenceChunk(BaseModel):
+    id: str
+    project_id: str
+    source_table: str
+    source_id: str
+    entity_type: str
+    entity_id: str
+    title: str
+    text: str
+    occurred_at: datetime | None = None
+    linked_task_id: str | None = None
+    score: float
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ProjectRetrievalContext(BaseModel):
+    project_id: str
+    query: str
+    as_of_date: date | None
+    count: int
+    items: list[ProjectEvidenceChunk]
+
+
+class ProjectRetrievalIndexResult(BaseModel):
+    project_id: str
+    chunks_indexed: int
+    embedding_model: str
+    embedding_dimensions: int
 
 
 class PortfolioProjectSummary(BaseModel):

@@ -9,7 +9,7 @@ from sqlalchemy.engine import make_url
 from backend.app.database.models import Base
 from backend.app.database.session import DatabaseUrl, create_async_engine_from_env, resolve_async_database_url
 
-LEGACY_TABLES: tuple[str, ...] = ("project_events",)
+LEGACY_TABLES: tuple[str, ...] = ("project_events", "project_rag_chunks")
 
 
 def mask_database_url(database_url: DatabaseUrl) -> str:

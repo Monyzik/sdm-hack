@@ -93,139 +93,149 @@ export function AppNavigation<T extends string>({
   }
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm shadow-slate-200/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-black/20 lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
-      <div className="flex items-center justify-between gap-3 lg:hidden">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            type="button"
-            aria-expanded={isMobileOpen}
-            aria-controls="mobile-primary-nav"
-            title={isMobileOpen ? "Свернуть меню" : "Открыть меню"}
-            onClick={() => setIsMobileOpen((value) => !value)}
-            className="grid size-10 shrink-0 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-slate-50"
-          >
-            <Menu aria-hidden strokeWidth={2.25} className="size-5" />
-            <span className="sr-only">
-              {isMobileOpen ? "Свернуть меню" : "Открыть меню"}
-            </span>
-          </button>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-              {activePageLabel}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              SDM
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <IconButton
-            title={
-              theme === "dark"
-                ? "Включить светлую тему"
-                : "Включить тёмную тему"
-            }
-            onClick={onThemeToggle}
-            className="text-slate-600 dark:text-slate-300"
-          >
-            {theme === "dark" ? (
-              <Sun aria-hidden strokeWidth={2.25} className="size-4" />
-            ) : (
-              <Moon aria-hidden strokeWidth={2.25} className="size-4" />
-            )}
-            <span className="sr-only">Переключить тему</span>
-          </IconButton>
-          <IconButton
-            title="Обновить"
-            onClick={onRefresh}
-            className="text-slate-700 dark:text-slate-300"
-          >
-            <RefreshCw
-              aria-hidden
-              strokeWidth={2.25}
-              className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            <span className="sr-only">Обновить</span>
-          </IconButton>
-        </div>
-      </div>
-
-      <div className="hidden h-full flex-col lg:flex">
-        <div
-          className={`flex items-center justify-between gap-3 ${
-            isCollapsed ? "lg:flex-col lg:justify-start" : ""
-          }`}
-        >
-          <div className="flex min-w-0 items-center gap-3 px-1">
-            {isCollapsed ? (
-              <button
-                type="button"
-                title="Показать меню"
-                onClick={() => onCollapsedChange(false)}
-                className="hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:text-slate-400 dark:hover:text-slate-100 lg:grid"
-              >
-                <ChevronRight
-                  aria-hidden
-                  strokeWidth={2.25}
-                  className="size-5"
-                />
-                <span className="sr-only">Показать меню</span>
-              </button>
-            ) : (
-              <div className="flex min-w-0 items-center gap-2.5">
-                <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-indigo-600 text-white shadow-sm">
-                  <LayoutDashboard aria-hidden strokeWidth={2.25} className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-bold leading-tight text-slate-950 dark:text-slate-50">Control Tower</div>
-                  <div className="text-xs leading-tight text-slate-400 dark:text-slate-500">SDM</div>
-                </div>
+    <>
+      <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-sm shadow-slate-200/40 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-black/20 lg:top-0 lg:flex lg:h-screen lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-3 lg:py-4">
+        <div className="flex items-center justify-between gap-3 lg:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              aria-expanded={isMobileOpen}
+              aria-controls="mobile-primary-nav"
+              title={isMobileOpen ? "Свернуть меню" : "Открыть меню"}
+              onClick={() => setIsMobileOpen((value) => !value)}
+              className="grid size-10 shrink-0 place-items-center rounded-lg text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-200 dark:hover:bg-slate-900 dark:hover:text-slate-50"
+            >
+              <Menu aria-hidden strokeWidth={2.25} className="size-5" />
+              <span className="sr-only">
+                {isMobileOpen ? "Свернуть меню" : "Открыть меню"}
+              </span>
+            </button>
+            <div className="min-w-0">
+              <div className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
+                {activePageLabel}
               </div>
-            )}
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                SDM
+              </div>
+            </div>
           </div>
 
-          <button
-            type="button"
-            title="Скрыть меню"
-            onClick={() => onCollapsedChange(!isCollapsed)}
-            className={`hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:text-slate-100 lg:inline-flex ${
-              isCollapsed ? "lg:hidden" : ""
+          <div className="flex items-center gap-1">
+            <IconButton
+              title={
+                theme === "dark"
+                  ? "Включить светлую тему"
+                  : "Включить тёмную тему"
+              }
+              onClick={onThemeToggle}
+              className="text-slate-600 dark:text-slate-300"
+            >
+              {theme === "dark" ? (
+                <Sun aria-hidden strokeWidth={2.25} className="size-4" />
+              ) : (
+                <Moon aria-hidden strokeWidth={2.25} className="size-4" />
+              )}
+              <span className="sr-only">Переключить тему</span>
+            </IconButton>
+            <IconButton
+              title="Обновить"
+              onClick={onRefresh}
+              className="text-slate-700 dark:text-slate-300"
+            >
+              <RefreshCw
+                aria-hidden
+                strokeWidth={2.25}
+                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              <span className="sr-only">Обновить</span>
+            </IconButton>
+          </div>
+        </div>
+
+        <div className="hidden h-full flex-col lg:flex">
+          <div
+            className={`flex items-center justify-between gap-3 ${
+              isCollapsed ? "lg:flex-col lg:justify-start" : ""
             }`}
           >
-            <ChevronLeft aria-hidden strokeWidth={2.25} className="size-5" />
-            <span className="sr-only">Скрыть меню</span>
-          </button>
-        </div>
+            <div className="flex min-w-0 items-center gap-3 px-1">
+              {isCollapsed ? (
+                <button
+                  type="button"
+                  title="Показать меню"
+                  onClick={() => onCollapsedChange(false)}
+                  className="hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:text-slate-400 dark:hover:text-slate-100 lg:grid"
+                >
+                  <ChevronRight
+                    aria-hidden
+                    strokeWidth={2.25}
+                    className="size-5"
+                  />
+                  <span className="sr-only">Показать меню</span>
+                </button>
+              ) : (
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-indigo-600 text-white shadow-sm">
+                    <LayoutDashboard
+                      aria-hidden
+                      strokeWidth={2.25}
+                      className="size-4"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-bold leading-tight text-slate-950 dark:text-slate-50">
+                      Control Tower
+                    </div>
+                    <div className="text-xs leading-tight text-slate-400 dark:text-slate-500">
+                      SDM
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-        <div className="mt-4 flex-1 space-y-2">
-          <NavigationItems
-            pages={pages}
-            activePage={activePage}
-            isCollapsed={isCollapsed}
-            onPageChange={handlePageChange}
-          />
-        </div>
+            <button
+              type="button"
+              title="Скрыть меню"
+              onClick={() => onCollapsedChange(!isCollapsed)}
+              className={`hidden h-9 w-9 shrink-0 items-center justify-center text-slate-500 transition hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:text-slate-100 lg:inline-flex ${
+                isCollapsed ? "lg:hidden" : ""
+              }`}
+            >
+              <ChevronLeft aria-hidden strokeWidth={2.25} className="size-5" />
+              <span className="sr-only">Скрыть меню</span>
+            </button>
+          </div>
 
-        <div className="mt-4 space-y-2">
-          <button
-            type="button"
-            onClick={onRefresh}
-            className={`inline-flex w-full items-center ${
-              isCollapsed
-                ? "lg:justify-center lg:px-0 lg:py-2"
-                : "justify-between"
-            } px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-300 dark:hover:text-slate-100`}
-          >
-            <span className={isCollapsed ? "lg:sr-only" : ""}>Обновить</span>
-            <RefreshCw
-              aria-hidden
-              strokeWidth={2.25}
-              className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+          <div className="mt-4 flex-1 space-y-2">
+            <NavigationItems
+              pages={pages}
+              activePage={activePage}
+              isCollapsed={isCollapsed}
+              onPageChange={handlePageChange}
             />
-          </button>
+          </div>
+
+          <div className="mt-4 space-y-2">
+            <button
+              type="button"
+              onClick={onRefresh}
+              className={`inline-flex w-full items-center ${
+                isCollapsed
+                  ? "lg:justify-center lg:px-0 lg:py-2"
+                  : "justify-between"
+              } px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-300 dark:hover:text-slate-100`}
+            >
+              <span className={isCollapsed ? "lg:sr-only" : ""}>Обновить</span>
+              <RefreshCw
+                aria-hidden
+                strokeWidth={2.25}
+                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+            </button>
+          </div>
         </div>
-      </div>
+      </nav>
 
       {isMobileOpen ? (
         <div
@@ -271,7 +281,7 @@ export function AppNavigation<T extends string>({
           </div>
         </div>
       ) : null}
-    </nav>
+    </>
   );
 }
 

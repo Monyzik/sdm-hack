@@ -6,8 +6,8 @@ services:
     container_name: sdm_hack_frontend
     restart: unless-stopped
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
-      VITE_AGENTS_API_URL: ${VITE_AGENTS_API_URL:-http://localhost:8010}
+      VITE_API_URL: ${VITE_API_URL:-/api}
+      VITE_AGENTS_API_URL: ${VITE_AGENTS_API_URL:-/agents}
     ports:
       - "${FRONTEND_PORT:-5180}:5180"
     depends_on:
@@ -25,6 +25,10 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
+      YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-}
+      YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}
+      YANDEX_EMBEDDING_DOC_MODEL: ${YANDEX_EMBEDDING_DOC_MODEL:-text-search-doc/latest}
+      YANDEX_EMBEDDING_QUERY_MODEL: ${YANDEX_EMBEDDING_QUERY_MODEL:-text-search-query/latest}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     depends_on:
@@ -54,7 +58,7 @@ services:
       - sdm_hack
 
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: sdm_hack_postgres
     restart: unless-stopped
     environment:
