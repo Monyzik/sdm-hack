@@ -23,7 +23,9 @@ export function MarkdownContent({ content }: MarkdownContentProps) {
 }
 
 function parseBlocks(content: string): MarkdownBlock[] {
-  const lines = normalizeCompactTables(content).replace(/\r\n/g, "\n").split("\n");
+  const lines = normalizeCompactMarkdown(content)
+    .replace(/\r\n/g, "\n")
+    .split("\n");
   const blocks: MarkdownBlock[] = [];
   let index = 0;
 
@@ -40,7 +42,10 @@ function parseBlocks(content: string): MarkdownBlock[] {
     if (codeFence) {
       const codeLines: string[] = [];
       index += 1;
-      while (index < lines.length && !(lines[index] ?? "").trim().startsWith("```")) {
+      while (
+        index < lines.length &&
+        !(lines[index] ?? "").trim().startsWith("```")
+      ) {
         codeLines.push(lines[index] ?? "");
         index += 1;
       }
@@ -104,7 +109,10 @@ function parseBlocks(content: string): MarkdownBlock[] {
 
     if (trimmed.startsWith(">")) {
       const quoteLines: string[] = [];
-      while (index < lines.length && (lines[index] ?? "").trim().startsWith(">")) {
+      while (
+        index < lines.length &&
+        (lines[index] ?? "").trim().startsWith(">")
+      ) {
         quoteLines.push((lines[index] ?? "").trim().replace(/^>\s?/, ""));
         index += 1;
       }
@@ -179,8 +187,10 @@ function renderBlock(block: MarkdownBlock, index: number) {
   }
 
   if (block.type === "table") {
-    const numericColumns = block.headers.map((_, columnIndex) =>
-      block.rows.length > 0 && block.rows.every((row) => isNumericCell(row[columnIndex] ?? "")),
+    const numericColumns = block.headers.map(
+      (_, columnIndex) =>
+        block.rows.length > 0 &&
+        block.rows.every((row) => isNumericCell(row[columnIndex] ?? "")),
     );
 
     return (
@@ -216,10 +226,15 @@ function renderBlock(block: MarkdownBlock, index: number) {
                     key={`${index}-r-${rowIndex}-c-${cellIndex}`}
                     className={[
                       "max-w-72 px-3 py-2 align-top text-slate-800 dark:text-slate-200",
-                      numericColumns[cellIndex] ? "whitespace-nowrap text-right tabular-nums" : "",
+                      numericColumns[cellIndex]
+                        ? "whitespace-nowrap text-right tabular-nums"
+                        : "",
                     ].join(" ")}
                   >
-                    {renderInline(row[cellIndex] ?? "", `${index}-${rowIndex}-${cellIndex}`)}
+                    {renderInline(
+                      row[cellIndex] ?? "",
+                      `${index}-${rowIndex}-${cellIndex}`,
+                    )}
                   </td>
                 ))}
               </tr>
@@ -232,7 +247,10 @@ function renderBlock(block: MarkdownBlock, index: number) {
 
   if (block.type === "code") {
     return (
-      <div key={index} className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
+      <div
+        key={index}
+        className="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800"
+      >
         {block.language ? (
           <div className="border-b border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium uppercase text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
             {block.language}
@@ -259,6 +277,57 @@ function renderBlock(block: MarkdownBlock, index: number) {
   return <p key={index}>{renderInline(block.text, `p-${index}`)}</p>;
 }
 
+function normalizeCompactMarkdown(content: string) {
+  return normalizeCompactLists(normalizeCompactTables(content));
+}
+
+function normalizeCompactLists(content: string) {
+  return content
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .flatMap((line) => expandCompactListLine(line))
+    .join("\n");
+}
+
+function expandCompactListLine(line: string): string[] {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith("|") || trimmed.startsWith("```")) {
+    return [line];
+  }
+
+  const ordered = splitCompactListLine(line, /(^|\s)(\d{1,2}[.)])\s+/g);
+  if (ordered) return ordered;
+
+  const unordered = splitCompactListLine(line, /(^|\s)([-*•])\s+/g);
+  return unordered ?? [line];
+}
+
+function splitCompactListLine(line: string, markerPattern: RegExp) {
+  const matches = [...line.matchAll(markerPattern)].map((match) => ({
+    markerStart: match.index + (match[1]?.length ?? 0),
+  }));
+  if (!matches.length) return null;
+
+  const firstMarkerStart = matches[0].markerStart;
+  const prefix = line.slice(0, firstMarkerStart).trim();
+  const hasInlinePrefix = firstMarkerStart > 0;
+  const shouldSplit =
+    matches.length > 1 || (hasInlinePrefix && /[:：]\s*$/.test(prefix));
+
+  if (!shouldSplit) return null;
+
+  const items = matches
+    .map((match, index) => {
+      const nextMatch = matches[index + 1];
+      return line
+        .slice(match.markerStart, nextMatch?.markerStart ?? line.length)
+        .trim();
+    })
+    .filter(Boolean);
+
+  return [prefix, ...items].filter(Boolean);
+}
+
 function normalizeCompactTables(content: string) {
   return content
     .replace(/\r\n/g, "\n")
@@ -279,7 +348,10 @@ function expandCompactTableLine(line: string): string[] {
   }
 
   let separatorEnd = separatorStart;
-  while (separatorEnd < parts.length && isTableSeparatorCell(parts[separatorEnd] ?? "")) {
+  while (
+    separatorEnd < parts.length &&
+    isTableSeparatorCell(parts[separatorEnd] ?? "")
+  ) {
     separatorEnd += 1;
   }
 
@@ -299,8 +371,12 @@ function expandCompactTableLine(line: string): string[] {
   }
 
   const prefixFromParts = parts.slice(0, headerStart).join("|").trim();
-  let headers = parts.slice(headerStart, headerEnd + 1).map((cell) => cell.trim());
-  const { prefix: prefixFromHeader, firstHeader } = splitPrefixFromFirstHeader(headers[0] ?? "");
+  let headers = parts
+    .slice(headerStart, headerEnd + 1)
+    .map((cell) => cell.trim());
+  const { prefix: prefixFromHeader, firstHeader } = splitPrefixFromFirstHeader(
+    headers[0] ?? "",
+  );
   if (prefixFromHeader) {
     headers = [firstHeader, ...headers.slice(1)];
   }
@@ -315,7 +391,9 @@ function expandCompactTableLine(line: string): string[] {
   }
 
   while (cursor + columnCount <= parts.length) {
-    const row = parts.slice(cursor, cursor + columnCount).map((cell) => cell.trim());
+    const row = parts
+      .slice(cursor, cursor + columnCount)
+      .map((cell) => cell.trim());
     if (row.every((cell) => !cell)) {
       break;
     }
@@ -330,7 +408,10 @@ function expandCompactTableLine(line: string): string[] {
     return [line];
   }
 
-  const prefix = [prefixFromParts, prefixFromHeader].filter(Boolean).join(" ").trim();
+  const prefix = [prefixFromParts, prefixFromHeader]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   const suffix = parts.slice(cursor).join("|").trim();
   const expanded = [
     prefix,
@@ -384,7 +465,9 @@ function isLikelyTableHeader(value: string) {
 }
 
 function isTableStart(lines: string[], index: number) {
-  return isTableRow(lines[index] ?? "") && isTableSeparator(lines[index + 1] ?? "");
+  return (
+    isTableRow(lines[index] ?? "") && isTableSeparator(lines[index + 1] ?? "")
+  );
 }
 
 function isTableRow(line: string) {
@@ -416,7 +499,8 @@ function isNumericCell(value: string) {
 }
 
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
-  const pattern = /(\[[^\]]+\]\(([^)\s]+)\)|`([^`]+)`|\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
+  const pattern =
+    /(\[[^\]]+\]\(([^)\s]+)\)|`([^`]+)`|\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
   const nodes: ReactNode[] = [];
   let cursor = 0;
   let match: RegExpExecArray | null;
@@ -453,7 +537,10 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
       );
     } else if (bold) {
       nodes.push(
-        <strong key={key} className="font-semibold text-slate-950 dark:text-slate-50">
+        <strong
+          key={key}
+          className="font-semibold text-slate-950 dark:text-slate-50"
+        >
           {bold}
         </strong>,
       );

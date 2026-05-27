@@ -1,3 +1,5 @@
+import { type KeyboardEvent, useState } from "react";
+
 import type { Tone } from "../../lib/risk";
 
 const toneStroke: Record<Tone, string> = {
@@ -112,17 +114,24 @@ interface TrendLineChartProps {
 export function TrendLineChart({
   labels,
   series,
-  height = 180,
+  height = 208,
 }: TrendLineChartProps) {
   const width = 640;
-  const paddingX = 28;
-  const paddingY = 18;
+  const paddingX = 36;
+  const paddingY = 24;
   const allValues = series.flatMap((item) => item.values);
   const maxValue = Math.max(1, ...allValues);
   const minValue = Math.min(0, ...allValues);
   const span = Math.max(1, maxValue - minValue);
   const plotWidth = width - paddingX * 2;
   const plotHeight = height - paddingY * 2;
+  const [activeIndex, setActiveIndex] = useState(labels.length - 1);
+  const selectedIndex = Math.min(
+    Math.max(activeIndex, 0),
+    Math.max(labels.length - 1, 0),
+  );
+  const selectedLabel =
+    labels[selectedIndex] ?? labels[labels.length - 1] ?? "";
 
   function point(value: number, index: number) {
     const x =
@@ -132,15 +141,49 @@ export function TrendLineChart({
     return { x, y };
   }
 
+  function pointPath(values: number[]) {
+    return values
+      .map((value, index) => {
+        const { x, y } = point(value, index);
+        return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+      })
+      .join(" ");
+  }
+
+  function formatValue(value: number, suffix = "") {
+    const rounded =
+      Math.abs(value) >= 10 ? Math.round(value) : Math.round(value * 10) / 10;
+    return `${rounded}${suffix}`;
+  }
+
+  function handlePointKeyDown(
+    event: KeyboardEvent<SVGRectElement>,
+    index: number,
+  ) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    setActiveIndex(index);
+  }
+
+  const selectedPoint = point(
+    series[0]?.values[selectedIndex] ?? 0,
+    selectedIndex,
+  );
+  const labelStep = Math.max(1, Math.ceil(labels.length / 4));
+
+  if (!labels.length || !series.length) {
+    return null;
+  }
+
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full overflow-hidden rounded-lg border border-slate-100 bg-gradient-to-b from-slate-50 to-white p-3 dark:border-slate-800 dark:from-slate-950 dark:to-slate-900/60">
       <svg
-        aria-hidden
+        aria-label="График тренда"
         viewBox={`0 0 ${width} ${height}`}
-        className="h-44 w-full"
+        className="h-52 w-full"
         preserveAspectRatio="none"
       >
-        {[0, 0.5, 1].map((ratio) => {
+        {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
           const y = paddingY + plotHeight * ratio;
           return (
             <line
@@ -149,66 +192,135 @@ export function TrendLineChart({
               x2={width - paddingX}
               y1={y}
               y2={y}
-              className="stroke-slate-100 dark:stroke-slate-800"
+              className="stroke-slate-200/80 dark:stroke-slate-800"
               strokeWidth="1"
             />
           );
         })}
-        {series.map((item) => {
-          const d = item.values
-            .map((value, index) => {
-              const { x, y } = point(value, index);
-              return `${index === 0 ? "M" : "L"} ${x} ${y}`;
-            })
-            .join(" ");
+        {labels.map((label, index) => {
+          if (
+            index !== 0 &&
+            index !== labels.length - 1 &&
+            index % labelStep !== 0
+          ) {
+            return null;
+          }
+          const { x } = point(0, index);
           return (
-            <path
-              key={item.label}
-              d={d}
-              fill="none"
-              className={toneStroke[item.tone ?? "neutral"]}
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+            <line
+              key={label}
+              x1={x}
+              x2={x}
+              y1={paddingY}
+              y2={height - paddingY}
+              className="stroke-slate-200/50 dark:stroke-slate-800/70"
+              strokeWidth="1"
             />
           );
         })}
-        {series.map((item) =>
-          item.values.map((value, index) => {
-            const { x, y } = point(value, index);
-            return (
-              <circle
-                key={`${item.label}-${index}`}
-                cx={x}
-                cy={y}
-                r="3.5"
-                className={`${toneStroke[item.tone ?? "neutral"]} fill-white dark:fill-slate-950`}
-                strokeWidth="2"
-              />
-            );
-          }),
-        )}
-      </svg>
-      <div className="mt-2 flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
-        {labels.map((label) => (
-          <span key={label} className="truncate">
-            {label}
-          </span>
+        <line
+          x1={selectedPoint.x}
+          x2={selectedPoint.x}
+          y1={paddingY}
+          y2={height - paddingY}
+          className="stroke-slate-400/70 dark:stroke-slate-500/70"
+          strokeDasharray="4 4"
+          strokeWidth="1.5"
+        />
+        {series.map((item) => (
+          <path
+            key={item.label}
+            d={pointPath(item.values)}
+            fill="none"
+            className={`${toneStroke[item.tone ?? "neutral"]} opacity-25`}
+            strokeWidth="8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         ))}
-      </div>
-      <div className="mt-3 flex flex-wrap gap-3">
+        {series.map((item) => (
+          <path
+            key={item.label}
+            d={pointPath(item.values)}
+            fill="none"
+            className={toneStroke[item.tone ?? "neutral"]}
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
         {series.map((item) => {
-          const latest = item.values[item.values.length - 1] ?? 0;
+          const { x, y } = point(
+            item.values[selectedIndex] ?? 0,
+            selectedIndex,
+          );
+          return (
+            <circle
+              key={`${item.label}-${selectedIndex}`}
+              cx={x}
+              cy={y}
+              r="5.5"
+              className={`${toneStroke[item.tone ?? "neutral"]} fill-white dark:fill-slate-950`}
+              strokeWidth="2"
+            />
+          );
+        })}
+        {labels.map((label, index) => {
+          const { x } = point(0, index);
+          const previousX = index === 0 ? paddingX : point(0, index - 1).x;
+          const nextX =
+            index === labels.length - 1
+              ? width - paddingX
+              : point(0, index + 1).x;
+          const hitX = index === 0 ? paddingX : (previousX + x) / 2;
+          const hitWidth =
+            index === labels.length - 1
+              ? width - paddingX - hitX
+              : (nextX + x) / 2 - hitX;
+
+          return (
+            <rect
+              key={`hit-${label}-${index}`}
+              role="button"
+              aria-label={`Показать срез ${label}`}
+              tabIndex={0}
+              x={hitX}
+              y={paddingY}
+              width={Math.max(8, hitWidth)}
+              height={plotHeight}
+              fill="transparent"
+              className="cursor-pointer outline-none"
+              onClick={() => setActiveIndex(index)}
+              onFocus={() => setActiveIndex(index)}
+              onKeyDown={(event) => handlePointKeyDown(event, index)}
+              onMouseEnter={() => setActiveIndex(index)}
+            />
+          );
+        })}
+      </svg>
+      <div className="mt-2 flex items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+        <span>{labels[0]}</span>
+        <span className="font-semibold tabular-nums text-slate-700 dark:text-slate-200">
+          {selectedLabel}
+        </span>
+        <span>{labels[labels.length - 1]}</span>
+      </div>
+      <div className="mt-3 grid gap-2 rounded-lg border border-slate-100 bg-white/80 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/50 sm:grid-cols-2">
+        {series.map((item) => {
+          const selectedValue = item.values[selectedIndex] ?? 0;
           return (
             <div
               key={item.label}
-              className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300"
+              className="flex min-w-0 items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300"
             >
-              <span className={`size-2 rounded-full ${toneFill[item.tone ?? "neutral"]}`} />
-              <span>{item.label}</span>
-              <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">
-                {Math.round(latest)}
-                {item.suffix ?? ""}
+              <span className="inline-flex min-w-0 items-center gap-2">
+                <span
+                  className={`size-2 rounded-full ${toneFill[item.tone ?? "neutral"]}`}
+                />
+                <span className="truncate">{item.label}</span>
+              </span>
+              <span className="shrink-0 font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                {formatValue(selectedValue, item.suffix)}
               </span>
             </div>
           );

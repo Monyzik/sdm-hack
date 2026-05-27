@@ -62,7 +62,7 @@ async def get_project_summary(
 async def get_project_trends(
     project_id: str,
     as_of: date | None = Query(default=None),
-    points: int = Query(default=8, ge=2, le=12),
+    points: int = Query(default=30, ge=2, le=60),
     session: AsyncSession = Depends(get_session),
 ) -> ProjectTrends:
     service = _summary_service(session)

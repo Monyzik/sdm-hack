@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from typing import Any
@@ -21,6 +22,7 @@ DEFAULT_LIMIT = 8
 MAX_LIMIT = 20
 EMBEDDING_DIMENSIONS = 256
 RAG_TABLE_NAME = "project_rag_chunks"
+TOKEN_PATTERN = re.compile(r"[a-zA-Zа-яА-ЯёЁ0-9]+")
 
 
 @dataclass(frozen=True)
@@ -167,6 +169,7 @@ async def search_project_rag(
     await ensure_project_rag_schema(session)
     query = " ".join(query.split())
     bounded_limit = max(1, min(MAX_LIMIT, limit))
+    candidate_limit = min(60, max(bounded_limit * 5, 20))
     if await _indexed_chunks_count(session, source.project.id) == 0:
         await reindex_project_rag(
             session,
@@ -194,16 +197,20 @@ async def search_project_rag(
                     1 - (embedding <=> CAST(:embedding AS vector)) AS score
                 FROM {RAG_TABLE_NAME}
                 WHERE project_id = :project_id
-                  AND (:as_of_date IS NULL OR occurred_at IS NULL OR occurred_at::date <= :as_of_date)
                   AND (
-                    :entity_id IS NULL
-                    OR source_id = :entity_id
-                    OR entity_id = :entity_id
-                    OR linked_task_id = :entity_id
+                    CAST(:as_of_date AS date) IS NULL
+                    OR occurred_at IS NULL
+                    OR occurred_at::date <= CAST(:as_of_date AS date)
+                  )
+                  AND (
+                    CAST(:entity_id AS text) IS NULL
+                    OR source_id = CAST(:entity_id AS text)
+                    OR entity_id = CAST(:entity_id AS text)
+                    OR linked_task_id = CAST(:entity_id AS text)
                     OR metadata::text ILIKE :entity_pattern
                   )
                 ORDER BY embedding <=> CAST(:embedding AS vector), occurred_at DESC NULLS LAST, source_id
-                LIMIT :limit
+                LIMIT :candidate_limit
                 """
             ),
             {
@@ -212,16 +219,25 @@ async def search_project_rag(
                 "as_of_date": as_of,
                 "entity_id": entity_id,
                 "entity_pattern": f"%{entity_id}%" if entity_id else None,
-                "limit": bounded_limit,
+                "candidate_limit": candidate_limit,
             },
         )
     ).mappings().all()
+    ranked_rows = sorted(
+        rows,
+        key=lambda row: (
+            float(row["score"] or 0.0) + _lexical_boost(row, query=query, entity_id=entity_id),
+            row["occurred_at"] or datetime.min,
+            str(row["source_id"]),
+        ),
+        reverse=True,
+    )[:bounded_limit]
 
     return ProjectRetrievalContext(
         project_id=source.project.id,
         query=query,
         as_of_date=as_of,
-        count=len(rows),
+        count=len(ranked_rows),
         items=[
             ProjectEvidenceChunk(
                 id=str(row["id"]),
@@ -234,10 +250,14 @@ async def search_project_rag(
                 text=str(row["text"]),
                 occurred_at=row["occurred_at"],
                 linked_task_id=row["linked_task_id"],
-                score=round(float(row["score"] or 0.0), 6),
+                score=round(
+                    float(row["score"] or 0.0)
+                    + _lexical_boost(row, query=query, entity_id=entity_id),
+                    6,
+                ),
                 metadata=dict(row["metadata"] or {}),
             )
-            for row in rows
+            for row in ranked_rows
         ],
     )
 
@@ -539,6 +559,53 @@ def _candidate_text(candidate: EvidenceCandidate) -> str:
     )
 
 
+def _lexical_boost(row: Any, *, query: str, entity_id: str | None) -> float:
+    normalized_query = _normalize(query)
+    normalized_title = _normalize(row["title"])
+    normalized_text = _normalize(row["text"])
+    metadata = dict(row["metadata"] or {})
+    metadata_text = " ".join(str(value) for value in metadata.values() if value is not None)
+    haystack = _normalize(
+        " ".join(
+            [
+                str(row["source_table"]),
+                str(row["source_id"]),
+                str(row["entity_type"]),
+                str(row["entity_id"]),
+                str(row["linked_task_id"] or ""),
+                str(row["title"]),
+                str(row["text"]),
+                metadata_text,
+            ]
+        )
+    )
+    boost = 0.0
+
+    if normalized_title and normalized_title in normalized_query:
+        boost += 2.0
+    if len(normalized_text) >= 16 and normalized_text in normalized_query:
+        boost += 1.0
+    if normalized_query and normalized_query in haystack:
+        boost += 0.8
+
+    query_tokens = {
+        token for token in TOKEN_PATTERN.findall(normalized_query) if len(token) >= 4
+    }
+    haystack_tokens = set(TOKEN_PATTERN.findall(haystack))
+    if query_tokens and haystack_tokens:
+        boost += min(0.8, 0.08 * len(query_tokens & haystack_tokens))
+
+    if "заблок" in normalized_query and "заблок" in haystack:
+        boost += 0.4
+    if entity_id and _normalize(entity_id) in {
+        _normalize(row["source_id"]),
+        _normalize(row["entity_id"]),
+        _normalize(row["linked_task_id"] or ""),
+    }:
+        boost += 2.0
+    return boost
+
+
 def _chunk_id(candidate: EvidenceCandidate) -> str:
     return f"{candidate.project_id}:{candidate.source_table}:{candidate.source_id}"
 
@@ -561,6 +628,10 @@ def _vector_literal(values: list[float]) -> str:
             f"Размерность вектора Yandex не совпадает: ожидалось {EMBEDDING_DIMENSIONS}, получено {len(values)}."
         )
     return "[" + ",".join(f"{value:.9f}" for value in values) + "]"
+
+
+def _normalize(value: Any) -> str:
+    return str(value or "").casefold().replace("ё", "е")
 
 
 def _is_observed(value: date | datetime, as_of: date | None) -> bool:

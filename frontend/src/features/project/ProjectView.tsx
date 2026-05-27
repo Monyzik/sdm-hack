@@ -49,7 +49,7 @@ export function ProjectView({
   const trendsQuery = useProjectTrends(
     project.project_id,
     asOfDate,
-    8,
+    60,
     activeTab === "summary",
   );
 
@@ -81,7 +81,9 @@ export function ProjectView({
   }, [problemContextQuery.error, problemContextQuery.isError]);
 
   const workTasks = useMemo(() => {
-    const blockedTaskIds = new Set(project.blocked_tasks.map((task) => task.id));
+    const blockedTaskIds = new Set(
+      project.blocked_tasks.map((task) => task.id),
+    );
     const overdueOnlyTasks = project.overdue_tasks.filter(
       (task) => !blockedTaskIds.has(task.id),
     );

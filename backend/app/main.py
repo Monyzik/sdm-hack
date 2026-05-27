@@ -33,6 +33,8 @@ app.add_middleware(
 )
 app.include_router(project_summary_router, prefix=settings.api_prefix)
 app.include_router(notifications_router, prefix=settings.api_prefix)
+app.include_router(project_summary_router, prefix=f"/api{settings.api_prefix}")
+app.include_router(notifications_router, prefix=f"/api{settings.api_prefix}")
 
 
 @app.get("/health")

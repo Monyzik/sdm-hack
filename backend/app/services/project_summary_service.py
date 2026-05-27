@@ -602,11 +602,14 @@ def _sort_problem_tasks(tasks: Iterable[Task]) -> list[Task]:
 
 
 def _trend_dates(start_date: date, end_date: date, points: int) -> list[date]:
-    points = min(max(points, 2), 12)
+    points = min(max(points, 2), 60)
     if start_date >= end_date:
         return [end_date]
 
     total_days = max(1, (end_date - start_date).days)
+    if points >= total_days + 1:
+        return [start_date + timedelta(days=offset) for offset in range(total_days + 1)]
+
     dates: list[date] = []
     for index in range(points):
         offset = round(total_days * index / (points - 1))

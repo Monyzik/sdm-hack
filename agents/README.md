@@ -1,25 +1,54 @@
 # Архитектура `agents`
 
-Слой `agents` разделен по ответственности, чтобы новые агенты не складывались в корень пакета.
+Код агентов собран в директории `agents/agents/<agent_name>/`. Внутри пакетов используется один принцип:
+`agent.py` для входного класса, `prompts.py` для инструкций, `schemas.py` для контрактов, а для графов
+добавляются `graph.py`, `state.py` и `nodes/`. По структуре сразу видно, где какая часть логики.
 
 ```text
 agents/
   api/                 HTTP API сервиса агентов
+  agents/              продуктовые агенты и графы
+    control_event_simulation/
+    internal_notifications/
+    project_analysis/
+    project_brief/
+    project_control/
+    project_monitor/
+    project_parser/
+    project_qa/
   domain/              чистые Pydantic-модели без LLM и I/O
-  use_cases/           пользовательские сценарии: brief, Q&A
-  workflows/           LangGraph orchestration: control, monitor
-  services/            прикладные агенты и парсер документов
+  tools/               переиспользуемые инструменты агентов
+    project_facts/     чтение project summary/problem context/RAG/budget
+    runtime.py         адаптеры LangChain tools без зависимости от конкретного агента
+  core/                общие утилиты без I/O и привязки к агентам
   infrastructure/      внешние адаптеры: LLM-провайдеры
-  cli/                 локальные консольные запуски
 ```
 
 Правило зависимостей:
 
 ```text
-api -> use_cases/workflows -> services -> infrastructure
-use_cases/workflows/services -> domain
+api -> agents/<agent_name> -> tools/core/domain/infrastructure
 ```
 
 `backend` не импортирует агентские сервисы напрямую: ему передается структурный объект проекта через backend-протокол.
-Скрипты импортируют публичные сценарии из `agents.workflows`, `agents.use_cases` и `agents.services`.
-Корень пакета не должен содержать новые агентские модули.
+Скрипты и API импортируют публичные функции из пакетов `agents.agents.<agent_name>`.
+Между API и агентом нет дополнительного слоя-обертки: все агентские входы лежат рядом
+и называются по продуктовой роли.
+
+Для крупного агента используем пакет, а не один файл:
+
+```text
+agents/<agent_name>/
+  agent.py      публичный запуск и класс агента
+  graph.py      сборка LangGraph
+  state.py      состояние графа
+  prompts.py    системные инструкции и skill-поведение
+  schemas.py    Pydantic-контракты агента
+  nodes/        узлы графа
+
+tools/<tool_group>/
+  schemas.py    Pydantic-контракты аргументов tools
+  factory.py    LangChain/graph tool wrappers
+  executor.py   I/O и вызовы backend/API
+  formatting.py сжатие и нормализация tool outputs
+```

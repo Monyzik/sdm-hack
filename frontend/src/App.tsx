@@ -73,12 +73,24 @@ const appPages: NavigationPage<AppPage>[] = [
     icon: Bell,
   },
 ];
+const APP_STATE_STORAGE_KEY = "sdm-hack.app-state";
+
+type StoredAppState = {
+  activePage?: AppPage;
+  selectedProjectId?: string | null;
+  previewProjectId?: string | null;
+};
 
 export default function App() {
   const queryClient = useQueryClient();
+  const storedAppState = readStoredAppState();
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
-  const [activePage, setActivePage] = useState<AppPage>("overview");
-  const [previewProjectId, setPreviewProjectId] = useState<string | null>(null);
+  const [activePage, setActivePage] = useState<AppPage>(
+    storedAppState.activePage ?? "overview",
+  );
+  const [previewProjectId, setPreviewProjectId] = useState<string | null>(
+    storedAppState.previewProjectId ?? null,
+  );
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "light";
     const stored = window.localStorage.getItem("theme");
@@ -88,7 +100,7 @@ export default function App() {
       : "light";
   });
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null,
+    storedAppState.selectedProjectId ?? null,
   );
 
   const portfolioQuery = usePortfolio(AS_OF_DATE);
@@ -121,6 +133,13 @@ export default function App() {
     document.documentElement.classList.toggle("dark", theme === "dark");
     window.localStorage.setItem("theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      APP_STATE_STORAGE_KEY,
+      JSON.stringify({ activePage, selectedProjectId, previewProjectId }),
+    );
+  }, [activePage, selectedProjectId, previewProjectId]);
 
   function handleRefresh() {
     queryClient.invalidateQueries();
@@ -308,7 +327,10 @@ export default function App() {
                   onRetry={() => projectQuery.refetch()}
                 />
               ) : projectQuery.data ? (
-                <ProjectView project={projectQuery.data} asOfDate={AS_OF_DATE} />
+                <ProjectView
+                  project={projectQuery.data}
+                  asOfDate={AS_OF_DATE}
+                />
               ) : (
                 <LoadingState label="Загрузка проекта…" />
               )}
@@ -419,4 +441,30 @@ export default function App() {
       ) : null}
     </div>
   );
+}
+
+function readStoredAppState(): StoredAppState {
+  if (typeof window === "undefined") return {};
+  try {
+    const rawValue = window.localStorage.getItem(APP_STATE_STORAGE_KEY);
+    if (!rawValue) return {};
+    const value = JSON.parse(rawValue) as StoredAppState;
+    const pageIds = new Set(appPages.map((page) => page.id));
+    return {
+      activePage:
+        value.activePage && pageIds.has(value.activePage)
+          ? value.activePage
+          : undefined,
+      selectedProjectId:
+        typeof value.selectedProjectId === "string"
+          ? value.selectedProjectId
+          : null,
+      previewProjectId:
+        typeof value.previewProjectId === "string"
+          ? value.previewProjectId
+          : null,
+    };
+  } catch {
+    return {};
+  }
 }

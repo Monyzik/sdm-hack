@@ -252,18 +252,20 @@ export function AppNavigation<T extends string>({
           />
           <div
             id="mobile-primary-nav"
-            className="absolute bottom-0 left-0 top-0 flex w-[min(86vw,336px)] flex-col border-r border-slate-200 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-slate-950 shadow-2xl shadow-slate-950/20"
+            className="absolute bottom-0 left-0 top-0 flex w-[min(86vw,336px)] flex-col border-r border-slate-200 bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] text-slate-950 shadow-2xl shadow-slate-950/20 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 dark:shadow-black/40"
           >
-            <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
               <div>
                 <div className="text-sm font-semibold">Разделы</div>
-                <div className="text-xs text-slate-500">SDM</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  SDM
+                </div>
               </div>
               <button
                 type="button"
                 title="Закрыть меню"
                 onClick={() => setIsMobileOpen(false)}
-                className="grid size-10 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                className="grid size-10 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-50"
               >
                 <X aria-hidden strokeWidth={2.25} className="size-5" />
                 <span className="sr-only">Закрыть меню</span>
@@ -275,7 +277,6 @@ export function AppNavigation<T extends string>({
                 pages={pages}
                 activePage={activePage}
                 onPageChange={handlePageChange}
-                forceLight
               />
             </div>
           </div>
@@ -289,7 +290,6 @@ interface NavigationItemsProps<T extends string> {
   pages: NavigationPage<T>[];
   activePage: T;
   isCollapsed?: boolean;
-  forceLight?: boolean;
   onPageChange: (page: T) => void;
 }
 
@@ -297,7 +297,6 @@ function NavigationItems<T extends string>({
   pages,
   activePage,
   isCollapsed = false,
-  forceLight = false,
   onPageChange,
 }: NavigationItemsProps<T>) {
   return (
@@ -314,13 +313,9 @@ function NavigationItems<T extends string>({
             title={page.label}
             onClick={() => onPageChange(page.id)}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
-              forceLight && isActive
-                ? "bg-indigo-50 text-indigo-700"
-                : forceLight
-                  ? "text-slate-600 hover:bg-slate-50"
-                  : isActive
-                    ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
-                    : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900/60"
+              isActive
+                ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
+                : "text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-900/60"
             } ${isCollapsed ? "lg:grid lg:size-12 lg:place-items-center lg:justify-items-center lg:p-0" : ""}`}
           >
             <Icon
@@ -330,13 +325,7 @@ function NavigationItems<T extends string>({
             />
             <span className={isCollapsed ? "lg:sr-only" : ""}>
               <span className="block text-sm font-semibold">{page.label}</span>
-              <span
-                className={`block text-xs ${
-                  forceLight
-                    ? "text-slate-500"
-                    : "text-slate-500 dark:text-slate-400"
-                }`}
-              >
+              <span className="block text-xs text-slate-500 dark:text-slate-400">
                 {page.description}
               </span>
             </span>

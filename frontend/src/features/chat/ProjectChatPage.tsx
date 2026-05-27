@@ -27,6 +27,7 @@ type ChatMessage =
 const CONTEXT_MESSAGE_LIMIT = 6;
 const CONTEXT_CHARS_PER_MESSAGE = 500;
 const CONTEXT_TOTAL_CHARS = 2200;
+const CHAT_STORAGE_PREFIX = "sdm-hack.project-chat";
 
 interface ProjectChatPageProps {
   projects: PortfolioProjectSummary[];
@@ -39,42 +40,57 @@ export function ProjectChatPage({
   selectedProjectId,
   asOfDate,
 }: ProjectChatPageProps) {
-  const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: "welcome",
-      role: "assistant",
-      content:
-        "Спросите меня по выбранному проекту. Я смотрю summary, проблемный context, задачи, риски, бюджет, коммуникации, решения и зависимости.",
-    },
-  ]);
+  const storageKey = chatStorageKey(selectedProjectId, asOfDate);
   const selectedProject = projects.find(
     (project) => project.project_id === selectedProjectId,
   );
   const selectedProjectName = selectedProject?.project_name;
+  const [draft, setDraft] = useState(
+    () => readStoredChat(storageKey, selectedProjectName).draft,
+  );
+  const [messages, setMessages] = useState<ChatMessage[]>(
+    () => readStoredChat(storageKey, selectedProjectName).messages,
+  );
   const questionMutation = useProjectQuestion(selectedProjectId, asOfDate);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const canSubmit = draft.trim().length > 0 && Boolean(selectedProjectId);
+  const canSubmit =
+    draft.trim().length > 0 &&
+    Boolean(selectedProjectId) &&
+    !questionMutation.isPending;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, questionMutation.isPending]);
 
   useEffect(() => {
-    setMessages([
-      {
-        id: `welcome-${selectedProjectId ?? "none"}`,
-        role: "assistant",
-        content: selectedProjectName
-          ? `Выбран проект «${selectedProjectName}». Задайте вопрос по статусу, срокам, рискам, бюджету или блокерам.`
-          : "Выберите проект, чтобы задать вопрос.",
-      },
-    ]);
-  }, [asOfDate, selectedProjectId, selectedProjectName]);
+    const storedChat = readStoredChat(storageKey, selectedProjectName);
+    setDraft(storedChat.draft);
+    setMessages(storedChat.messages);
+  }, [storageKey, selectedProjectName]);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        draft,
+        messages: messages.slice(-20),
+      }),
+    );
+  }, [draft, messages, storageKey]);
+
+  useEffect(() => {
+    if (!questionMutation.isPending) return undefined;
+    const preventUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", preventUnload);
+    return () => window.removeEventListener("beforeunload", preventUnload);
+  }, [questionMutation.isPending]);
 
   function sendQuestion(question: string) {
     const value = question.trim();
-    if (!value || !selectedProjectId) return;
+    if (!value || !selectedProjectId || questionMutation.isPending) return;
 
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -145,7 +161,9 @@ export function ProjectChatPage({
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
-                sendQuestion(draft);
+                if (canSubmit) {
+                  sendQuestion(draft);
+                }
               }
             }}
             placeholder="Задайте вопрос о проекте"
@@ -154,7 +172,7 @@ export function ProjectChatPage({
           />
           <button
             type="submit"
-            disabled={!canSubmit || questionMutation.isPending}
+            disabled={!canSubmit}
             className="grid size-10 shrink-0 place-items-center rounded-full bg-indigo-600 text-white transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-300 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:disabled:bg-slate-700"
           >
             <ArrowUp aria-hidden className="size-4" />
@@ -173,9 +191,68 @@ function formatAgentError(error: unknown) {
   return "Не смог получить ответ агента. Проверьте agents API, backend и настройки LLM.";
 }
 
-function buildConversationContext(messages: ChatMessage[]): ProjectChatContextMessage[] {
+function chatStorageKey(projectId: string | null, asOfDate: string) {
+  return `${CHAT_STORAGE_PREFIX}.${projectId ?? "none"}.${asOfDate}`;
+}
+
+function readStoredChat(
+  storageKey: string,
+  selectedProjectName?: string,
+): {
+  draft: string;
+  messages: ChatMessage[];
+} {
+  if (typeof window !== "undefined") {
+    try {
+      const rawValue = window.localStorage.getItem(storageKey);
+      if (rawValue) {
+        const parsed = JSON.parse(rawValue) as {
+          draft?: unknown;
+          messages?: unknown;
+        };
+        if (Array.isArray(parsed.messages) && parsed.messages.length > 0) {
+          return {
+            draft: typeof parsed.draft === "string" ? parsed.draft : "",
+            messages: parsed.messages.filter(isChatMessage).slice(-20),
+          };
+        }
+      }
+    } catch {
+      // Переходим к приветственному сообщению ниже.
+    }
+  }
+  return {
+    draft: "",
+    messages: [
+      {
+        id: `welcome-${selectedProjectName ?? "none"}`,
+        role: "assistant",
+        content: selectedProjectName
+          ? `Выбран проект «${selectedProjectName}». Задайте вопрос по статусу, срокам, рискам, бюджету или блокерам.`
+          : "Выберите проект, чтобы задать вопрос.",
+      },
+    ],
+  };
+}
+
+function isChatMessage(value: unknown): value is ChatMessage {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<ChatMessage>;
+  return (
+    typeof item.id === "string" &&
+    typeof item.content === "string" &&
+    (item.role === "assistant" || item.role === "user")
+  );
+}
+
+function buildConversationContext(
+  messages: ChatMessage[],
+): ProjectChatContextMessage[] {
   const relevantMessages = messages
-    .filter((message) => !message.id.startsWith("welcome") && message.content.trim().length > 0)
+    .filter(
+      (message) =>
+        !message.id.startsWith("welcome") && message.content.trim().length > 0,
+    )
     .slice(-CONTEXT_MESSAGE_LIMIT);
 
   const context: ProjectChatContextMessage[] = [];
@@ -231,7 +308,9 @@ function ChatBubble({
         <MarkdownContent content={message.content} />
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {message.evidenceIds?.length ? (
-            <Badge tone="neutral">evidence: {message.evidenceIds.join(", ")}</Badge>
+            <Badge tone="neutral">
+              evidence: {message.evidenceIds.join(", ")}
+            </Badge>
           ) : null}
           <button
             type="button"

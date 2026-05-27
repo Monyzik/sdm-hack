@@ -12,7 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from agents.workflows.project_control import ProjectControlData, build_project_control_graph
+from agents.agents.project_control import ProjectControlData, build_project_control_graph
 from backend.app.database.models import Base
 from backend.app.database.session import create_async_engine_from_env, create_async_session_factory
 

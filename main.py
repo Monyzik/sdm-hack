@@ -6,7 +6,7 @@ import os
 from datetime import date
 from pathlib import Path
 
-from agents.workflows.project_control import (
+from agents.agents.project_control import (
     DocxEventType,
     ProjectControlData,
     build_project_control_graph,

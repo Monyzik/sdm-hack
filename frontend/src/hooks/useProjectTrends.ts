@@ -6,7 +6,7 @@ import { queryKeys } from "./queryKeys";
 export function useProjectTrends(
   projectId: string | null,
   asOf: string,
-  points = 8,
+  points = 60,
   enabled = Boolean(projectId),
 ) {
   return useQuery({

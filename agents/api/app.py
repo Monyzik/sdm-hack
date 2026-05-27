@@ -7,15 +7,15 @@ import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from agents.use_cases.control_event_simulation import (
+from agents.agents.control_event_simulation import (
     SimulationClearResult,
     SimulationJob,
     clear_control_event_simulation,
     get_control_event_simulation,
     start_control_event_simulation,
 )
-from agents.use_cases.project_brief import ProjectManagerBrief, run_project_brief
-from agents.use_cases.project_qa import (
+from agents.agents.project_brief import ProjectManagerBrief, run_project_brief
+from agents.agents.project_qa import (
     ProjectQuestionAnswer,
     ProjectQuestionRequest,
     run_project_question,
