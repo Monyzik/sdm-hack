@@ -164,7 +164,7 @@ async def main_async() -> None:
 
     parser = argparse.ArgumentParser(description="Загрузить демо-CSV в базу данных.")
     parser.add_argument("--database-url", dest="database_url", default=None, help="URL подключения SQLAlchemy")
-    parser.add_argument("--data-dir", dest="data_dir", default=str(PROJECT_ROOT / "data"), help="Директория с CSV")
+    parser.add_argument("--data-dir", dest="data_dir", default=str(PROJECT_ROOT / "data" / "demo"), help="Директория с CSV")
     parser.add_argument("--schema", dest="schema", default=None, help="Опциональная схема БД")
     parser.add_argument("--append", action="store_true", help="Дозалить строки без пересоздания ORM-таблиц")
     args = parser.parse_args()

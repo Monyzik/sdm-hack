@@ -3,8 +3,13 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import sys
 from datetime import date
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from sdm.agents.project_control import (
     DocxEventType,
@@ -15,10 +20,10 @@ from sdm.backend.database.models import Base
 from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 
 
-DOCX_DIR = Path("data/project_documents")
-OUTPUT_FILE = Path("data/agents_json/batch_output.json")
-PER_FILE_OUTPUT_DIR = Path("data/per_file_json")
-MONITORING_OUTPUT_FILE = Path("data/agents_json/project_monitoring_output.json")
+DOCX_DIR = PROJECT_ROOT / "data/documents"
+OUTPUT_FILE = PROJECT_ROOT / "outputs/agents_json/batch_output.json"
+PER_FILE_OUTPUT_DIR = PROJECT_ROOT / "outputs/per_file_json"
+MONITORING_OUTPUT_FILE = PROJECT_ROOT / "outputs/agents_json/project_monitoring_output.json"
 DEFAULT_AS_OF = "2026-06-19"
 
 

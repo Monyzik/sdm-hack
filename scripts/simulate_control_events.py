@@ -17,8 +17,8 @@ from sdm.backend.database.models import Base
 from sdm.backend.database.session import create_async_engine_from_env, create_async_session_factory
 
 
-EVENTS_FILE = PROJECT_ROOT / "data/control_events.jsonl"
-OUTPUT_FILE = PROJECT_ROOT / "data/agents_json/control_event_simulation_output.json"
+EVENTS_FILE = PROJECT_ROOT / "data/demo/control_events.jsonl"
+OUTPUT_FILE = PROJECT_ROOT / "outputs/agents_json/control_event_simulation_output.json"
 SIMULATION_START_DATE = date(2026, 6, 19)
 
 EVENT_FIELD_ALIASES = {
