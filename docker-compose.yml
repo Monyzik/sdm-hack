@@ -18,8 +18,8 @@ services:
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend.Dockerfile
     container_name: sdm_hack_backend
     restart: unless-stopped
     environment:
@@ -40,7 +40,7 @@ services:
   agents:
     build:
       context: .
-      dockerfile: agents/Dockerfile
+      dockerfile: agents.Dockerfile
     container_name: sdm_hack_agents
     restart: unless-stopped
     environment:
@@ -75,7 +75,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - ./infra/postgres/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -84,6 +84,9 @@ services:
       retries: 5
     networks:
       - sdm_hack
+
+volumes:
+  postgres_data:
 
 networks:
   sdm_hack:
