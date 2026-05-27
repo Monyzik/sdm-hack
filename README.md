@@ -150,7 +150,7 @@ docs/screenshots/notifications.png
 
 ### 🔄 Симуляция событий
 
-Демо-поток из `data/control_events.jsonl` (задачи, риски, бюджет, зависимости, коммуникации, DOCX). Показывает сценарий **«не дашборд, а мониторинг изменений»**.
+Демо-поток из `data/demo/control_events.jsonl` (задачи, риски, бюджет, зависимости, коммуникации, DOCX). Показывает сценарий **«не дашборд, а мониторинг изменений»**.
 
 ### 📄 Обработка DOCX без шаблона
 
@@ -196,11 +196,11 @@ flowchart TB
     style Client fill:#6366f133,stroke:#6366f1
 ```
 
-**Поток DOCX:** `data/project_documents/*.docx` → `project_parser` → `per_file_json/` → `project_control` graph → `project_monitor` → `batch_output.json` + обновление `projects` в БД.
+**Поток DOCX:** `data/documents/*.docx` → `project_parser` → `outputs/per_file_json/` → `project_control` graph → `project_monitor` → `outputs/agents_json/batch_output.json` + обновление `projects` в БД.
 
 **Поток чата:** `POST /agents/projects/{id}/ask` → `project_qa` (LangGraph + tools: search, calc, retrieval) → ответ с `sources`.
 
-Подробнее: [`docs/Задание.txt`](docs/Задание.txt) · [`METRICS_PROTOCOL.md`](METRICS_PROTOCOL.md) · [`agents/README.md`](agents/README.md)
+Подробнее: [`docs/Задание.txt`](docs/Задание.txt) · [`METRICS_PROTOCOL.md`](METRICS_PROTOCOL.md)
 
 ---
 
@@ -215,7 +215,7 @@ flowchart TB
 | **LLM / Embeddings** | YandexGPT-совместимый провайдер · `text-search-doc/query` · OpenAI / Polza (опционально) | Генерация сводок, чат, векторный поиск |
 | **Runtime** | <img src="https://skillicons.dev/icons?i=docker" width="16"/> Docker Compose | Локальный и продовый запуск |
 
-Версии зафиксированы в [`frontend/package.json`](frontend/package.json) · [`backend/requirements.txt`](backend/requirements.txt) · [`agents/requirements.txt`](agents/requirements.txt) · [`requirements.txt`](requirements.txt) · [`docker-compose.yml`](docker-compose.yml:1)
+Версии зафиксированы в [`frontend/package.json`](frontend/package.json) · [`requirements.txt`](requirements.txt) · [`docker-compose.yml`](docker-compose.yml:1)
 
 ---
 
@@ -243,7 +243,7 @@ cp .env.example .env
 docker compose up -d postgres
 
 # создание таблиц
-python -m backend.app.database.init_db --drop-existing
+python -m sdm.backend.database.init_db --drop-existing
 
 # демо-данные
 python scripts/load_demo_data_to_db.py
@@ -262,12 +262,11 @@ open http://localhost:5180
 ```bash
 # backend
 python -m venv .venv && source .venv/bin/activate
-pip install -r backend/requirements.txt
-uvicorn backend.app.main:app --reload --port 8000
+pip install -r requirements.txt
+uvicorn sdm.backend.main:app --reload --port 8000
 
-# agents (в другом терминале)
-pip install -r agents/requirements.txt
-uvicorn agents.api.app:app --reload --port 8010
+# agents (в другом терминале, тот же venv)
+uvicorn sdm.agents.api:app --reload --port 8010
 
 # frontend (в третьем терминале)
 cd frontend && npm ci && npm run dev
@@ -305,7 +304,7 @@ cd frontend && npm ci && npm run dev
 | `AGENTS_CORS_ORIGINS` | — | `http://localhost:5180,...` | CORS для agents |
 | `VITE_API_URL` | — | `/api` | URL backend для фронта |
 | `VITE_AGENTS_API_URL` | — | `/agents` | URL agents для фронта |
-| `AS_OF_DATE` | — | `2026-06-19` | Дата среза для `main.py` |
+| `AS_OF_DATE` | — | `2026-06-19` | Дата среза для `scripts/run_docx_batch.py` |
 
 > `*` — обязательна для выбранного `LLM_PROVIDER`. Без LLM стек поднимается, но `brief`/`ask` вернут `502`.
 
@@ -362,22 +361,24 @@ curl -X POST "http://localhost:8010/api/v1/agents/projects/prj-001/ask" \
 
 | Агент | Модуль | Задача |
 |-------|--------|--------|
-| `project_brief` | [`agents/agents/project_brief`](agents/agents/project_brief) | Управленческая сводка: статус → диагноз → варианты → действия |
-| `project_qa` | [`agents/agents/project_qa`](agents/agents/project_qa) | Чат по фактам/расчетам/истории с инструментами и источниками |
-| `project_monitor` | [`agents/agents/project_monitor`](agents/agents/project_monitor) | Мониторинг метрик и генерация алертов |
-| `project_control` | [`agents/agents/project_control`](agents/agents/project_control) | Маршрутизация событий управления (LangGraph) |
-| `internal_notifications` | [`agents/agents/internal_notifications`](agents/agents/internal_notifications) | Генерация inbox-уведомлений |
-| `project_parser` | [`agents/agents/project_parser`](agents/agents/project_parser) | Извлечение полей из DOCX без шаблона |
-| `project_analysis` | [`agents/agents/project_analysis`](agents/agents/project_analysis) | Аналитическая сводка состояния |
-| `control_event_simulation` | [`agents/agents/control_event_simulation`](agents/agents/control_event_simulation) | Демо-поток событий |
+| `project_brief` | [`sdm/agents/project_brief`](sdm/agents/project_brief) | Управленческая сводка: статус → диагноз → варианты → действия |
+| `project_qa` | [`sdm/agents/project_qa`](sdm/agents/project_qa) | Чат по фактам/расчетам/истории с инструментами и источниками |
+| `project_monitor` | [`sdm/agents/project_monitor`](sdm/agents/project_monitor) | Мониторинг метрик и генерация алертов |
+| `project_control` | [`sdm/agents/project_control`](sdm/agents/project_control) | Маршрутизация событий управления (LangGraph) |
+| `internal_notifications` | [`sdm/agents/internal_notifications`](sdm/agents/internal_notifications) | Генерация inbox-уведомлений |
+| `project_parser` | [`sdm/agents/project_parser`](sdm/agents/project_parser) | Извлечение полей из DOCX без шаблона |
+| `project_analysis` | [`sdm/agents/project_analysis`](sdm/agents/project_analysis) | Аналитическая сводка состояния |
+| `control_event_simulation` | [`sdm/agents/control_event_simulation`](sdm/agents/control_event_simulation) | Демо-поток событий |
 
-Граф DOCX: [`main.py`](main.py) → `build_project_control_graph(session_factory)` → `project_parser` → `project_control` → `project_monitor`.
+Внутри пакета агента один принцип: `agent.py` — входной класс, `prompts.py` — инструкции, `schemas.py` — контракты, для графов добавляются `graph.py`, `state.py` и `nodes/`.
+
+Граф DOCX: [`scripts/run_docx_batch.py`](scripts/run_docx_batch.py) → `build_project_control_graph(session_factory)` → `project_parser` → `project_control` → `project_monitor`.
 
 ---
 
 ## 📐 Метрики
 
-Все производные метрики **считаются**, а не хранятся. Формулы — в [`backend/app/services/metrics.py`](backend/app/services/metrics.py), протокол — в [`METRICS_PROTOCOL.md`](METRICS_PROTOCOL.md).
+Все производные метрики **считаются**, а не хранятся. Формулы — в [`sdm/backend/services/metrics.py`](sdm/backend/services/metrics.py), протокол — в [`METRICS_PROTOCOL.md`](METRICS_PROTOCOL.md).
 
 | Метрика | Формула (упрощенно) | Сигнал |
 |---------|---------------------|--------|
@@ -402,23 +403,28 @@ sdm_hack/
 │   ├── src/features/         # portfolio / project / chat / notifications / tasks
 │   ├── src/api/              # клиенты к /api и /agents
 │   └── vite.config.ts        # прокси /api → :8000, /agents → :8010
-├── backend/                  # FastAPI — REST, метрики, RAG, БД
-│   ├── app/api/              # summaries, notifications
-│   ├── app/services/         # metrics, project_summary_*, retrieval, yandex_embeddings
-│   ├── app/database/         # models, init_db, session (asyncpg + SQLAlchemy)
-│   └── app/schemas/          # Pydantic-контракты
-├── agents/                   # FastAPI + LangGraph — 8 агентов
-│   ├── agents/               # project_brief / qa / monitor / control / parser ...
-│   ├── api/app.py            # /health, /brief, /ask, /simulation, /docx/*
-│   └── core/ + tools/        # LLM-клиенты, инструменты поиска/расчета
-├── data/                     # синтетические CSV + DOCX + control_events.jsonl
-│   ├── project_documents/    # исходные DOCX
-│   ├── per_file_json/        # JSON после парсинга DOCX
-│   └── agents_json/          # batch_output, monitoring, simulation
-├── scripts/                  # load_demo_data_to_db, simulate_control_events, generate_demo_data
-├── infra/postgres/           # init-скрипты и volume для pgvector
+├── sdm/                      # единый Python-пакет: backend + agents
+│   ├── backend/              # FastAPI — REST, метрики, RAG, БД
+│   │   ├── api/              # summaries, notifications
+│   │   ├── services/         # metrics, project_summary_*, retrieval, yandex_embeddings
+│   │   ├── database/         # models, init_db, session (asyncpg + SQLAlchemy)
+│   │   ├── schemas/          # Pydantic-контракты
+│   │   └── main.py           # entrypoint :8000
+│   └── agents/               # FastAPI + LangGraph — 8 агентов
+│       ├── project_brief/ … project_qa/ … control_event_simulation/
+│       ├── tools/            # project_facts + runtime-адаптеры LangChain tools
+│       ├── llm.py            # LLM-адаптеры провайдеров (yandex / openai / polza)
+│       ├── text.py           # общие утилиты текста
+│       └── api.py            # entrypoint :8010 (/health, /brief, /ask, /simulation, /docx/*)
+├── data/                     # только входные данные
+│   ├── demo/                 # синтетические CSV + control_events.jsonl
+│   └── documents/            # исходные DOCX (не трекаются)
+├── outputs/                  # всё сгенерированное: agents_json, per_file_json
+├── scripts/                  # run_docx_batch, load_demo_data_to_db, simulate_control_events, generate_demo_data
+├── infra/postgres/           # init-скрипты pgvector (данные БД — в named volume)
 ├── docs/                     # задание, метрики, скриншоты
-├── main.py                   # DOCX-pipeline через LangGraph (AS_OF_DATE)
+├── backend.Dockerfile        # образ backend (контекст — корень репо)
+├── agents.Dockerfile         # образ agents (контекст — корень репо)
 ├── docker-compose.yml        # postgres + backend + agents + frontend
 └── .env.example              # все переменные окружения
 ```
@@ -433,27 +439,27 @@ sdm_hack/
 
 ```bash
 # файл с событиями
-cat data/control_events.jsonl
+cat data/demo/control_events.jsonl
 
 # запуск через API (асинхронная job-модель)
 curl -X POST http://localhost:8010/api/v1/agents/control-events/simulation | jq
 
 # или напрямую скриптом
 python scripts/simulate_control_events.py
-# → data/agents_json/control_event_simulation_output.json
+# → outputs/agents_json/control_event_simulation_output.json
 ```
 
 **DOCX pipeline (без шаблона):**
 
 ```bash
-# обработка всех DOCX из data/project_documents/
-python main.py
-AS_OF_DATE=2026-06-19 python main.py
+# обработка всех DOCX из data/documents/
+python scripts/run_docx_batch.py
+AS_OF_DATE=2026-06-19 python scripts/run_docx_batch.py
 
 # результаты
-ls data/per_file_json/                    # по файлам
-cat data/agents_json/batch_output.json    # общий
-cat data/agents_json/project_monitoring_output.json  # мониторинг
+ls outputs/per_file_json/                          # по файлам
+cat outputs/agents_json/batch_output.json          # общий
+cat outputs/agents_json/project_monitoring_output.json  # мониторинг
 ```
 
 ---
@@ -462,11 +468,11 @@ cat data/agents_json/project_monitoring_output.json  # мониторинг
 
 | Команда | Что делает |
 |---------|------------|
-| `python -m backend.app.database.init_db --drop-existing` | Создание таблиц (с пересозданием) |
+| `python -m sdm.backend.database.init_db --drop-existing` | Создание таблиц (с пересозданием) |
 | `python scripts/load_demo_data_to_db.py` | Загрузка CSV → Postgres (+ эмбеддинги при наличии ключей) |
 | `python scripts/generate_demo_data.py` | Генерация синтетики |
 | `python scripts/simulate_control_events.py` | Прогон `control_events.jsonl` |
-| `python main.py` | DOCX → JSON → мониторинг |
+| `python scripts/run_docx_batch.py` | DOCX → JSON → мониторинг |
 | `cd frontend && npm run lint` / `npm run format:check` | Линт и проверка форматирования |
 | `docker compose up -d --build` | Пересборка всех сервисов |
 
@@ -481,8 +487,8 @@ npm run lint
 npm run format
 
 # проверки бэкенда (если настроены)
-ruff check backend/ agents/
-mypy backend/ agents/
+ruff check sdm/
+mypy sdm/
 
 # тесты (при наличии)
 pytest
@@ -490,7 +496,7 @@ pytest
 
 **Соглашения:**
 
-- Метрики — только через `backend/app/services/metrics.py`, не дублировать формулы в агентах
+- Метрики — только через `sdm/backend/services/metrics.py`, не дублировать формулы в агентах
 - Pydantic-контракты — единый источник типов для API и LLM
 - `as_of` — обязательный параметр для всех временных срезов
 - Ответы агента — всегда с `sources` для проверки
@@ -532,7 +538,7 @@ PR приветствуются. Для локальной проверки пе
 
 ```bash
 docker compose up -d postgres
-python -m backend.app.database.init_db --drop-existing
+python -m sdm.backend.database.init_db --drop-existing
 python scripts/load_demo_data_to_db.py
 docker compose up -d backend agents frontend
 curl -fsS http://localhost:8000/health && curl -fsS http://localhost:8010/health
