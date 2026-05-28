@@ -44,8 +44,8 @@ class Case(BaseModel):
 
 def corpus_catalog(root: Path, document_root: Path):
     """Source aliases and project ownership from local fixtures, without provider calls."""
-    from sdm.backend.services.document_evidence import load_document_evidence, load_manifest
     from scripts.generate_interview_data import build_records
+    from sdm.backend.services.document_evidence import load_document_evidence, load_manifest
 
     catalog = {}
     files = sorted((root / "data/demo").glob("*.csv"))

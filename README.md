@@ -204,6 +204,7 @@ RAG разбивает Markdown и DOCX по разделам на фрагме�
 | Переписки и комментарии | [conversations.json](data/interview/conversations.json), [task-comments.json](data/interview/task-comments.json) |
 | Сценарий и таблицы | [scenario.json](data/interview/scenario.json), [data/demo](data/demo/) |
 | 300 вопросов и разбиение | [eval_cases.jsonl](data/interview/eval_cases.jsonl), [eval_splits.json](data/interview/eval_splits.json) |
+| 16 сценариев агента | [agent_cases.jsonl](data/interview/agent_cases.jsonl): факты, расчёты, неизвестные данные, диалоги и границы задачи |
 | Точные цитаты для новых случаев | [evidence_map.json](data/interview/collection/evidence_map.json) |
 
 Последний retrieval-прогон: 120 новых вопросов E181–E300 на корпусе v3;
@@ -244,7 +245,7 @@ npm --prefix frontend run lint
 npm --prefix frontend run build
 ```
 
-268 offline-тестов проверяют граф, инструменты, схемы, цитаты, восстановление после
+306 offline-тестов проверяют граф, инструменты, схемы, цитаты, восстановление после
 ошибок, SSE, retrieval и разметку корпуса. [CI](.github/workflows/ci.yml) выполняет
 тесты, линтеры и сборку без внешних API. Качество модели оценивается отдельными прогонами.
 
@@ -256,19 +257,34 @@ python -m sdm.evaluation --dataset data/interview/eval_holdout.jsonl \
   --retrieval-modes dense bm25 hybrid hybrid_rerank --skip-qa \
   --output outputs/evaluations/heldout-new-run
 
-# Один QA-кейс с дополнительной проверкой тезисов.
-python -m sdm.evaluation --dataset data/interview/eval_cases.jsonl \
-  --case-id E021 --output outputs/evaluations/qa-e021-new-run
+# Агент: одинаковые сценарии в обычном режиме и с проверкой тезисов.
+python -m sdm.evaluation.agent --dataset data/interview/agent_cases.jsonl \
+  --modes standard verified --concurrency 2 \
+  --output outputs/evaluations/agent-new-run
 ```
 
 Выходной каталог должен быть новым. Прогоны обращаются к внешним API.
-Runner создаёт `raw.jsonl`, `metadata.json`, `summary.csv`, `report.html` и
-`manual_review.csv`; Pandas формирует таблицы и отчёты. QA runner не передаёт
-`verify_claims` и использует API-default `true`, тогда как UI по умолчанию отправляет
-`false`. При ручной оценке проверьте поддержку каждого факта источником, полноту
-ответа, правильность ссылок и отказ от выдуманных сведений. Наличие ссылки само
-по себе не подтверждает утверждение. Разметка синтетическая и требует независимой
-человеческой проверки. Формулы и результаты — в [метриках](docs/METRICS.md).
+Оценка поиска сохраняет `raw.jsonl`, CSV и HTML-отчёт. Оценка агента отдельно сохраняет
+`agent_raw.jsonl` с ответами и вызовами инструментов, `judgments.jsonl` с оценками
+судьи, `cases.csv`, `summary.csv`, `report.html` и `manual_review.csv`.
+`metadata.json` фиксирует набор, код, модели, порядок и параллельность запросов.
+
+Для агента считаются успешность задачи, покрытие ожидаемых фактов, подтверждение
+утверждений источниками, запрещённые утверждения, корректный отказ при неизвестных
+данных, соблюдение правил вызова инструментов, задержки и токены. Конкретные аргументы
+расчётного инструмента проверяет код. Семантику ответа оценивает отдельный LLM-судья
+по эталону и источникам, без доступа к статусу проверки самого агента.
+
+Судья запускается после измерения всех запросов, его время и токены учитываются
+отдельно. По умолчанию он использует ту же модель, поэтому может разделять ошибки
+ответчика; `--judge-model` позволяет выбрать другую модель на настроенном провайдере.
+Независимая человеческая оценка остаётся необходимой. Ошибка судьи исключает ответ
+из оценки качества, ошибка агента считается неуспехом задачи; знаменатели сохранены
+в CSV. Формулы и результаты — в [метриках](docs/METRICS.md).
+
+Прежний `python -m sdm.evaluation` также умеет сохранять QA-ответы для ручного просмотра
+через `--case-id E021`. Этот режим использует API-default `verify_claims=true`;
+отдельный агентский runner явно выбирает `standard=false` и `verified=true`.
 
 Для воспроизведения CSV без изменения текущей базы:
 

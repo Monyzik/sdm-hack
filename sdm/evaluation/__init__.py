@@ -1,3 +1,3 @@
-"""Versioned, deterministic retrieval evaluation and unscored QA review exports."""
+"""Воспроизводимые прогоны поиска и агента с раздельными метриками качества."""
 
 SCHEMA_VERSION = 1
