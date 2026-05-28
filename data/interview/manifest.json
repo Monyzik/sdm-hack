@@ -1,0 +1,1465 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-06-19",
+  "documents": [
+    {
+      "id": "DOC-P007-PASSPORT",
+      "path": "passport.md",
+      "project_id": "P007",
+      "title": "Паспорт ведомственного помощника",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-PROCEDURE",
+      "path": "procedure.md",
+      "project_id": "P007",
+      "title": "Порядок сопровождения и допуска к пилоту",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-MINUTES",
+      "path": "minutes-2026-06-18.md",
+      "project_id": "P007",
+      "title": "Протокол совещания 18 июня 2026",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-ACCESS",
+      "path": "access-matrix-draft.md",
+      "project_id": "P007",
+      "title": "Проект матрицы доступа",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-FINANCE",
+      "path": "finance-note.md",
+      "project_id": "P007",
+      "title": "Финансовая записка",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-FAQ",
+      "path": "support-faq.md",
+      "project_id": "P007",
+      "title": "FAQ сопровождения",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-ACCEPTANCE",
+      "path": "acceptance-checklist.md",
+      "project_id": "P007",
+      "title": "Чеклист приёмки",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-SOURCES",
+      "path": "source-register.md",
+      "project_id": "P007",
+      "title": "Реестр синтетических источников P007",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-ARCHITECTURE",
+      "path": "architecture-note.md",
+      "project_id": "P007",
+      "title": "Техническая записка: целевая архитектура P007",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-QUALITY",
+      "path": "quality-plan.md",
+      "project_id": "P007",
+      "title": "План качества и приемки P007",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-INCIDENTS",
+      "path": "incident-runbook.md",
+      "project_id": "P007",
+      "title": "Учебный runbook инцидентов P007",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-MEETING17",
+      "path": "minutes-2026-06-17.md",
+      "project_id": "P007",
+      "title": "Живой протокол обсуждения 17 июня 2026 года",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X01",
+      "path": "expanded/doc-p007-x01a.md",
+      "project_id": "P007",
+      "title": "Предложение состава",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X01",
+      "path": "expanded/doc-p007-x01b.md",
+      "project_id": "P007",
+      "title": "Уточнение состава",
+      "published_at": "2026-06-18",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X02",
+      "path": "expanded/doc-p007-x02a.md",
+      "project_id": "P007",
+      "title": "Два исключения стендовой проверки",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X02",
+      "path": "expanded/doc-p007-x02b.md",
+      "project_id": "P007",
+      "title": "Уточнение закрытия исключений",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X03",
+      "path": "expanded/doc-p007-x03a.md",
+      "project_id": "P007",
+      "title": "Черновик приоритета источников",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X03",
+      "path": "expanded/doc-p007-x03b.md",
+      "project_id": "P007",
+      "title": "Уточнение конфликтов",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X04",
+      "path": "expanded/doc-p007-x04a.md",
+      "project_id": "P007",
+      "title": "Черновик отпечатка файла",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X04",
+      "path": "expanded/doc-p007-x04b.md",
+      "project_id": "P007",
+      "title": "Уточнение дедупликации",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X05",
+      "path": "expanded/doc-p007-x05a.md",
+      "project_id": "P007",
+      "title": "План восстановления индекса",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X05",
+      "path": "expanded/doc-p007-x05b.md",
+      "project_id": "P007",
+      "title": "Уточнение свежести индекса",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X06",
+      "path": "expanded/doc-p007-x06a.md",
+      "project_id": "P007",
+      "title": "Черновой сценарий ролей",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X06",
+      "path": "expanded/doc-p007-x06b.md",
+      "project_id": "P007",
+      "title": "Уточнение отрицательного теста",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X07",
+      "path": "expanded/support-triage-draft.md",
+      "project_id": "P007",
+      "title": "Черновик маршрутизации обращений",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X07",
+      "path": "expanded/support-triage-clarification.md",
+      "project_id": "P007",
+      "title": "Уточнение маршрутизации",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X08",
+      "path": "expanded/review-sampling-draft.md",
+      "project_id": "P007",
+      "title": "Проект выборки проверки",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X08",
+      "path": "expanded/review-sampling-clarification.md",
+      "project_id": "P007",
+      "title": "Уточнение ручной проверки",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X09",
+      "path": "expanded/workshop-draft.md",
+      "project_id": "P007",
+      "title": "План учебного семинара",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X09",
+      "path": "expanded/workshop-clarification.md",
+      "project_id": "P007",
+      "title": "Уточнение семинара",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X10",
+      "path": "expanded/budget-options-draft.md",
+      "project_id": "P007",
+      "title": "Варианты дополнительной проверки",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X10",
+      "path": "expanded/budget-options-clarification.md",
+      "project_id": "P007",
+      "title": "Финансовое уточнение вариантов",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X11",
+      "path": "expanded/answer-contract-draft.md",
+      "project_id": "P007",
+      "title": "Проект контракта ответа",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X11",
+      "path": "expanded/answer-contract-clarification.md",
+      "project_id": "P007",
+      "title": "Уточнение контракта ответа",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X12",
+      "path": "expanded/correspondence-protocol-draft.md",
+      "project_id": "P007",
+      "title": "Проект протокола переписки",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-X12",
+      "path": "expanded/correspondence-protocol-clarification.md",
+      "project_id": "P007",
+      "title": "Уточнение протокола переписки",
+      "published_at": "2026-06-19",
+      "version": "2",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D001",
+      "path": "collection/data/d001.md",
+      "project_id": "P007",
+      "title": "Заявка ING-201 на опись учебных книг",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D002",
+      "path": "collection/data/d002.md",
+      "project_id": "P007",
+      "title": "Карточка состава книги «Поставки»",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D003",
+      "path": "collection/data/d003.md",
+      "project_id": "P007",
+      "title": "Протокол разбора скрытой вкладки",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D004",
+      "path": "collection/data/d004.md",
+      "project_id": "P007",
+      "title": "Пояснение к формулам и сохраненным значениям",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D005",
+      "path": "collection/data/d005.md",
+      "project_id": "P007",
+      "title": "Лист сверки пустых строк «Архива»",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D006",
+      "path": "collection/data/d006.md",
+      "project_id": "P007",
+      "title": "Уточнение границ описи ING-201",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D007",
+      "path": "collection/data/d007.md",
+      "project_id": "P007",
+      "title": "Запрос ING-202 о чтении учебного CSV",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D008",
+      "path": "collection/data/d008.md",
+      "project_id": "P007",
+      "title": "Карта соответствия колонок «Очереди»",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D009",
+      "path": "collection/data/d009.md",
+      "project_id": "P007",
+      "title": "Кабинетный пример кавычек в CSV",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D010",
+      "path": "collection/data/d010.md",
+      "project_id": "P007",
+      "title": "Записка о нечитаемом заголовке",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D011",
+      "path": "collection/data/d011.md",
+      "project_id": "P007",
+      "title": "Протокол перестановки столбцов ING-202",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D012",
+      "path": "collection/data/d012.md",
+      "project_id": "P007",
+      "title": "Ответ о статусе карты CSV",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D013",
+      "path": "collection/data/d013.md",
+      "project_id": "P007",
+      "title": "Заявка ING-203 на расшифровку сканов",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D014",
+      "path": "collection/data/d014.md",
+      "project_id": "P007",
+      "title": "Лист сомнений в символах приложения",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D015",
+      "path": "collection/data/d015.md",
+      "project_id": "P007",
+      "title": "Протокол повторного чтения строки 3",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D016",
+      "path": "collection/data/d016.md",
+      "project_id": "P007",
+      "title": "Пояснение о порядке сканированных страниц",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D017",
+      "path": "collection/data/d017.md",
+      "project_id": "P007",
+      "title": "Карточка рукописной пометы к скану",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D018",
+      "path": "collection/data/d018.md",
+      "project_id": "P007",
+      "title": "Письмо о неполной расшифровке ING-203",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D019",
+      "path": "collection/data/d019.md",
+      "project_id": "P007",
+      "title": "Запрос ING-204 о времени источника",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D020",
+      "path": "collection/data/d020.md",
+      "project_id": "P007",
+      "title": "Пояснение к полям без времени",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D021",
+      "path": "collection/data/d021.md",
+      "project_id": "P007",
+      "title": "Кабинетная сверка публикации и получения",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D022",
+      "path": "collection/data/d022.md",
+      "project_id": "P007",
+      "title": "Записка о срезе на конец дня",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D023",
+      "path": "collection/data/d023.md",
+      "project_id": "P007",
+      "title": "Протокол исправления даты карточки",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D024",
+      "path": "collection/data/d024.md",
+      "project_id": "P007",
+      "title": "Ответ о датах и разрешении действий",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D025",
+      "path": "collection/data/d025.md",
+      "project_id": "P007",
+      "title": "Заявка ING-205 на обозначение единиц",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D026",
+      "path": "collection/data/d026.md",
+      "project_id": "P007",
+      "title": "Пояснение к упаковкам образцов",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D027",
+      "path": "collection/data/d027.md",
+      "project_id": "P007",
+      "title": "Записка о валюте учебных цен",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D028",
+      "path": "collection/data/d028.md",
+      "project_id": "P007",
+      "title": "Кабинетный разбор тысяч и рублей",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D029",
+      "path": "collection/data/d029.md",
+      "project_id": "P007",
+      "title": "Карточка процентов и процентных пунктов",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D030",
+      "path": "collection/data/d030.md",
+      "project_id": "P007",
+      "title": "Письмо о пустой единице ING-205",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D031",
+      "path": "collection/data/d031.md",
+      "project_id": "P007",
+      "title": "Запрос ING-206 о совпадающих именах",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D032",
+      "path": "collection/data/d032.md",
+      "project_id": "P007",
+      "title": "Кабинетная карточка разных контрольных сумм",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D033",
+      "path": "collection/data/d033.md",
+      "project_id": "P007",
+      "title": "Протокол одинакового текста разных писем",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D034",
+      "path": "collection/data/d034.md",
+      "project_id": "P007",
+      "title": "Пояснение о новой копии вложения",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D035",
+      "path": "collection/data/d035.md",
+      "project_id": "P007",
+      "title": "Уточнение сравнения источников ING-206",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D036",
+      "path": "collection/data/d036.md",
+      "project_id": "P007",
+      "title": "Записка о ссылке на нужное вложение",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D037",
+      "path": "collection/data/d037.md",
+      "project_id": "P007",
+      "title": "Заявка ING-207 на разбор неполного импорта",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D038",
+      "path": "collection/data/d038.md",
+      "project_id": "P007",
+      "title": "Лист сопоставления строк пакета К",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D039",
+      "path": "collection/data/d039.md",
+      "project_id": "P007",
+      "title": "Карточка оборванной строки ING-207",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D040",
+      "path": "collection/data/d040.md",
+      "project_id": "P007",
+      "title": "Проект карточки карантина данных",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D041",
+      "path": "collection/data/d041.md",
+      "project_id": "P007",
+      "title": "Протокол повторной передачи пакета К",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-D042",
+      "path": "collection/data/d042.md",
+      "project_id": "P007",
+      "title": "Ответ о возврате пакетов из карантина",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O001",
+      "path": "collection/operations/o001.md",
+      "project_id": "P007",
+      "title": "OPS-301 · Карточка приема ВХ-31",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O002",
+      "path": "collection/operations/o002.md",
+      "project_id": "P007",
+      "title": "OPS-301 · Письмо об обязательных полях Ф-31",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O003",
+      "path": "collection/operations/o003.md",
+      "project_id": "P007",
+      "title": "OPS-301 · Лист проверки заполненности Ч-31",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O004",
+      "path": "collection/operations/o004.md",
+      "project_id": "P007",
+      "title": "OPS-301 · Квитанция дополнения Д-31",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O005",
+      "path": "collection/operations/o005.md",
+      "project_id": "P007",
+      "title": "OPS-301 · Предложение статуса З-31",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O006",
+      "path": "collection/operations/o006.md",
+      "project_id": "P007",
+      "title": "OPS-301 · Памятка двух вопросов П-31",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O007",
+      "path": "collection/operations/o007.md",
+      "project_id": "P007",
+      "title": "OPS-302 · Учебный график замещения Г-32",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O008",
+      "path": "collection/operations/o008.md",
+      "project_id": "P007",
+      "title": "OPS-302 · Опись передачи ОП-32",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O009",
+      "path": "collection/operations/o009.md",
+      "project_id": "P007",
+      "title": "OPS-302 · Решение о регистраторе Р-32",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O010",
+      "path": "collection/operations/o010.md",
+      "project_id": "P007",
+      "title": "OPS-302 · Акт настольной передачи А-32",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O011",
+      "path": "collection/operations/o011.md",
+      "project_id": "P007",
+      "title": "OPS-302 · Записка возврата В-32",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O012",
+      "path": "collection/operations/o012.md",
+      "project_id": "P007",
+      "title": "OPS-302 · Проект расширения замены ЗМ-32",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O013",
+      "path": "collection/operations/o013.md",
+      "project_id": "P007",
+      "title": "OPS-303 · Запрос уточнения У-33",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O014",
+      "path": "collection/operations/o014.md",
+      "project_id": "P007",
+      "title": "OPS-303 · Заключение о похожих карточках С-33",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O015",
+      "path": "collection/operations/o015.md",
+      "project_id": "P007",
+      "title": "OPS-303 · Решение о дубле ДБ-33",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O016",
+      "path": "collection/operations/o016.md",
+      "project_id": "P007",
+      "title": "OPS-303 · Ответ на уточнение ОУ-33",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O017",
+      "path": "collection/operations/o017.md",
+      "project_id": "P007",
+      "title": "OPS-303 · Лист пограничных примеров ПГ-33",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O018",
+      "path": "collection/operations/o018.md",
+      "project_id": "P007",
+      "title": "OPS-303 · Предложение закрытия ЗК-33",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O019",
+      "path": "collection/operations/o019.md",
+      "project_id": "P007",
+      "title": "OPS-304 · Приглашение на разбор ВСТ-34",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O020",
+      "path": "collection/operations/o020.md",
+      "project_id": "P007",
+      "title": "OPS-304 · Черновая повестка ПВ-34",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O021",
+      "path": "collection/operations/o021.md",
+      "project_id": "P007",
+      "title": "OPS-304 · Запрос переноса ПР-34",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O022",
+      "path": "collection/operations/o022.md",
+      "project_id": "P007",
+      "title": "OPS-304 · Решение организатора РВ-34",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O023",
+      "path": "collection/operations/o023.md",
+      "project_id": "P007",
+      "title": "OPS-304 · Записка отмены ОТ-34",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O024",
+      "path": "collection/operations/o024.md",
+      "project_id": "P007",
+      "title": "OPS-304 · Контроль приглашения СМ-34",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O025",
+      "path": "collection/operations/o025.md",
+      "project_id": "P007",
+      "title": "OPS-305 · Заявка на статью БЗ-35",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O026",
+      "path": "collection/operations/o026.md",
+      "project_id": "P007",
+      "title": "OPS-305 · Редакторская записка РД-35",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O027",
+      "path": "collection/operations/o027.md",
+      "project_id": "P007",
+      "title": "OPS-305 · Лист рецензии РЦ-35",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O028",
+      "path": "collection/operations/o028.md",
+      "project_id": "P007",
+      "title": "OPS-305 · Опись исправлений ИС-35",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O029",
+      "path": "collection/operations/o029.md",
+      "project_id": "P007",
+      "title": "OPS-305 · Запрос учебного размещения ПБ-35",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O030",
+      "path": "collection/operations/o030.md",
+      "project_id": "P007",
+      "title": "OPS-305 · Решение о заголовке ЗГ-35",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O031",
+      "path": "collection/operations/o031.md",
+      "project_id": "P007",
+      "title": "OPS-306 · Задание на раздатку РЗ-36",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O032",
+      "path": "collection/operations/o032.md",
+      "project_id": "P007",
+      "title": "OPS-306 · Чеклист читаемости ЧТ-36",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O033",
+      "path": "collection/operations/o033.md",
+      "project_id": "P007",
+      "title": "OPS-306 · Проба черно-белого макета ПЧ-36",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O034",
+      "path": "collection/operations/o034.md",
+      "project_id": "P007",
+      "title": "OPS-306 · Словарь раздатки СЛ-36",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O035",
+      "path": "collection/operations/o035.md",
+      "project_id": "P007",
+      "title": "OPS-306 · Лист повторного просмотра ПП-36",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O036",
+      "path": "collection/operations/o036.md",
+      "project_id": "P007",
+      "title": "OPS-306 · Проект выдачи ВД-36",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O037",
+      "path": "collection/operations/o037.md",
+      "project_id": "P007",
+      "title": "OPS-307 · Оценка трудоемкости ТР-37",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O038",
+      "path": "collection/operations/o038.md",
+      "project_id": "P007",
+      "title": "OPS-307 · Альтернатива оценки АЛ-37",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O039",
+      "path": "collection/operations/o039.md",
+      "project_id": "P007",
+      "title": "OPS-307 · Запрос календарного окна КЛ-37",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O040",
+      "path": "collection/operations/o040.md",
+      "project_id": "P007",
+      "title": "OPS-307 · Решение о варианте РТ-37",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O041",
+      "path": "collection/operations/o041.md",
+      "project_id": "P007",
+      "title": "OPS-307 · Уточнение брони БР-37",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-O042",
+      "path": "collection/operations/o042.md",
+      "project_id": "P007",
+      "title": "OPS-307 · Финансовая сверка ФС-37",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q001",
+      "path": "collection/quality/q001.md",
+      "project_id": "P007",
+      "title": "QLT-401: записка о двух значениях готовности",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q002",
+      "path": "collection/quality/q002.md",
+      "project_id": "P007",
+      "title": "QLT-401: письмо о размере и составе набора",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q003",
+      "path": "collection/quality/q003.md",
+      "project_id": "P007",
+      "title": "QLT-401: карточка составного вопроса о расходах",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q004",
+      "path": "collection/quality/q004.md",
+      "project_id": "P007",
+      "title": "QLT-401: памятка о местоимении «они»",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q005",
+      "path": "collection/quality/q005.md",
+      "project_id": "P007",
+      "title": "QLT-401: протокол проверки слова «сегодня»",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q006",
+      "path": "collection/quality/q006.md",
+      "project_id": "P007",
+      "title": "QLT-401: лист разбора пропущенной части",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q007",
+      "path": "collection/quality/q007.md",
+      "project_id": "P007",
+      "title": "QLT-402: карточка границы цитаты с условием",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q008",
+      "path": "collection/quality/q008.md",
+      "project_id": "P007",
+      "title": "QLT-402: записка о заголовке и ячейке",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q009",
+      "path": "collection/quality/q009.md",
+      "project_id": "P007",
+      "title": "QLT-402: письмо о доказательстве отрицания",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q010",
+      "path": "collection/quality/q010.md",
+      "project_id": "P007",
+      "title": "QLT-402: лист двух источников для одного ответа",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q011",
+      "path": "collection/quality/q011.md",
+      "project_id": "P007",
+      "title": "QLT-402: протокол сохранения единиц бюджета",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q012",
+      "path": "collection/quality/q012.md",
+      "project_id": "P007",
+      "title": "QLT-402: памятка о цитате учебной команды",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q013",
+      "path": "collection/quality/q013.md",
+      "project_id": "P007",
+      "title": "QLT-403: реестр ранней локальной заметки",
+      "published_at": "2026-06-16",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q014",
+      "path": "collection/quality/q014.md",
+      "project_id": "P007",
+      "title": "QLT-403: письмо о видимой метке черновика",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q015",
+      "path": "collection/quality/q015.md",
+      "project_id": "P007",
+      "title": "QLT-403: протокол снятия локальной формулировки",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q016",
+      "path": "collection/quality/q016.md",
+      "project_id": "P007",
+      "title": "QLT-403: карточка равных дат и разных статусов",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q017",
+      "path": "collection/quality/q017.md",
+      "project_id": "P007",
+      "title": "QLT-403: записка о соседних кодах ошибок",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q018",
+      "path": "collection/quality/q018.md",
+      "project_id": "P007",
+      "title": "QLT-403: лист передачи неразрешённого конфликта",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q019",
+      "path": "collection/quality/q019.md",
+      "project_id": "P007",
+      "title": "QLT-404: предложение о карточке читателя",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q020",
+      "path": "collection/quality/q020.md",
+      "project_id": "P007",
+      "title": "QLT-404: письмо о задачах проверяющего",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q021",
+      "path": "collection/quality/q021.md",
+      "project_id": "P007",
+      "title": "QLT-404: записка об администраторе индекса",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q022",
+      "path": "collection/quality/q022.md",
+      "project_id": "P007",
+      "title": "QLT-404: тестовая карта косвенного раскрытия",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q023",
+      "path": "collection/quality/q023.md",
+      "project_id": "P007",
+      "title": "QLT-404: протокол настольного распределения ролей",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q024",
+      "path": "collection/quality/q024.md",
+      "project_id": "P007",
+      "title": "QLT-404: вопросник об отказе при смене роли",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q025",
+      "path": "collection/quality/q025.md",
+      "project_id": "P007",
+      "title": "QLT-405: карта проверки имён вложений",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q026",
+      "path": "collection/quality/q026.md",
+      "project_id": "P007",
+      "title": "QLT-405: записка о заголовке в метаданных",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q027",
+      "path": "collection/quality/q027.md",
+      "project_id": "P007",
+      "title": "QLT-405: письмо о комментарии к вложению",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q028",
+      "path": "collection/quality/q028.md",
+      "project_id": "P007",
+      "title": "QLT-405: тестовая карточка вложенной заметки",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q029",
+      "path": "collection/quality/q029.md",
+      "project_id": "P007",
+      "title": "QLT-405: памятка об истории комментариев",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q030",
+      "path": "collection/quality/q030.md",
+      "project_id": "P007",
+      "title": "QLT-405: протокол разграничения итогов маскирования",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q031",
+      "path": "collection/quality/q031.md",
+      "project_id": "P007",
+      "title": "QLT-406: форма регистрации ошибки разметки",
+      "published_at": "2026-06-15",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q032",
+      "path": "collection/quality/q032.md",
+      "project_id": "P007",
+      "title": "QLT-406: рубрика различения пробела и выдумки",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q033",
+      "path": "collection/quality/q033.md",
+      "project_id": "P007",
+      "title": "QLT-406: карточка бумажного разбора образца",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q034",
+      "path": "collection/quality/q034.md",
+      "project_id": "P007",
+      "title": "QLT-406: письмо о выборе второго рецензента",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q035",
+      "path": "collection/quality/q035.md",
+      "project_id": "P007",
+      "title": "QLT-406: записка о знаменателе отчёта",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q036",
+      "path": "collection/quality/q036.md",
+      "project_id": "P007",
+      "title": "QLT-406: лист арбитража спорной цитаты",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q037",
+      "path": "collection/quality/q037.md",
+      "project_id": "P007",
+      "title": "QLT-407: сценарий проверки перед репетицией",
+      "published_at": "2026-06-17",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q038",
+      "path": "collection/quality/q038.md",
+      "project_id": "P007",
+      "title": "QLT-407: карточка недоступного провайдера",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q039",
+      "path": "collection/quality/q039.md",
+      "project_id": "P007",
+      "title": "QLT-407: письмо об отмене учебного показа",
+      "published_at": "2026-06-18",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q040",
+      "path": "collection/quality/q040.md",
+      "project_id": "P007",
+      "title": "QLT-407: памятка о прерывании долгого ответа",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q041",
+      "path": "collection/quality/q041.md",
+      "project_id": "P007",
+      "title": "QLT-407: лист отметок о восстановлении показа",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    },
+    {
+      "id": "DOC-P007-Q042",
+      "path": "collection/quality/q042.md",
+      "project_id": "P007",
+      "title": "QLT-407: протокол границ репетиционного итога",
+      "published_at": "2026-06-19",
+      "version": "1",
+      "synthetic": true
+    }
+  ],
+  "corpus_version": "3"
+}
