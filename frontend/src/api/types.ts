@@ -294,186 +294,27 @@ export interface PortfolioAttentionSummary {
   signals: PortfolioAttentionSignal[];
 }
 
-export type NotificationSeverity = "info" | "warning" | "critical";
-
-export interface InternalNotification {
-  id: string;
-  project_id: string;
-  project_name: string | null;
-  as_of_date: string | null;
-  trigger_event_type: string | null;
-  trigger_event_label: string | null;
-  created_at: string;
-  updated_at: string;
-  source: string;
-  target_role: string;
-  recipient_hint: string | null;
-  severity: NotificationSeverity;
-  title: string;
-  body: string;
-  reason: string;
-  action_items: string[];
-  requires_acknowledgement: boolean;
-  deduplication_key: string;
-  is_read: boolean;
-  read_at: string | null;
-}
-
-export interface NotificationList {
-  total: number;
-  unread_count: number;
-  items: InternalNotification[];
-}
-
-export type SimulationStageStatus = "pending" | "running" | "success" | "error";
-export type SimulationJobStatus = "queued" | "running" | "completed" | "failed";
-
-export interface SimulationStage {
-  id: string;
-  label: string;
-  detail: string | null;
-  status: SimulationStageStatus;
-  timestamp: string;
-}
-
-export interface SimulationEventResult {
-  event_type: string;
-  event_label: string;
-  project_id: string | null;
-  notification_id: string | null;
-  error: string | null;
-}
-
-export interface SimulationJob {
-  job_id: string;
-  status: SimulationJobStatus;
-  total_events: number;
-  processed_events: number;
-  failed_events: number;
-  stages: SimulationStage[];
-  results: SimulationEventResult[];
-  output_file: string | null;
-  error: string | null;
-}
-
-export interface SimulationClearResult {
-  deleted_notifications: number;
-  output_file_removed: boolean;
-}
-
-export interface ProjectDocxEditableUpdate {
-  project_name: string;
-  start_date: string | null;
-  planned_end_date: string | null;
-  business_goal: string;
-  expected_result: string;
-}
-
-export interface ProjectDocxFieldChange {
-  field: keyof ProjectDocxEditableUpdate;
-  label: string;
-  current_value: string | null;
-  proposed_value: string | null;
-  changed: boolean;
-}
-
-export interface ParsedProjectGoal {
-  goal: string;
-  confidence: number;
-}
-
-export interface ParsedProjectResult {
-  result: string;
-  confidence: number;
-  measurable: boolean;
-}
-
-export interface ParsedProjectTimeline {
-  start_date: string | null;
-  end_date: string | null;
-  duration: string | null;
-  confidence: number;
-}
-
-export interface ParsedProjectData {
-  project_name: string;
-  goals: ParsedProjectGoal[];
-  results: ParsedProjectResult[];
-  timeline: ParsedProjectTimeline | null;
-}
-
-export interface ProjectDocxPreview {
-  project_id: string;
-  file_name: string;
-  parsed_project: ParsedProjectData;
-  editable_update: ProjectDocxEditableUpdate;
-  changes: ProjectDocxFieldChange[];
-}
-
-export interface ProjectDocxApplyResult {
-  project_id: string;
-  updated_project: ProjectDocxEditableUpdate;
-  changes: ProjectDocxFieldChange[];
-}
-
-export type AgentBriefStatus = "в норме" | "под наблюдением" | "критично";
-
-export interface DecisionOption {
-  option: string;
-  when_to_choose: string;
-  tradeoff: string;
-}
-
-export interface BusinessImpact {
-  delay_days: number | null;
-  cost_of_delay: number | null;
-  budget_delta: number | null;
-  impact_summary: string;
-}
-
-export interface AgentActionItem {
-  action: string;
-  owner_hint: string;
-  deadline: string;
-  success_signal: string;
-}
-
-export interface DraftMessage {
-  recipient_hint: string;
-  subject: string;
-  body: string;
-}
-
-export interface FollowUpCheck {
-  check_after: string;
-  success_condition: string;
-  escalation_condition: string;
-}
-
-export interface ProjectManagerBrief {
-  status: AgentBriefStatus;
-  headline: string;
-  management_question: string;
-  diagnosis: string;
-  bottleneck: string;
-  critical_path: string[];
-  recommended_move: string;
-  decision_options: DecisionOption[];
-  business_impact: BusinessImpact;
-  next_actions: AgentActionItem[];
-  draft_message: DraftMessage;
-  follow_up_check: FollowUpCheck;
-  watchouts: string[];
-  evidence_ids: string[];
-  missing_data: string[];
-}
-
 export interface ProjectQuestionAnswer {
   answer: string;
   evidence_ids: string[];
   evidence_sources: ProjectEvidenceSource[];
   used_tools: string[];
   suggested_questions: string[];
+  claims?: ProjectAnswerClaim[];
+  verification?: ProjectAnswerVerification;
+}
+
+export interface ProjectAnswerClaim {
+  text: string;
+  evidence_ids: string[];
+  evidence?: { source_id: string; quote: string }[];
+}
+
+export interface ProjectAnswerVerification {
+  status: "passed" | "partial" | "abstained" | "unavailable" | "not_checked";
+  checked_claims: number;
+  supported_claims: number;
+  recovery_rounds: number;
 }
 
 export interface ProjectEvidenceSource {
@@ -490,3 +331,103 @@ export interface ProjectChatContextMessage {
   role: "user" | "assistant";
   content: string;
 }
+
+export interface ProjectRunMetrics {
+  duration_ms?: number;
+  ttft_ms?: number | null;
+  input_tokens?: number;
+  output_tokens?: number;
+  total_tokens?: number;
+  [key: string]: unknown;
+}
+
+export type ProjectStreamEvent =
+  | { type: "verification_failed"; round?: number }
+  | {
+      type: "recovery_skipped";
+      reason: "time_budget" | "answer_supported";
+      remaining_seconds?: number;
+      required_seconds?: number;
+    }
+  | {
+      type: "draft_reused";
+      reason: "length" | "timeout" | "invalid_output" | "provider_error";
+    }
+  | {
+      type: "evidence_review";
+      round: number;
+      claims_total: number;
+      supported: number;
+      unsupported: number;
+      contradicted: number;
+      missing_aspects: string[];
+      recovery_available: boolean;
+    }
+  | {
+      type: "evidence_recovery";
+      round: number;
+      queries: string[];
+      context_source_ids: string[];
+    }
+  | { type: "run_started"; run_id: string }
+  | {
+      type: "llm_progress";
+      operation: string;
+      received_characters: number;
+    }
+  | {
+      type: "rerank_started" | "rerank_completed" | "rerank_failed";
+      candidate_count?: number;
+      returned_count?: number;
+      model?: string;
+      duration_ms?: number;
+    }
+  | {
+      type: "stage_started" | "stage_finished";
+      stage: string;
+      duration_ms?: number;
+      status?: "success" | "error";
+    }
+  | { type: "llm_started"; operation: string }
+  | {
+      type: "llm_retry";
+      operation: string;
+      attempt: number;
+      max_attempts: number;
+    }
+  | {
+      type: "llm_finished";
+      operation: string;
+      status?: "completed" | "incomplete" | "refused";
+      finish_reason?: string | null;
+      duration_ms: number;
+      ttft_ms?: number | null;
+      usage?: {
+        input_tokens?: number | null;
+        output_tokens?: number | null;
+        total_tokens?: number | null;
+      };
+    }
+  | { type: "reasoning_delta" | "answer_delta"; text: string }
+  | {
+      type: "tool_started";
+      call_id: string;
+      name: string;
+      args?: Record<string, unknown>;
+    }
+  | {
+      type: "tool_finished";
+      call_id: string;
+      name: string;
+      duration_ms: number;
+      status: string;
+      summary?: string;
+    }
+  | {
+      type: "usage";
+      input_tokens?: number | null;
+      output_tokens?: number | null;
+      total_tokens?: number | null;
+    }
+  | { type: "final"; answer: ProjectQuestionAnswer; metrics: ProjectRunMetrics }
+  | { type: "error"; message: string };

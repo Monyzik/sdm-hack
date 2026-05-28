@@ -1,13 +1,11 @@
 import { AlertTriangle, Clock3 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ApiError } from "../../api/client";
 import type { ProjectSummary } from "../../api/types";
-import { useProjectBrief } from "../../hooks/useProjectBrief";
 import { useProjectProblemContext } from "../../hooks/useProjectProblemContext";
 import { useProjectTrends } from "../../hooks/useProjectTrends";
 import { ProjectHeader } from "./ProjectHeader";
-import { AgentBriefPanel } from "./panels/AgentBriefPanel";
 import { BudgetPanel } from "./panels/BudgetPanel";
 import { ChangeRequestsPanel } from "./panels/ChangeRequestsPanel";
 import { CommunicationsPanel } from "./panels/CommunicationsPanel";
@@ -34,12 +32,6 @@ export function ProjectView({
   const [activeTab, setActiveTab] = useState<
     "summary" | "work" | "coordination"
   >("summary");
-  const [isBriefRequested, setIsBriefRequested] = useState(true);
-  const briefQuery = useProjectBrief(
-    project.project_id,
-    asOfDate,
-    activeTab === "summary" && isBriefRequested,
-  );
   const problemContextQuery = useProjectProblemContext(
     project.project_id,
     asOfDate,
@@ -52,20 +44,6 @@ export function ProjectView({
     60,
     activeTab === "summary",
   );
-
-  useEffect(() => {
-    setIsBriefRequested(true);
-  }, [asOfDate, project.project_id]);
-
-  const briefErrorMessage = useMemo(() => {
-    if (!isBriefRequested || !briefQuery.isError) {
-      return null;
-    }
-    if (briefQuery.error instanceof ApiError && briefQuery.error.message) {
-      return briefQuery.error.message;
-    }
-    return "Агент сейчас недоступен или вернул некорректный ответ";
-  }, [briefQuery.error, briefQuery.isError, isBriefRequested]);
 
   const problemContextErrorMessage = useMemo(() => {
     if (!problemContextQuery.isError) {
@@ -159,20 +137,7 @@ export function ProjectView({
           />
           <BudgetPanel budget={project.budget} />
           <RisksPanel risks={project.top_risks.slice(0, 5)} />
-          <AgentBriefPanel
-            brief={isBriefRequested ? briefQuery.data : undefined}
-            isLoading={briefQuery.isFetching}
-            errorMessage={briefErrorMessage}
-            hasRequested={isBriefRequested}
-            onRequest={() => {
-              if (isBriefRequested) {
-                void briefQuery.refetch();
-                return;
-              }
-              setIsBriefRequested(true);
-            }}
-            onOpenTasks={() => setActiveTab("work")}
-          />
+
         </div>
       ) : null}
 

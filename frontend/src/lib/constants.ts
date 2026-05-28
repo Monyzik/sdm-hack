@@ -13,5 +13,3 @@ export const AGENTS_API_URL: string =
   import.meta.env.VITE_AGENTS_API_URL || "http://localhost:8010";
 
 export const AS_OF_DATE = "2026-06-19";
-
-export const DEFAULT_PROJECT_ID = "P001";

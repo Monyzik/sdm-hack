@@ -7,21 +7,14 @@
  */
 import { AGENTS_API_URL, API_URL } from "../lib/constants";
 import type {
-  InternalNotification,
-  NotificationList,
   PortfolioAttentionSummary,
   PortfolioSummary,
   ProjectChatContextMessage,
-  ProjectDocxApplyResult,
-  ProjectDocxEditableUpdate,
-  ProjectDocxPreview,
-  ProjectManagerBrief,
   ProjectProblemContext,
   ProjectQuestionAnswer,
+  ProjectStreamEvent,
   ProjectSummary,
   ProjectTrends,
-  SimulationClearResult,
-  SimulationJob,
 } from "./types";
 
 /** Ошибка запроса с сохранённым HTTP-статусом — удобно различать 404 и прочее. */
@@ -155,150 +148,102 @@ export function fetchProjectTrends(
   );
 }
 
-export function fetchNotifications(
-  options: {
-    projectId?: string;
-    asOfDate?: string;
-    unreadOnly?: boolean;
-    limit?: number;
-  } = {},
-  signal?: AbortSignal,
-): Promise<NotificationList> {
-  const query = new URLSearchParams();
-  if (options.projectId) {
-    query.set("project_id", options.projectId);
-  }
-  if (options.asOfDate) {
-    query.set("as_of_date", options.asOfDate);
-  }
-  if (options.unreadOnly) {
-    query.set("unread_only", "true");
-  }
-  if (options.limit) {
-    query.set("limit", options.limit.toString());
-  }
-
-  const queryString = query.toString();
-  const suffix = queryString ? `?${queryString}` : "";
-  return request<NotificationList>(`/api/v1/notifications${suffix}`, signal);
-}
-
-export function markNotificationRead(
-  notificationId: string,
-  signal?: AbortSignal,
-): Promise<InternalNotification> {
-  return request<InternalNotification>(
-    `/api/v1/notifications/${encodeURIComponent(notificationId)}/read`,
-    signal,
-    { method: "PATCH" },
-  );
-}
-
-export function startControlEventSimulation(
-  signal?: AbortSignal,
-): Promise<SimulationJob> {
-  return requestFrom<SimulationJob>(
-    AGENTS_API_URL,
-    "/api/v1/agents/control-events/simulation",
-    signal,
-    { method: "POST" },
-  );
-}
-
-export function fetchControlEventSimulation(
-  jobId: string,
-  signal?: AbortSignal,
-): Promise<SimulationJob> {
-  return requestFrom<SimulationJob>(
-    AGENTS_API_URL,
-    `/api/v1/agents/control-events/simulation/${encodeURIComponent(jobId)}`,
-    signal,
-  );
-}
-
-export function clearControlEventSimulation(
-  signal?: AbortSignal,
-): Promise<SimulationClearResult> {
-  return requestFrom<SimulationClearResult>(
-    AGENTS_API_URL,
-    "/api/v1/agents/control-events/simulation",
-    signal,
-    { method: "DELETE" },
-  );
-}
-
-export function fetchProjectBrief(
-  projectId: string,
-  asOf: string,
-  signal?: AbortSignal,
-): Promise<ProjectManagerBrief> {
-  const query = new URLSearchParams({ as_of: asOf, max_depth: "2" });
-  return requestFrom<ProjectManagerBrief>(
-    AGENTS_API_URL,
-    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/brief?${query.toString()}`,
-    signal,
-  );
-}
-
-export function previewProjectDocxUpdate(
-  projectId: string,
-  file: File,
-  signal?: AbortSignal,
-): Promise<ProjectDocxPreview> {
-  return requestFrom<ProjectDocxPreview>(
-    AGENTS_API_URL,
-    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/docx-preview`,
-    signal,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          file.type ||
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "X-File-Name": encodeURIComponent(file.name),
-      },
-      body: file,
-    },
-  );
-}
-
-export function applyProjectDocxUpdate(
-  projectId: string,
-  update: ProjectDocxEditableUpdate,
-  signal?: AbortSignal,
-): Promise<ProjectDocxApplyResult> {
-  return requestFrom<ProjectDocxApplyResult>(
-    AGENTS_API_URL,
-    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/docx-apply`,
-    signal,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(update),
-    },
-  );
-}
-
-export function askProjectAgent(
+export async function streamProjectAgent(
   projectId: string,
   question: string,
   asOf: string,
-  conversationContext?: ProjectChatContextMessage[],
-  signal?: AbortSignal,
+  conversationContext: ProjectChatContextMessage[] | undefined,
+  onEvent: (event: ProjectStreamEvent) => void,
+  signal: AbortSignal,
+  verifyClaims = true,
 ): Promise<ProjectQuestionAnswer> {
-  return requestFrom<ProjectQuestionAnswer>(
-    AGENTS_API_URL,
-    `/api/v1/agents/projects/${encodeURIComponent(projectId)}/ask`,
-    signal,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question,
-        as_of: asOf,
-        max_depth: 2,
-        conversation_context: conversationContext ?? [],
-      }),
-    },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      apiUrl(
+        AGENTS_API_URL,
+        `/api/v1/agents/projects/${encodeURIComponent(projectId)}/ask/stream`,
+      ),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+        },
+        body: JSON.stringify({
+          question,
+          as_of: asOf,
+          max_depth: 2,
+          verify_claims: verifyClaims,
+          conversation_context: conversationContext ?? [],
+        }),
+        signal,
+      },
+    );
+  } catch {
+    signal.throwIfAborted();
+    throw new ApiError(
+      "Не удалось подключиться к агенту. Проверьте соединение и отправьте вопрос ещё раз.",
+      0,
+    );
+  }
+  if (!response.ok)
+    throw new ApiError(
+      `Запрос завершился с ошибкой ${response.status}`,
+      response.status,
+    );
+  if (!response.body) throw new Error("Сервер не вернул поток ответа");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let answer: ProjectQuestionAnswer | undefined;
+  const dispatch = (frame: string) => {
+    let eventName = "message";
+    const data: string[] = [];
+    for (const line of frame.split(/\r?\n/)) {
+      if (line.startsWith("event:")) eventName = line.slice(6).trim();
+      if (line.startsWith("data:")) data.push(line.slice(5).replace(/^ /, ""));
+    }
+    if (!data.length) return;
+    const payload = JSON.parse(data.join("\n")) as ProjectStreamEvent;
+    const event = {
+      ...payload,
+      type: eventName === "message" ? payload.type : eventName,
+    } as ProjectStreamEvent;
+    onEvent(event);
+    if (event.type === "error") throw new Error(event.message);
+    if (event.type === "final") answer = event.answer;
+  };
+  try {
+    while (true) {
+      let chunk: ReadableStreamReadResult<Uint8Array>;
+      try {
+        chunk = await reader.read();
+      } catch {
+        signal.throwIfAborted();
+        throw new ApiError(
+          "Соединение с агентом прервалось до завершения ответа. Отправьте вопрос ещё раз.",
+          0,
+        );
+      }
+      const { value, done } = chunk;
+      buffer += decoder.decode(value, { stream: !done });
+      let boundary: RegExpExecArray | null;
+      while ((boundary = /\r?\n\r?\n/.exec(buffer))) {
+        dispatch(buffer.slice(0, boundary.index));
+        buffer = buffer.slice(boundary.index + boundary[0].length);
+        if (answer) return answer;
+      }
+      if (done) break;
+    }
+    if (buffer.trim()) dispatch(buffer);
+    if (!answer)
+      throw new Error(
+        "Поток прервался до завершения ответа. Попробуйте ещё раз.",
+      );
+    return answer;
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
+  }
 }

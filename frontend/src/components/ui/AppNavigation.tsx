@@ -122,7 +122,7 @@ export function AppNavigation<T extends string>({
                   {activePageLabel}
                 </div>
                 <div className="hidden text-xs text-slate-500 dark:text-slate-400">
-                  SDM
+                  QA-агент по проектам
                 </div>
               </div>
             )}
@@ -192,10 +192,10 @@ export function AppNavigation<T extends string>({
                   </div>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-bold leading-tight text-slate-950 dark:text-slate-50">
-                      Control Tower
+                      QA-агент
                     </div>
                     <div className="text-xs leading-tight text-slate-400 dark:text-slate-500">
-                      SDM
+                      По данным проектов
                     </div>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ export function AppNavigation<T extends string>({
               <div>
                 <div className="text-sm font-semibold">Разделы</div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                  SDM
+                  QA-агент по проектам
                 </div>
               </div>
               <button

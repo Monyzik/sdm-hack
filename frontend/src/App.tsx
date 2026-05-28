@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   BarChart3,
-  Bell,
   ClipboardList,
   Gauge,
   MessageCircle,
@@ -21,7 +20,6 @@ import {
   type NavigationPage,
 } from "./components/ui";
 import { ProjectChatPage } from "./features/chat/ProjectChatPage";
-import { NotificationsPage } from "./features/notifications/NotificationsPage";
 import { PortfolioCommandCenter } from "./features/portfolio/PortfolioCommandCenter";
 import { PortfolioSidebar } from "./features/portfolio/PortfolioSidebar";
 import { ProjectView } from "./features/project/ProjectView";
@@ -40,38 +38,32 @@ function describeError(error: unknown): string {
   return "Не удалось загрузить данные.";
 }
 
-type AppPage = "overview" | "analysis" | "tasks" | "chat" | "notifications";
+type AppPage = "overview" | "analysis" | "tasks" | "chat";
 
 const appPages: NavigationPage<AppPage>[] = [
   {
-    id: "overview" as const,
-    label: "Обзор",
-    description: "Сводка портфеля",
-    icon: Gauge,
-  },
-  {
-    id: "analysis" as const,
-    label: "Анализ",
-    description: "Выбранный проект",
-    icon: BarChart3,
-  },
-  {
-    id: "tasks" as const,
-    label: "Задачи",
-    description: "Трекер задач",
-    icon: ClipboardList,
-  },
-  {
     id: "chat" as const,
-    label: "Чат",
+    label: "QA-агент",
     description: "Вопросы по проекту",
     icon: MessageCircle,
   },
   {
-    id: "notifications" as const,
-    label: "Уведомления",
-    description: "Внутренний inbox",
-    icon: Bell,
+    id: "overview" as const,
+    label: "Обзор",
+    description: "Показатели проекта",
+    icon: Gauge,
+  },
+  {
+    id: "analysis" as const,
+    label: "Данные проекта",
+    description: "Просмотр исходных данных",
+    icon: BarChart3,
+  },
+  {
+    id: "tasks" as const,
+    label: "Проблемные задачи",
+    description: "Блокировки и просрочки",
+    icon: ClipboardList,
   },
 ];
 const APP_STATE_STORAGE_KEY = "sdm-hack.app-state";
@@ -88,9 +80,7 @@ export default function App() {
   const [isNavCollapsed, setIsNavCollapsed] = useState(true);
   const [chatClearRequest, setChatClearRequest] = useState(0);
   const [isChatBusy, setIsChatBusy] = useState(false);
-  const [activePage, setActivePage] = useState<AppPage>(
-    storedAppState.activePage ?? "overview",
-  );
+  const [activePage, setActivePage] = useState<AppPage>("chat");
   const [previewProjectId, setPreviewProjectId] = useState<string | null>(
     storedAppState.previewProjectId ?? null,
   );
@@ -128,7 +118,7 @@ export default function App() {
     if (!projects?.length) return;
     const exists = projects.some((p) => p.project_id === selectedProjectId);
     if (!exists) {
-      setSelectedProjectId(projects[0].project_id);
+      setSelectedProjectId(projects.find((project) => project.project_id === "P007")?.project_id ?? projects[0].project_id);
     }
   }, [portfolioQuery.data, selectedProjectId]);
 
@@ -236,10 +226,8 @@ export default function App() {
                     : activePage === "analysis"
                       ? "Анализ проекта"
                       : activePage === "tasks"
-                        ? "Задачи"
-                        : activePage === "chat"
-                          ? "Чат по проекту"
-                          : "Уведомления"}
+                        ? "Проблемные задачи"
+                        : "QA-агент по проекту"}
                 </h1>
               </div>
               <div
@@ -313,6 +301,8 @@ export default function App() {
                 ) : null}
               </div>
             </header>
+
+            <p className="shrink-0 py-1 text-xs text-slate-500 dark:text-slate-400">Синтетические данные · срез 19.06.2026</p>
 
             <main
               id="metrics"
@@ -390,21 +380,6 @@ export default function App() {
                     asOfDate={AS_OF_DATE}
                     clearRequest={chatClearRequest}
                     onBusyChange={setIsChatBusy}
-                  />
-                )
-              ) : activePage === "notifications" ? (
-                portfolioQuery.isPending ? (
-                  <LoadingState label="Загрузка проектов…" />
-                ) : portfolioQuery.isError ? (
-                  <ErrorState
-                    message={describeError(portfolioQuery.error)}
-                    onRetry={() => portfolioQuery.refetch()}
-                  />
-                ) : (
-                  <NotificationsPage
-                    projects={portfolioQuery.data.projects}
-                    selectedProjectId={selectedProjectId}
-                    onSelectProject={setSelectedProjectId}
                   />
                 )
               ) : projectQuery.isError ? (
