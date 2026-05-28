@@ -1,0 +1,4 @@
+mode,cases,failures,group_recall_at_8,mrr,success_count,success_duration_p50_ms,success_duration_p95_ms,failure_duration_p50_ms,failure_duration_p95_ms,qa_ttft_p50_ms,qa_ttft_p95_ms
+dense,60,0,0.8333333333333334,0.7238738738738738,60,1835.245,7791.581999999998,,,,
+dense_lexical,60,0,0.8854166666666666,0.7820141570141569,60,230.315,340.987,,,,
+qa,12,1,,,11,27226.7,39579.445,48727.79,48727.79,3290.7,3680.35

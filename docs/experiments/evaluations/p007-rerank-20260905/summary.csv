@@ -1,0 +1,2 @@
+mode,cases,failures,rerank_fallback_count,group_recall_at_8,mrr,success_count,success_duration_p50_ms,success_duration_p95_ms,failure_duration_p50_ms,failure_duration_p95_ms,qa_ttft_p50_ms,qa_ttft_p95_ms
+hybrid_rerank,60,0,0,0.9479166666666666,0.9076576576576575,60,6299.375,9175.3005,,,,

@@ -1,0 +1,144 @@
+[
+  {
+    "case_id": "E209-official-number-scope",
+    "duration_s": 5.97,
+    "expected_verdicts": [
+      "unsupported",
+      "supported"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "supported"
+    ],
+    "passed": false,
+    "assessment": {
+      "claims": [
+        {
+          "entailed": true,
+          "all_numbers_supported": true,
+          "status_and_modality_supported": true,
+          "contradicted": false,
+          "claim_index": 0
+        },
+        {
+          "entailed": true,
+          "all_numbers_supported": true,
+          "status_and_modality_supported": true,
+          "contradicted": false,
+          "claim_index": 1
+        }
+      ],
+      "missing_aspects": [
+        "Что именно мешает общему итогу по трём строкам на 19 июня (отсутствующая единица третьей строки) в явном виде в ответе?"
+      ],
+      "searches": [],
+      "context_source_ids": []
+    }
+  },
+  {
+    "case_id": "E209-number-scope-reordered",
+    "duration_s": 7.23,
+    "expected_verdicts": [
+      "supported",
+      "unsupported"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "unsupported"
+    ],
+    "passed": true,
+    "assessment": {
+      "claims": [
+        {
+          "entailed": true,
+          "all_numbers_supported": true,
+          "status_and_modality_supported": true,
+          "contradicted": false,
+          "claim_index": 0
+        },
+        {
+          "entailed": false,
+          "all_numbers_supported": false,
+          "status_and_modality_supported": true,
+          "contradicted": false,
+          "claim_index": 1
+        }
+      ],
+      "missing_aspects": [],
+      "searches": [],
+      "context_source_ids": []
+    }
+  },
+  {
+    "case_id": "E209-unit-semantics",
+    "duration_s": 4.93,
+    "expected_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "passed": true,
+    "assessment": {
+      "claims": [
+        {
+          "entailed": true,
+          "all_numbers_supported": true,
+          "status_and_modality_supported": true,
+          "contradicted": false,
+          "claim_index": 0
+        },
+        {
+          "entailed": false,
+          "all_numbers_supported": false,
+          "status_and_modality_supported": false,
+          "contradicted": true,
+          "claim_index": 1
+        }
+      ],
+      "missing_aspects": [
+        "Что именно удалось перевести в штуки по «Расходным образцам»?"
+      ],
+      "searches": [],
+      "context_source_ids": [
+        "P007:documents:DOC-P007-D026:v1:c0001"
+      ]
+    }
+  },
+  {
+    "case_id": "E209-plan-versus-completed",
+    "duration_s": 4.26,
+    "expected_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "passed": true,
+    "assessment": {
+      "claims": [
+        {
+          "entailed": true,
+          "all_numbers_supported": true,
+          "status_and_modality_supported": true,
+          "contradicted": false,
+          "claim_index": 0
+        },
+        {
+          "entailed": false,
+          "all_numbers_supported": true,
+          "status_and_modality_supported": false,
+          "contradicted": true,
+          "claim_index": 1
+        }
+      ],
+      "missing_aspects": [],
+      "searches": [],
+      "context_source_ids": []
+    }
+  }
+]

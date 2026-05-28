@@ -1,0 +1,3 @@
+mode,cases,failures,rerank_fallback_count,group_recall_at_8,mrr,success_count,success_duration_p50_ms,success_duration_p95_ms,failure_duration_p50_ms,failure_duration_p95_ms,qa_ttft_p50_ms,qa_ttft_p95_ms
+dense,120,0,0,0.9141592920353983,0.8626302083333333,120,550.5649999999999,6753.3219999999965,,,,
+hybrid_rerank,120,0,2,0.9646017699115044,0.953125,120,7067.82,17092.585999999996,,,,

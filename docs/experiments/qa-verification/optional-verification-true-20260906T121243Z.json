@@ -1,0 +1,2502 @@
+{
+  "question": "При каких условиях можно начать пилот?",
+  "verify_claims": true,
+  "duration_s": 101.87,
+  "events": [
+    {
+      "event": "run_started",
+      "data": {
+        "run_id": "df4a62dd64ed4de99afb17fd50622fcf"
+      },
+      "elapsed_s": 0.12
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "route_request"
+      },
+      "elapsed_s": 0.12
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "RequestRoute"
+      },
+      "elapsed_s": 0.12
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "RequestRoute",
+        "received_characters": 2
+      },
+      "elapsed_s": 4.05
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "RequestRoute",
+        "received_characters": 66
+      },
+      "elapsed_s": 4.41
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "RequestRoute",
+        "received_characters": 132
+      },
+      "elapsed_s": 4.77
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "RequestRoute",
+        "duration_ms": 4706.9,
+        "ttft_ms": 3924.6,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 482,
+          "output_tokens": 53,
+          "total_tokens": 535
+        }
+      },
+      "elapsed_s": 4.83
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "route_request",
+        "status": "success",
+        "duration_ms": 4711.9
+      },
+      "elapsed_s": 4.83
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "request_project_context"
+      },
+      "elapsed_s": 4.84
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_69ccb2f3b2f14585bfcc5a4ffdae8f95",
+        "name": "get_project_summary",
+        "args": {}
+      },
+      "elapsed_s": 4.84
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_bcbddeb3b54e4000b07c60435dd20051",
+        "name": "get_problem_context",
+        "args": {
+          "max_depth": null
+        }
+      },
+      "elapsed_s": 4.84
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_b26d8fd408294f2e8d70ff4ca6cdccdf",
+        "name": "search_project_evidence",
+        "args": {
+          "query": "При каких условиях можно начать пилот?",
+          "entity_id": null,
+          "limit": null
+        }
+      },
+      "elapsed_s": 4.84
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_69ccb2f3b2f14585bfcc5a4ffdae8f95",
+        "name": "get_project_summary",
+        "status": "success",
+        "duration_ms": 38.1
+      },
+      "elapsed_s": 4.87
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_bcbddeb3b54e4000b07c60435dd20051",
+        "name": "get_problem_context",
+        "status": "success",
+        "duration_ms": 35.9
+      },
+      "elapsed_s": 4.87
+    },
+    {
+      "event": "rerank_started",
+      "data": {
+        "candidate_count": 16,
+        "top_k": 8,
+        "model": "glm-5.3-flash"
+      },
+      "elapsed_s": 5.22
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "EvidenceReranking"
+      },
+      "elapsed_s": 5.22
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 2
+      },
+      "elapsed_s": 8.6
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 67
+      },
+      "elapsed_s": 8.87
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 134
+      },
+      "elapsed_s": 9.15
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 199
+      },
+      "elapsed_s": 9.38
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 263
+      },
+      "elapsed_s": 9.68
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 328
+      },
+      "elapsed_s": 10.01
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 392
+      },
+      "elapsed_s": 10.37
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 456
+      },
+      "elapsed_s": 10.6
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 520
+      },
+      "elapsed_s": 10.84
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 584
+      },
+      "elapsed_s": 11.14
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 650
+      },
+      "elapsed_s": 11.31
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "EvidenceReranking",
+        "duration_ms": 6190.6,
+        "ttft_ms": 3383.7,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 2815,
+          "output_tokens": 262,
+          "total_tokens": 3077
+        }
+      },
+      "elapsed_s": 11.41
+    },
+    {
+      "event": "rerank_completed",
+      "data": {
+        "model": "glm-5.3-flash",
+        "duration_ms": 6196.0,
+        "candidate_count": 16,
+        "returned_count": 8,
+        "ordered_ids": [
+          "P007:documents:DOC-P007-PROCEDURE:v1:c0002",
+          "P007:documents:DOC-P007-FAQ:v1:c0004",
+          "P007:documents:DOC-P007-MINUTES:v1:c0002",
+          "P007:documents:DOC-P007-ACCESS:v1:c0006",
+          "P007:task_comments:TC7004",
+          "P007:documents:DOC-P007-MEETING17:v1:c0009",
+          "P007:documents:DOC-P007-ARCHITECTURE:v1:c0008",
+          "P007:documents:DOC-P007-X02:v1:c0005",
+          "P007:task_comments:TC7022",
+          "P007:task_comments:TC7036",
+          "P007:communication_messages:MSG7074",
+          "P007:documents:DOC-P007-PROCEDURE:v1:c0004",
+          "P007:documents:DOC-P007-X01:v1:c0003",
+          "P007:documents:DOC-P007-ACCEPTANCE:v1:c0009",
+          "P007:communication_messages:MSG7055",
+          "P007:communication_messages:MSG7050"
+        ]
+      },
+      "elapsed_s": 11.41
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_b26d8fd408294f2e8d70ff4ca6cdccdf",
+        "name": "search_project_evidence",
+        "status": "success",
+        "duration_ms": 6572.3
+      },
+      "elapsed_s": 11.41
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "request_project_context",
+        "status": "success",
+        "duration_ms": 6577.6
+      },
+      "elapsed_s": 11.41
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "select_tools"
+      },
+      "elapsed_s": 11.42
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "tool_selection"
+      },
+      "elapsed_s": 11.42
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 2
+      },
+      "elapsed_s": 13.77
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 66
+      },
+      "elapsed_s": 14.01
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 131
+      },
+      "elapsed_s": 14.28
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 197
+      },
+      "elapsed_s": 14.58
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 261
+      },
+      "elapsed_s": 15.03
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 327
+      },
+      "elapsed_s": 15.27
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 392
+      },
+      "elapsed_s": 15.55
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 460
+      },
+      "elapsed_s": 15.88
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 526
+      },
+      "elapsed_s": 16.46
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 591
+      },
+      "elapsed_s": 16.85
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 655
+      },
+      "elapsed_s": 17.19
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 719
+      },
+      "elapsed_s": 17.49
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 783
+      },
+      "elapsed_s": 17.9
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 853
+      },
+      "elapsed_s": 18.22
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 917
+      },
+      "elapsed_s": 18.38
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 982
+      },
+      "elapsed_s": 18.81
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 1046
+      },
+      "elapsed_s": 19.17
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 1110
+      },
+      "elapsed_s": 19.57
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "tool_selection",
+        "duration_ms": 8452.7,
+        "ttft_ms": 2352.4,
+        "status": "completed",
+        "finish_reason": "stop",
+        "usage": {
+          "input_tokens": 16660,
+          "output_tokens": 337,
+          "total_tokens": 16997
+        }
+      },
+      "elapsed_s": 19.87
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "select_tools",
+        "status": "success",
+        "duration_ms": 8457.3
+      },
+      "elapsed_s": 19.87
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "draft_answer"
+      },
+      "elapsed_s": 19.88
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "GroundedAnswerDraft"
+      },
+      "elapsed_s": 19.88
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2
+      },
+      "elapsed_s": 23.34
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 69
+      },
+      "elapsed_s": 23.56
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 138
+      },
+      "elapsed_s": 23.67
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 206
+      },
+      "elapsed_s": 23.88
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 270
+      },
+      "elapsed_s": 23.99
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 335
+      },
+      "elapsed_s": 24.21
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 408
+      },
+      "elapsed_s": 24.41
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 476
+      },
+      "elapsed_s": 24.61
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 543
+      },
+      "elapsed_s": 24.78
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 611
+      },
+      "elapsed_s": 24.9
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 678
+      },
+      "elapsed_s": 25.1
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 742
+      },
+      "elapsed_s": 25.36
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 807
+      },
+      "elapsed_s": 25.59
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 876
+      },
+      "elapsed_s": 25.84
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 944
+      },
+      "elapsed_s": 26.02
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1011
+      },
+      "elapsed_s": 26.26
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1081
+      },
+      "elapsed_s": 26.43
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1146
+      },
+      "elapsed_s": 26.59
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1210
+      },
+      "elapsed_s": 26.76
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1274
+      },
+      "elapsed_s": 26.89
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1338
+      },
+      "elapsed_s": 27.12
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1407
+      },
+      "elapsed_s": 27.35
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1471
+      },
+      "elapsed_s": 27.51
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1536
+      },
+      "elapsed_s": 27.68
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1603
+      },
+      "elapsed_s": 27.95
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1669
+      },
+      "elapsed_s": 28.31
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1733
+      },
+      "elapsed_s": 28.58
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1797
+      },
+      "elapsed_s": 28.7
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1861
+      },
+      "elapsed_s": 28.99
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1926
+      },
+      "elapsed_s": 29.17
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1990
+      },
+      "elapsed_s": 29.34
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2058
+      },
+      "elapsed_s": 29.54
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2122
+      },
+      "elapsed_s": 29.78
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2194
+      },
+      "elapsed_s": 30.1
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2266
+      },
+      "elapsed_s": 30.52
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2333
+      },
+      "elapsed_s": 30.69
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2397
+      },
+      "elapsed_s": 30.97
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2461
+      },
+      "elapsed_s": 31.15
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2531
+      },
+      "elapsed_s": 31.37
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "duration_ms": 11713.2,
+        "ttft_ms": 3454.6,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 16081,
+          "output_tokens": 714,
+          "total_tokens": 16795
+        }
+      },
+      "elapsed_s": 31.6
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "draft_answer",
+        "status": "success",
+        "duration_ms": 11725.5
+      },
+      "elapsed_s": 31.6
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "verify_answer"
+      },
+      "elapsed_s": 31.61
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 31.61
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 31.61
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 5
+      },
+      "elapsed_s": 35.09
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 2
+      },
+      "elapsed_s": 35.7
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 71
+      },
+      "elapsed_s": 35.71
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 66
+      },
+      "elapsed_s": 36.08
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 136
+      },
+      "elapsed_s": 36.13
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 4564.7,
+        "ttft_ms": 4095.4,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 1734,
+          "output_tokens": 39,
+          "total_tokens": 1773
+        }
+      },
+      "elapsed_s": 36.18
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 36.18
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 203
+      },
+      "elapsed_s": 36.37
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 4779.9,
+        "ttft_ms": 3483.1,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 1898,
+          "output_tokens": 71,
+          "total_tokens": 1969
+        }
+      },
+      "elapsed_s": 36.4
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 36.4
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 2
+      },
+      "elapsed_s": 39.85
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 5
+      },
+      "elapsed_s": 40.02
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 66
+      },
+      "elapsed_s": 40.06
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 3991.7,
+        "ttft_ms": 3671.8,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 1866,
+          "output_tokens": 39,
+          "total_tokens": 1905
+        }
+      },
+      "elapsed_s": 40.17
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 74
+      },
+      "elapsed_s": 40.5
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 143
+      },
+      "elapsed_s": 40.79
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 211
+      },
+      "elapsed_s": 41.12
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 275
+      },
+      "elapsed_s": 41.28
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 4941.6,
+        "ttft_ms": 3621.9,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 859,
+          "output_tokens": 75,
+          "total_tokens": 934
+        }
+      },
+      "elapsed_s": 41.34
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "EvidenceReview"
+      },
+      "elapsed_s": 41.34
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 5
+      },
+      "elapsed_s": 44.53
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 74
+      },
+      "elapsed_s": 45.0
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 143
+      },
+      "elapsed_s": 45.21
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 215
+      },
+      "elapsed_s": 45.49
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 290
+      },
+      "elapsed_s": 45.77
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 360
+      },
+      "elapsed_s": 45.98
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 425
+      },
+      "elapsed_s": 46.34
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 489
+      },
+      "elapsed_s": 46.52
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 554
+      },
+      "elapsed_s": 46.85
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 622
+      },
+      "elapsed_s": 47.16
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 687
+      },
+      "elapsed_s": 47.51
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 752
+      },
+      "elapsed_s": 47.8
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "EvidenceReview",
+        "duration_ms": 6678.7,
+        "ttft_ms": 3187.4,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 6503,
+          "output_tokens": 205,
+          "total_tokens": 6708
+        }
+      },
+      "elapsed_s": 48.02
+    },
+    {
+      "event": "llm_retry",
+      "data": {
+        "operation": "EvidenceReview",
+        "attempt": 2,
+        "max_attempts": 2
+      },
+      "elapsed_s": 48.02
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "EvidenceReview"
+      },
+      "elapsed_s": 48.02
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 3
+      },
+      "elapsed_s": 51.09
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 74
+      },
+      "elapsed_s": 51.32
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 139
+      },
+      "elapsed_s": 51.82
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 209
+      },
+      "elapsed_s": 52.39
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 273
+      },
+      "elapsed_s": 52.87
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 337
+      },
+      "elapsed_s": 53.39
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 404
+      },
+      "elapsed_s": 54.05
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 468
+      },
+      "elapsed_s": 54.3
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 536
+      },
+      "elapsed_s": 54.53
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 600
+      },
+      "elapsed_s": 54.89
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 667
+      },
+      "elapsed_s": 55.26
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 731
+      },
+      "elapsed_s": 55.55
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "EvidenceReview",
+        "duration_ms": 7759.1,
+        "ttft_ms": 3066.2,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 6613,
+          "output_tokens": 204,
+          "total_tokens": 6817
+        }
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "evidence_review",
+      "data": {
+        "round": 1,
+        "claims_total": 4,
+        "supported": 3,
+        "unsupported": 1,
+        "contradicted": 0,
+        "missing_aspects": [],
+        "recovery_available": true
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "verify_answer",
+        "status": "success",
+        "duration_ms": 24190.2
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "recover_evidence"
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "evidence_recovery",
+      "data": {
+        "round": 1,
+        "queries": [
+          "Подтверждение отдельного подписанного решения о промышленном запуске P007"
+        ],
+        "context_source_ids": []
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "recover_evidence",
+        "status": "success",
+        "duration_ms": 0.6
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "run_recovery_tools"
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_2a82038f23c34b92924f90021169ba8f",
+        "name": "search_project_evidence",
+        "args": {
+          "query": "Подтверждение отдельного подписанного решения о промышленном запуске P007",
+          "entity_id": "DEC706",
+          "limit": null
+        }
+      },
+      "elapsed_s": 55.79
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_2a82038f23c34b92924f90021169ba8f",
+        "name": "search_project_evidence",
+        "status": "success",
+        "duration_ms": 24605.6
+      },
+      "elapsed_s": 80.4
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "run_recovery_tools",
+        "status": "success",
+        "duration_ms": 24607.6
+      },
+      "elapsed_s": 80.4
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "draft_answer"
+      },
+      "elapsed_s": 80.41
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "GroundedAnswerDraft"
+      },
+      "elapsed_s": 80.41
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2
+      },
+      "elapsed_s": 84.43
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 69
+      },
+      "elapsed_s": 84.67
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 138
+      },
+      "elapsed_s": 84.78
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 206
+      },
+      "elapsed_s": 84.99
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 270
+      },
+      "elapsed_s": 85.1
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 335
+      },
+      "elapsed_s": 85.32
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 408
+      },
+      "elapsed_s": 85.48
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 476
+      },
+      "elapsed_s": 85.59
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 543
+      },
+      "elapsed_s": 85.82
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 611
+      },
+      "elapsed_s": 85.99
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 678
+      },
+      "elapsed_s": 86.16
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 742
+      },
+      "elapsed_s": 86.33
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 809
+      },
+      "elapsed_s": 86.5
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 873
+      },
+      "elapsed_s": 86.66
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 939
+      },
+      "elapsed_s": 86.83
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1006
+      },
+      "elapsed_s": 87.06
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1076
+      },
+      "elapsed_s": 87.18
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1141
+      },
+      "elapsed_s": 87.34
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1205
+      },
+      "elapsed_s": 87.53
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1269
+      },
+      "elapsed_s": 87.72
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1333
+      },
+      "elapsed_s": 87.83
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1402
+      },
+      "elapsed_s": 88.13
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1466
+      },
+      "elapsed_s": 88.36
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1531
+      },
+      "elapsed_s": 88.51
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1598
+      },
+      "elapsed_s": 88.78
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1664
+      },
+      "elapsed_s": 88.96
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1728
+      },
+      "elapsed_s": 89.19
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1795
+      },
+      "elapsed_s": 89.39
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1859
+      },
+      "elapsed_s": 89.59
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1923
+      },
+      "elapsed_s": 89.81
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 1989
+      },
+      "elapsed_s": 89.99
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2054
+      },
+      "elapsed_s": 90.15
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2119
+      },
+      "elapsed_s": 90.44
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2184
+      },
+      "elapsed_s": 90.72
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "received_characters": 2251
+      },
+      "elapsed_s": 91.06
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "GroundedAnswerDraft",
+        "duration_ms": 10885.2,
+        "ttft_ms": 4016.4,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 17052,
+          "output_tokens": 642,
+          "total_tokens": 17694
+        }
+      },
+      "elapsed_s": 91.3
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "draft_answer",
+        "status": "success",
+        "duration_ms": 10894.5
+      },
+      "elapsed_s": 91.3
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "verify_answer"
+      },
+      "elapsed_s": 91.31
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 91.31
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 91.31
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 2
+      },
+      "elapsed_s": 94.4
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 66
+      },
+      "elapsed_s": 94.62
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 2
+      },
+      "elapsed_s": 94.63
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 3417.7,
+        "ttft_ms": 3089.3,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 1734,
+          "output_tokens": 39,
+          "total_tokens": 1773
+        }
+      },
+      "elapsed_s": 94.73
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "ClaimSupport"
+      },
+      "elapsed_s": 94.73
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 66
+      },
+      "elapsed_s": 95.12
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 3970.3,
+        "ttft_ms": 3311.4,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 1897,
+          "output_tokens": 39,
+          "total_tokens": 1936
+        }
+      },
+      "elapsed_s": 95.28
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 2
+      },
+      "elapsed_s": 97.68
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "ClaimSupport",
+        "received_characters": 66
+      },
+      "elapsed_s": 97.9
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "ClaimSupport",
+        "duration_ms": 3276.0,
+        "ttft_ms": 2944.8,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 1686,
+          "output_tokens": 39,
+          "total_tokens": 1725
+        }
+      },
+      "elapsed_s": 98.02
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "EvidenceReview"
+      },
+      "elapsed_s": 98.02
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 2
+      },
+      "elapsed_s": 101.16
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 68
+      },
+      "elapsed_s": 101.34
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReview",
+        "received_characters": 139
+      },
+      "elapsed_s": 101.58
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "EvidenceReview",
+        "duration_ms": 3836.7,
+        "ttft_ms": 3138.8,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 6566,
+          "output_tokens": 78,
+          "total_tokens": 6644
+        }
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "evidence_review",
+      "data": {
+        "round": 2,
+        "claims_total": 3,
+        "supported": 3,
+        "unsupported": 0,
+        "contradicted": 0,
+        "missing_aspects": [],
+        "recovery_available": false
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "verify_answer",
+        "status": "success",
+        "duration_ms": 10561.8
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "finalize_answer"
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "finalize_answer",
+        "status": "success",
+        "duration_ms": 3.3
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "answer_delta",
+      "data": {
+        "text": "- Пилот может начаться только после одновременного выполнения двух обязательных условий: завершения маскирования данных и утверждения матрицы доступа.\n\n- По состоянию на 2026-06-19 ни одно из двух условий не выполнено: маскирование не завершено (masking_complete=false из-за открытых исключений), а матрица доступа существует только как проект и ожидает утверждения.\n\n- Плановые сроки не являются разрешением на запуск: предложение начать пилот 22 июня обсуждалось 17 июня, но не одобрено; срок маскирования сам по себе не даёт допуска."
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "usage",
+      "data": {
+        "input_tokens": 84446,
+        "output_tokens": 2836,
+        "total_tokens": 87282
+      },
+      "elapsed_s": 101.86
+    },
+    {
+      "event": "final",
+      "data": {
+        "answer": {
+          "answer": "- Пилот может начаться только после одновременного выполнения двух обязательных условий: завершения маскирования данных и утверждения матрицы доступа.\n\n- По состоянию на 2026-06-19 ни одно из двух условий не выполнено: маскирование не завершено (masking_complete=false из-за открытых исключений), а матрица доступа существует только как проект и ожидает утверждения.\n\n- Плановые сроки не являются разрешением на запуск: предложение начать пилот 22 июня обсуждалось 17 июня, но не одобрено; срок маскирования сам по себе не даёт допуска.",
+          "evidence_ids": [
+            "search_project_evidence:documents:P007:documents:DOC-P007-PROCEDURE:v1:c0002:0",
+            "search_project_evidence:documents:P007:documents:DOC-P007-FAQ:v1:c0004:1",
+            "search_project_evidence:documents:P007:documents:DOC-P007-X02:v1:c0005:8",
+            "get_problem_context:pending_decisions:DEC702:25",
+            "search_project_evidence:documents:P007:documents:DOC-P007-MINUTES:v1:c0002:2",
+            "search_project_evidence:documents:P007:documents:DOC-P007-ARCHITECTURE:v1:c0008:7",
+            "search_project_evidence:task_comments:P007:task_comments:TC7004:4"
+          ],
+          "used_tools": [
+            "get_project_summary",
+            "get_problem_context",
+            "search_project_evidence"
+          ],
+          "suggested_questions": [],
+          "evidence_sources": [
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-PROCEDURE:v1:c0002:0",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Порядок сопровождения и допуска к пилоту — Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота",
+              "reference": "P007:documents:DOC-P007-PROCEDURE:v1:c0002",
+              "excerpt": "Обязательные условия начала пилота Пилот может начаться ТОЛЬКО после завершения маскирования данных и утверждения матрицы доступа. Оба условия обязательны одновременно. Незавершённое маскирование блокирует пилот независимо от наличия синтетических тестовых обращений.",
+              "data": {
+                "id": "P007:documents:DOC-P007-PROCEDURE:v1:c0002",
+                "source_table": "documents",
+                "source_id": "DOC-P007-PROCEDURE:v1:c0002",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-PROCEDURE",
+                "title": "Порядок сопровождения и допуска к пилоту — Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота",
+                "text": "Обязательные условия начала пилота\n\nПилот может начаться ТОЛЬКО после завершения маскирования данных и утверждения матрицы доступа. Оба условия обязательны одновременно. Незавершённое маскирование блокирует пилот независимо от наличия синтетических тестовых обращений.",
+                "occurred_at": "2026-06-16T12:00:00",
+                "score": 0.0287391216352965,
+                "retrieval": {
+                  "dense_rank": 1,
+                  "dense_score": 0.7282837247003269,
+                  "bm25_rank": 21,
+                  "bm25_score": 3.7573102691418714,
+                  "fusion_score": 0.0287391216352965,
+                  "rerank_rank": 1
+                },
+                "metadata": {
+                  "file": "procedure.md",
+                  "locator": "procedure.md#Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота; blocks 3-4",
+                  "section": "Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота",
+                  "version": "1",
+                  "char_end": 268,
+                  "block_end": 4,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 3,
+                  "document_id": "DOC-P007-PROCEDURE",
+                  "published_at": "2026-06-16"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-FAQ:v1:c0004:1",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "FAQ сопровождения — FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?",
+              "reference": "P007:documents:DOC-P007-FAQ:v1:c0004",
+              "excerpt": "Разрешён ли пилот 22 июня? Нет, дата не является разрешением. 17 июня обсуждалось предложение начать пилот 22 июня, а 18 июня отдельно уточнено, что срок маскирования не даёт допуска. Начало возможно только после завершения и проверки маскирования и после утверждения матрицы доступа. Оба условия обязательны одновременно.",
+              "data": {
+                "id": "P007:documents:DOC-P007-FAQ:v1:c0004",
+                "source_table": "documents",
+                "source_id": "DOC-P007-FAQ:v1:c0004",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-FAQ",
+                "title": "FAQ сопровождения — FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?",
+                "text": "Разрешён ли пилот 22 июня?\n\nНет, дата не является разрешением. 17 июня обсуждалось предложение начать пилот 22 июня, а 18 июня отдельно уточнено, что срок маскирования не даёт допуска. Начало возможно только после завершения и проверки маскирования и после утверждения матрицы доступа. Оба условия обязательны одновременно.",
+                "occurred_at": "2026-06-19T12:00:00",
+                "score": 0.03200204813108039,
+                "retrieval": {
+                  "dense_rank": 2,
+                  "dense_score": 0.627507284582534,
+                  "bm25_rank": 3,
+                  "bm25_score": 8.180323139567513,
+                  "fusion_score": 0.03200204813108039,
+                  "rerank_rank": 2
+                },
+                "metadata": {
+                  "file": "support-faq.md",
+                  "locator": "support-faq.md#FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?; blocks 7-8",
+                  "section": "FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?",
+                  "version": "1",
+                  "char_end": 323,
+                  "block_end": 8,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 7,
+                  "document_id": "DOC-P007-FAQ",
+                  "published_at": "2026-06-19"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-X02:v1:c0005:8",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Два исключения стендовой проверки — Два исключения стендовой проверки / Стенд / Решение о допуске",
+              "reference": "P007:documents:DOC-P007-X02:v1:c0005",
+              "excerpt": "Решение о допуске `masking_complete=false`. Открытые исключения не позволяют считать маскирование завершённым или выдавать разрешение на пилот. Число 16 относится только к стендовым строкам.",
+              "data": {
+                "id": "P007:documents:DOC-P007-X02:v1:c0005",
+                "source_table": "documents",
+                "source_id": "DOC-P007-X02:v1:c0005",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-X02",
+                "title": "Два исключения стендовой проверки — Два исключения стендовой проверки / Стенд / Решение о допуске",
+                "text": "Решение о допуске\n\n`masking_complete=false`. Открытые исключения не позволяют считать маскирование завершённым или выдавать разрешение на пилот. Число 16 относится только к стендовым строкам.",
+                "occurred_at": "2026-06-18T12:00:00",
+                "score": 0.022424242424242423,
+                "retrieval": {
+                  "dense_rank": 15,
+                  "dense_score": 0.49312987800775565,
+                  "bm25_rank": 50,
+                  "bm25_score": 2.876605352280765,
+                  "fusion_score": 0.022424242424242423,
+                  "rerank_rank": 8
+                },
+                "metadata": {
+                  "file": "expanded/doc-p007-x02a.md",
+                  "locator": "expanded/doc-p007-x02a.md#Два исключения стендовой проверки / Стенд / Решение о допуске; blocks 9-10",
+                  "section": "Два исключения стендовой проверки / Стенд / Решение о допуске",
+                  "version": "1",
+                  "char_end": 191,
+                  "block_end": 10,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 9,
+                  "document_id": "DOC-P007-X02",
+                  "published_at": "2026-06-18"
+                }
+              }
+            },
+            {
+              "id": "get_problem_context:pending_decisions:DEC702:25",
+              "tool": "get_problem_context",
+              "source_type": "pending_decisions",
+              "title": "Матрица доступа подготовлена как проект и ожидает утверждения",
+              "reference": "DEC702",
+              "excerpt": "Матрица доступа подготовлена как проект и ожидает утверждения",
+              "data": {
+                "id": "DEC702",
+                "decision_type": "организационное",
+                "description": "Матрица доступа подготовлена как проект и ожидает утверждения",
+                "decision_owner": "Марина Соколова",
+                "status": "ожидает",
+                "decision_date": "2026-06-18"
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-MINUTES:v1:c0002:2",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Протокол совещания 18 июня 2026 — Протокол совещания 18 июня 2026 года / Готовность пилота",
+              "reference": "P007:documents:DOC-P007-MINUTES:v1:c0002",
+              "excerpt": "Готовность пилота Маскирование данных не завершено; это блокирует начало пилота. Матрица доступа ожидает утверждения. Пилот на 20 синтетических обращениях пока не начат. Сотрудники сохраняют обязанность утверждать ответы.",
+              "data": {
+                "id": "P007:documents:DOC-P007-MINUTES:v1:c0002",
+                "source_table": "documents",
+                "source_id": "DOC-P007-MINUTES:v1:c0002",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-MINUTES",
+                "title": "Протокол совещания 18 июня 2026 — Протокол совещания 18 июня 2026 года / Готовность пилота",
+                "text": "Готовность пилота\n\nМаскирование данных не завершено; это блокирует начало пилота. Матрица доступа ожидает утверждения. Пилот на 20 синтетических обращениях пока не начат. Сотрудники сохраняют обязанность утверждать ответы.",
+                "occurred_at": "2026-06-18T12:00:00",
+                "score": 0.02326468344774981,
+                "retrieval": {
+                  "dense_rank": 9,
+                  "dense_score": 0.5317430978740444,
+                  "bm25_rank": 54,
+                  "bm25_score": 2.797562023888954,
+                  "fusion_score": 0.02326468344774981,
+                  "rerank_rank": 3
+                },
+                "metadata": {
+                  "file": "minutes-2026-06-18.md",
+                  "locator": "minutes-2026-06-18.md#Протокол совещания 18 июня 2026 года / Готовность пилота; blocks 3-4",
+                  "section": "Протокол совещания 18 июня 2026 года / Готовность пилота",
+                  "version": "1",
+                  "char_end": 222,
+                  "block_end": 4,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 3,
+                  "document_id": "DOC-P007-MINUTES",
+                  "published_at": "2026-06-18"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-ARCHITECTURE:v1:c0008:7",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Техническая записка: целевая архитектура P007 — Техническая записка: целевая архитектура P007 / План внедрения и риски",
+              "reference": "P007:documents:DOC-P007-ARCHITECTURE:v1:c0008",
+              "excerpt": "План внедрения и риски Планы на 20–26 июня включают закрытие исключений, оценку Recall@8, обучение и приемку; это будущие задачи T704, T706, T710, T711 и T716. Предложение начать пилот 22 июня, обсуждавшееся 17 июня, не одобрено. 18 июня уточнено: срок маскирования сам по себе не разрешает запуск; нужны оба условия. Промышленный запуск требует отдельного подписанного решения.",
+              "data": {
+                "id": "P007:documents:DOC-P007-ARCHITECTURE:v1:c0008",
+                "source_table": "documents",
+                "source_id": "DOC-P007-ARCHITECTURE:v1:c0008",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-ARCHITECTURE",
+                "title": "Техническая записка: целевая архитектура P007 — Техническая записка: целевая архитектура P007 / План внедрения и риски",
+                "text": "План внедрения и риски\n\nПланы на 20–26 июня включают закрытие исключений, оценку Recall@8, обучение и приемку; это будущие задачи T704, T706, T710, T711 и T716. Предложение начать пилот 22 июня, обсуждавшееся 17 июня, не одобрено. 18 июня уточнено: срок маскирования сам по себе не разрешает запуск; нужны оба условия. Промышленный запуск требует отдельного подписанного решения.",
+                "occurred_at": "2026-06-19T12:00:00",
+                "score": 0.02564935064935065,
+                "retrieval": {
+                  "dense_rank": 28,
+                  "dense_score": 0.4602565533458056,
+                  "bm25_rank": 10,
+                  "bm25_score": 5.809873098253007,
+                  "fusion_score": 0.02564935064935065,
+                  "rerank_rank": 7
+                },
+                "metadata": {
+                  "file": "architecture-note.md",
+                  "locator": "architecture-note.md#Техническая записка: целевая архитектура P007 / План внедрения и риски; blocks 15-16",
+                  "section": "Техническая записка: целевая архитектура P007 / План внедрения и риски",
+                  "version": "1",
+                  "char_end": 379,
+                  "block_end": 16,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 15,
+                  "document_id": "DOC-P007-ARCHITECTURE",
+                  "published_at": "2026-06-19"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:task_comments:P007:task_comments:TC7004:4",
+              "tool": "search_project_evidence",
+              "source_type": "task_comments",
+              "title": "Комментарий по ВЕД-702",
+              "reference": "P007:task_comments:TC7004",
+              "excerpt": "Допуск заблокирован незавершённым маскированием и неутверждённой матрицей. Плановый срок 23 июня не разрешает начать пилот.",
+              "data": {
+                "id": "P007:task_comments:TC7004",
+                "source_table": "task_comments",
+                "source_id": "TC7004",
+                "entity_type": "task_comment",
+                "entity_id": "T702",
+                "title": "Комментарий по ВЕД-702",
+                "text": "Допуск заблокирован незавершённым маскированием и неутверждённой матрицей. Плановый срок 23 июня не разрешает начать пилот.",
+                "occurred_at": "2026-06-18T14:00:00",
+                "linked_task_id": "T702",
+                "score": 0.025917252146760345,
+                "retrieval": {
+                  "dense_rank": 45,
+                  "dense_score": 0.4218764398245317,
+                  "bm25_rank": 1,
+                  "bm25_score": 9.561333601163852,
+                  "fusion_score": 0.025917252146760345,
+                  "rerank_rank": 5
+                },
+                "metadata": {
+                  "channel": "трекер",
+                  "task_title": "Утвердить матрицу доступа и допуск к пилоту",
+                  "author_name": "Анна Волкова",
+                  "source_system": "Синтетический трекер"
+                }
+              }
+            }
+          ],
+          "claims": [
+            {
+              "text": "Пилот может начаться только после одновременного выполнения двух обязательных условий: завершения маскирования данных и утверждения матрицы доступа.",
+              "evidence_ids": [
+                "search_project_evidence:documents:P007:documents:DOC-P007-PROCEDURE:v1:c0002:0",
+                "search_project_evidence:documents:P007:documents:DOC-P007-FAQ:v1:c0004:1"
+              ],
+              "evidence": [
+                {
+                  "source_id": "search_project_evidence:documents:P007:documents:DOC-P007-PROCEDURE:v1:c0002:0",
+                  "quote": "Пилот может начаться ТОЛЬКО после завершения маскирования данных и утверждения матрицы доступа. Оба условия обязательны одновременно."
+                },
+                {
+                  "source_id": "search_project_evidence:documents:P007:documents:DOC-P007-FAQ:v1:c0004:1",
+                  "quote": "Начало возможно только после завершения и проверки маскирования и после утверждения матрицы доступа. Оба условия обязательны одновременно."
+                }
+              ]
+            },
+            {
+              "text": "По состоянию на 2026-06-19 ни одно из двух условий не выполнено: маскирование не завершено (masking_complete=false из-за открытых исключений), а матрица доступа существует только как проект и ожидает утверждения.",
+              "evidence_ids": [
+                "search_project_evidence:documents:P007:documents:DOC-P007-X02:v1:c0005:8",
+                "get_problem_context:pending_decisions:DEC702:25",
+                "search_project_evidence:documents:P007:documents:DOC-P007-MINUTES:v1:c0002:2"
+              ],
+              "evidence": [
+                {
+                  "source_id": "search_project_evidence:documents:P007:documents:DOC-P007-X02:v1:c0005:8",
+                  "quote": "`masking_complete=false`. Открытые исключения не позволяют считать маскирование завершённым или выдавать разрешение на пилот."
+                },
+                {
+                  "source_id": "get_problem_context:pending_decisions:DEC702:25",
+                  "quote": "Матрица доступа подготовлена как проект и ожидает утверждения"
+                },
+                {
+                  "source_id": "search_project_evidence:documents:P007:documents:DOC-P007-MINUTES:v1:c0002:2",
+                  "quote": "Маскирование данных не завершено; это блокирует начало пилота. Матрица доступа ожидает утверждения. Пилот на 20 синтетических обращениях пока не начат."
+                }
+              ]
+            },
+            {
+              "text": "Плановые сроки не являются разрешением на запуск: предложение начать пилот 22 июня обсуждалось 17 июня, но не одобрено; срок маскирования сам по себе не даёт допуска.",
+              "evidence_ids": [
+                "search_project_evidence:documents:P007:documents:DOC-P007-ARCHITECTURE:v1:c0008:7",
+                "search_project_evidence:task_comments:P007:task_comments:TC7004:4"
+              ],
+              "evidence": [
+                {
+                  "source_id": "search_project_evidence:documents:P007:documents:DOC-P007-ARCHITECTURE:v1:c0008:7",
+                  "quote": "Предложение начать пилот 22 июня, обсуждавшееся 17 июня, не одобрено. 18 июня уточнено: срок маскирования сам по себе не разрешает запуск; нужны оба условия."
+                },
+                {
+                  "source_id": "search_project_evidence:task_comments:P007:task_comments:TC7004:4",
+                  "quote": "Плановый срок 23 июня не разрешает начать пилот."
+                }
+              ]
+            }
+          ],
+          "verification": {
+            "status": "passed",
+            "checked_claims": 3,
+            "supported_claims": 3,
+            "recovery_rounds": 1
+          }
+        },
+        "metrics": {
+          "duration_ms": 101767.6,
+          "ttft_ms": 3924.6,
+          "stages_ms": {
+            "route_request": 4711.9,
+            "rerank": 6196.0,
+            "request_project_context": 6577.6,
+            "select_tools": 8457.3,
+            "draft_answer": 22620.0,
+            "verify_answer": 34752.0,
+            "recover_evidence": 0.6,
+            "run_recovery_tools": 24607.6,
+            "finalize_answer": 3.3
+          },
+          "tool_calls": 4,
+          "tools": [
+            {
+              "call_id": "tool_69ccb2f3b2f14585bfcc5a4ffdae8f95",
+              "name": "get_project_summary",
+              "status": "success",
+              "duration_ms": 38.1
+            },
+            {
+              "call_id": "tool_bcbddeb3b54e4000b07c60435dd20051",
+              "name": "get_problem_context",
+              "status": "success",
+              "duration_ms": 35.9
+            },
+            {
+              "call_id": "tool_b26d8fd408294f2e8d70ff4ca6cdccdf",
+              "name": "search_project_evidence",
+              "status": "success",
+              "duration_ms": 6572.3
+            },
+            {
+              "call_id": "tool_2a82038f23c34b92924f90021169ba8f",
+              "name": "search_project_evidence",
+              "status": "success",
+              "duration_ms": 24605.6
+            }
+          ],
+          "llm_calls": [
+            {
+              "operation": "RequestRoute",
+              "duration_ms": 4706.9,
+              "ttft_ms": 3924.6,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 482,
+                "output_tokens": 53,
+                "total_tokens": 535
+              }
+            },
+            {
+              "operation": "EvidenceReranking",
+              "duration_ms": 6190.6,
+              "ttft_ms": 3383.7,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 2815,
+                "output_tokens": 262,
+                "total_tokens": 3077
+              }
+            },
+            {
+              "operation": "tool_selection",
+              "duration_ms": 8452.7,
+              "ttft_ms": 2352.4,
+              "status": "completed",
+              "finish_reason": "stop",
+              "usage": {
+                "input_tokens": 16660,
+                "output_tokens": 337,
+                "total_tokens": 16997
+              }
+            },
+            {
+              "operation": "GroundedAnswerDraft",
+              "duration_ms": 11713.2,
+              "ttft_ms": 3454.6,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 16081,
+                "output_tokens": 714,
+                "total_tokens": 16795
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 4564.7,
+              "ttft_ms": 4095.4,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 1734,
+                "output_tokens": 39,
+                "total_tokens": 1773
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 4779.9,
+              "ttft_ms": 3483.1,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 1898,
+                "output_tokens": 71,
+                "total_tokens": 1969
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 3991.7,
+              "ttft_ms": 3671.8,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 1866,
+                "output_tokens": 39,
+                "total_tokens": 1905
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 4941.6,
+              "ttft_ms": 3621.9,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 859,
+                "output_tokens": 75,
+                "total_tokens": 934
+              }
+            },
+            {
+              "operation": "EvidenceReview",
+              "duration_ms": 6678.7,
+              "ttft_ms": 3187.4,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 6503,
+                "output_tokens": 205,
+                "total_tokens": 6708
+              }
+            },
+            {
+              "operation": "EvidenceReview",
+              "duration_ms": 7759.1,
+              "ttft_ms": 3066.2,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 6613,
+                "output_tokens": 204,
+                "total_tokens": 6817
+              }
+            },
+            {
+              "operation": "GroundedAnswerDraft",
+              "duration_ms": 10885.2,
+              "ttft_ms": 4016.4,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 17052,
+                "output_tokens": 642,
+                "total_tokens": 17694
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 3417.7,
+              "ttft_ms": 3089.3,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 1734,
+                "output_tokens": 39,
+                "total_tokens": 1773
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 3970.3,
+              "ttft_ms": 3311.4,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 1897,
+                "output_tokens": 39,
+                "total_tokens": 1936
+              }
+            },
+            {
+              "operation": "ClaimSupport",
+              "duration_ms": 3276.0,
+              "ttft_ms": 2944.8,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 1686,
+                "output_tokens": 39,
+                "total_tokens": 1725
+              }
+            },
+            {
+              "operation": "EvidenceReview",
+              "duration_ms": 3836.7,
+              "ttft_ms": 3138.8,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 6566,
+                "output_tokens": 78,
+                "total_tokens": 6644
+              }
+            }
+          ],
+          "rerank_calls": [
+            {
+              "status": "success",
+              "model": "glm-5.3-flash",
+              "duration_ms": 6196.0,
+              "candidate_count": 16,
+              "returned_count": 8
+            }
+          ],
+          "input_tokens": 84446,
+          "output_tokens": 2836,
+          "total_tokens": 87282,
+          "usage": {
+            "input_tokens": 84446,
+            "output_tokens": 2836,
+            "total_tokens": 87282
+          }
+        }
+      },
+      "elapsed_s": 101.86
+    }
+  ],
+  "error": null
+}

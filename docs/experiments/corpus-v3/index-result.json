@@ -1,0 +1,9 @@
+{
+  "project_id": "P007",
+  "chunks_indexed": 769,
+  "embedding_model": "qwen/qwen3-embedding-8b",
+  "embedding_dimensions": 4096,
+  "reused_embeddings": 595,
+  "new_embeddings": 174,
+  "cache_policy": "Exact embedding-input SHA-256 and provider profile match; captured candidates matched every persisted field before reuse."
+}

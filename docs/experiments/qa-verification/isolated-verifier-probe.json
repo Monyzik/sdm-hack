@@ -1,0 +1,335 @@
+[
+  {
+    "case_id": "E209-official-number-scope",
+    "duration_s": 10.96,
+    "expected_verdicts": [
+      "unsupported",
+      "supported"
+    ],
+    "actual_verdicts": [
+      "unsupported",
+      "supported"
+    ],
+    "passed": true,
+    "review": {
+      "claims": [
+        {
+          "claim_index": 0,
+          "verdict": "unsupported"
+        },
+        {
+          "claim_index": 1,
+          "verdict": "supported"
+        }
+      ],
+      "missing_aspects": [
+        "Что именно мешает общему итогу по трем строкам на 19 июня (отсутствие единицы третьей строки с числом 5) — не отражено в тезисах черновика"
+      ],
+      "searches": [],
+      "context_source_ids": [
+        "search_project_evidence:documents:P007:documents:DOC-P007-D026:v1:c0001:0"
+      ]
+    },
+    "metrics": {
+      "duration_ms": 10957.2,
+      "ttft_ms": 1723.5,
+      "stages_ms": {
+        "verify_answer": 10957.1
+      },
+      "tool_calls": 0,
+      "tools": [],
+      "llm_calls": [
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 2050.5,
+          "ttft_ms": 1723.5,
+          "usage": {
+            "input_tokens": 1340,
+            "output_tokens": 39,
+            "total_tokens": 1379
+          }
+        },
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 3151.1,
+          "ttft_ms": 1854.3,
+          "usage": {
+            "input_tokens": 1117,
+            "output_tokens": 79,
+            "total_tokens": 1196
+          }
+        },
+        {
+          "operation": "EvidenceReview",
+          "duration_ms": 7709.1,
+          "ttft_ms": 2949.2,
+          "usage": {
+            "input_tokens": 4163,
+            "output_tokens": 236,
+            "total_tokens": 4399
+          }
+        }
+      ],
+      "rerank_calls": [],
+      "input_tokens": 6620,
+      "output_tokens": 354,
+      "total_tokens": 6974,
+      "usage": {
+        "input_tokens": 6620,
+        "output_tokens": 354,
+        "total_tokens": 6974
+      }
+    }
+  },
+  {
+    "case_id": "E209-number-scope-reordered",
+    "duration_s": 12.69,
+    "expected_verdicts": [
+      "supported",
+      "unsupported"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "unsupported"
+    ],
+    "passed": true,
+    "review": {
+      "claims": [
+        {
+          "claim_index": 0,
+          "verdict": "supported"
+        },
+        {
+          "claim_index": 1,
+          "verdict": "unsupported"
+        }
+      ],
+      "missing_aspects": [
+        "Почему на 19 июня недоступен общий итог всех трёх строк «Расходных образцов» (какая единица отсутствует)?"
+      ],
+      "searches": [],
+      "context_source_ids": [
+        "search_project_evidence:documents:P007:documents:DOC-P007-D030:v1:c0001:2",
+        "search_project_evidence:communication_messages:P007:communication_messages:MSG7185:1"
+      ]
+    },
+    "metrics": {
+      "duration_ms": 12691.7,
+      "ttft_ms": 3122.1,
+      "stages_ms": {
+        "verify_answer": 12691.6
+      },
+      "tool_calls": 0,
+      "tools": [],
+      "llm_calls": [
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 3570.9,
+          "ttft_ms": 3122.1,
+          "usage": {
+            "input_tokens": 1340,
+            "output_tokens": 39,
+            "total_tokens": 1379
+          }
+        },
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 3671.2,
+          "ttft_ms": 2861.9,
+          "usage": {
+            "input_tokens": 1100,
+            "output_tokens": 60,
+            "total_tokens": 1160
+          }
+        },
+        {
+          "operation": "EvidenceReview",
+          "duration_ms": 8973.3,
+          "ttft_ms": 2969.4,
+          "usage": {
+            "input_tokens": 4146,
+            "output_tokens": 301,
+            "total_tokens": 4447
+          }
+        }
+      ],
+      "rerank_calls": [],
+      "input_tokens": 6586,
+      "output_tokens": 400,
+      "total_tokens": 6986,
+      "usage": {
+        "input_tokens": 6586,
+        "output_tokens": 400,
+        "total_tokens": 6986
+      }
+    }
+  },
+  {
+    "case_id": "E209-unit-semantics",
+    "duration_s": 8.85,
+    "expected_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "passed": true,
+    "review": {
+      "claims": [
+        {
+          "claim_index": 0,
+          "verdict": "supported"
+        },
+        {
+          "claim_index": 1,
+          "verdict": "contradicted"
+        }
+      ],
+      "missing_aspects": [
+        "Что удалось перевести в штуки по первым двум строкам «Расходных образцов» (24 штуки и основание пересчета)?",
+        "Что именно мешает общему итогу на 19 июня (не задана единица третьей строки с числом 5)?"
+      ],
+      "searches": [],
+      "context_source_ids": [
+        "search_project_evidence:documents:P007:documents:DOC-P007-D026:v1:c0001:0",
+        "search_project_evidence:communication_messages:P007:communication_messages:MSG7185:1"
+      ]
+    },
+    "metrics": {
+      "duration_ms": 8847.9,
+      "ttft_ms": 3216.0,
+      "stages_ms": {
+        "verify_answer": 8847.8
+      },
+      "tool_calls": 0,
+      "tools": [],
+      "llm_calls": [
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 3558.3,
+          "ttft_ms": 3216.0,
+          "usage": {
+            "input_tokens": 1345,
+            "output_tokens": 39,
+            "total_tokens": 1384
+          }
+        },
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 3563.7,
+          "ttft_ms": 3183.7,
+          "usage": {
+            "input_tokens": 1339,
+            "output_tokens": 39,
+            "total_tokens": 1378
+          }
+        },
+        {
+          "operation": "EvidenceReview",
+          "duration_ms": 5240.3,
+          "ttft_ms": 3128.3,
+          "usage": {
+            "input_tokens": 4699,
+            "output_tokens": 172,
+            "total_tokens": 4871
+          }
+        }
+      ],
+      "rerank_calls": [],
+      "input_tokens": 7383,
+      "output_tokens": 250,
+      "total_tokens": 7633,
+      "usage": {
+        "input_tokens": 7383,
+        "output_tokens": 250,
+        "total_tokens": 7633
+      }
+    }
+  },
+  {
+    "case_id": "E209-plan-versus-completed",
+    "duration_s": 7.47,
+    "expected_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "actual_verdicts": [
+      "supported",
+      "contradicted"
+    ],
+    "passed": true,
+    "review": {
+      "claims": [
+        {
+          "claim_index": 0,
+          "verdict": "supported"
+        },
+        {
+          "claim_index": 1,
+          "verdict": "contradicted"
+        }
+      ],
+      "missing_aspects": [
+        "Что удалось перевести в штуки по «Расходным образцам» (24 штуки по первым двум строкам) — покрыто ли это в ответе?",
+        "Что мешает общему итогу на 19 июня (отсутствует единица третьей строки с числом 5) — отражено ли явно?"
+      ],
+      "searches": [],
+      "context_source_ids": [
+        "search_project_evidence:documents:P007:documents:DOC-P007-D026:v1:c0001:0",
+        "search_project_evidence:communication_messages:P007:communication_messages:MSG7185:1"
+      ]
+    },
+    "metrics": {
+      "duration_ms": 7466.7,
+      "ttft_ms": 1479.6,
+      "stages_ms": {
+        "verify_answer": 7466.6
+      },
+      "tool_calls": 0,
+      "tools": [],
+      "llm_calls": [
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 1791.1,
+          "ttft_ms": 1479.6,
+          "usage": {
+            "input_tokens": 1372,
+            "output_tokens": 39,
+            "total_tokens": 1411
+          }
+        },
+        {
+          "operation": "ClaimSupport",
+          "duration_ms": 1929.8,
+          "ttft_ms": 1531.0,
+          "usage": {
+            "input_tokens": 1368,
+            "output_tokens": 39,
+            "total_tokens": 1407
+          }
+        },
+        {
+          "operation": "EvidenceReview",
+          "duration_ms": 5490.2,
+          "ttft_ms": 3140.2,
+          "usage": {
+            "input_tokens": 4755,
+            "output_tokens": 180,
+            "total_tokens": 4935
+          }
+        }
+      ],
+      "rerank_calls": [],
+      "input_tokens": 7495,
+      "output_tokens": 258,
+      "total_tokens": 7753,
+      "usage": {
+        "input_tokens": 7495,
+        "output_tokens": 258,
+        "total_tokens": 7753
+      }
+    }
+  }
+]

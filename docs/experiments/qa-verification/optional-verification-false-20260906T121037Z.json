@@ -1,0 +1,1397 @@
+{
+  "question": "При каких условиях можно начать пилот?",
+  "verify_claims": false,
+  "duration_s": 32.94,
+  "events": [
+    {
+      "event": "run_started",
+      "data": {
+        "run_id": "cbd0736908cc43019f43862f3f226df5"
+      },
+      "elapsed_s": 0.16
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "route_request"
+      },
+      "elapsed_s": 0.37
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "RequestRoute"
+      },
+      "elapsed_s": 0.37
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "RequestRoute",
+        "received_characters": 2
+      },
+      "elapsed_s": 3.57
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "RequestRoute",
+        "received_characters": 68
+      },
+      "elapsed_s": 3.78
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "RequestRoute",
+        "duration_ms": 3991.5,
+        "ttft_ms": 3394.0,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 482,
+          "output_tokens": 42,
+          "total_tokens": 524
+        }
+      },
+      "elapsed_s": 4.17
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "route_request",
+        "status": "success",
+        "duration_ms": 4005.8
+      },
+      "elapsed_s": 4.17
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "request_project_context"
+      },
+      "elapsed_s": 4.17
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_9a89b1d193734e118c8ddcf950d99a8d",
+        "name": "get_project_summary",
+        "args": {}
+      },
+      "elapsed_s": 4.18
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_7d1a5a41a92349ebbef9c51cdadaee5d",
+        "name": "get_problem_context",
+        "args": {
+          "max_depth": null
+        }
+      },
+      "elapsed_s": 4.18
+    },
+    {
+      "event": "tool_started",
+      "data": {
+        "call_id": "tool_174d896a433041a78d43eb0546c7c97b",
+        "name": "search_project_evidence",
+        "args": {
+          "query": "При каких условиях можно начать пилот?",
+          "entity_id": null,
+          "limit": null
+        }
+      },
+      "elapsed_s": 4.18
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_7d1a5a41a92349ebbef9c51cdadaee5d",
+        "name": "get_problem_context",
+        "status": "success",
+        "duration_ms": 100.7
+      },
+      "elapsed_s": 4.27
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_9a89b1d193734e118c8ddcf950d99a8d",
+        "name": "get_project_summary",
+        "status": "success",
+        "duration_ms": 104.1
+      },
+      "elapsed_s": 4.27
+    },
+    {
+      "event": "rerank_started",
+      "data": {
+        "candidate_count": 16,
+        "top_k": 8,
+        "model": "glm-5.3-flash"
+      },
+      "elapsed_s": 4.85
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "EvidenceReranking"
+      },
+      "elapsed_s": 4.85
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 2
+      },
+      "elapsed_s": 6.22
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 67
+      },
+      "elapsed_s": 6.4
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 133
+      },
+      "elapsed_s": 6.67
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 204
+      },
+      "elapsed_s": 6.89
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 273
+      },
+      "elapsed_s": 7.23
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 338
+      },
+      "elapsed_s": 7.66
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 402
+      },
+      "elapsed_s": 7.78
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 466
+      },
+      "elapsed_s": 8.12
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 531
+      },
+      "elapsed_s": 8.31
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 595
+      },
+      "elapsed_s": 8.52
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "EvidenceReranking",
+        "received_characters": 660
+      },
+      "elapsed_s": 8.83
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "EvidenceReranking",
+        "duration_ms": 3977.5,
+        "ttft_ms": 1364.5,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 2815,
+          "output_tokens": 262,
+          "total_tokens": 3077
+        }
+      },
+      "elapsed_s": 8.83
+    },
+    {
+      "event": "rerank_completed",
+      "data": {
+        "model": "glm-5.3-flash",
+        "duration_ms": 3982.6,
+        "candidate_count": 16,
+        "returned_count": 8,
+        "ordered_ids": [
+          "P007:documents:DOC-P007-PROCEDURE:v1:c0002",
+          "P007:documents:DOC-P007-FAQ:v1:c0004",
+          "P007:documents:DOC-P007-ACCESS:v1:c0006",
+          "P007:documents:DOC-P007-MINUTES:v1:c0002",
+          "P007:documents:DOC-P007-X02:v1:c0005",
+          "P007:task_comments:TC7004",
+          "P007:documents:DOC-P007-MEETING17:v1:c0009",
+          "P007:task_comments:TC7022",
+          "P007:task_comments:TC7036",
+          "P007:communication_messages:MSG7074",
+          "P007:documents:DOC-P007-ARCHITECTURE:v1:c0008",
+          "P007:documents:DOC-P007-PROCEDURE:v1:c0004",
+          "P007:communication_messages:MSG7055",
+          "P007:communication_messages:MSG7050",
+          "P007:documents:DOC-P007-ACCEPTANCE:v1:c0009",
+          "P007:documents:DOC-P007-X01:v1:c0003"
+        ]
+      },
+      "elapsed_s": 8.83
+    },
+    {
+      "event": "tool_finished",
+      "data": {
+        "call_id": "tool_174d896a433041a78d43eb0546c7c97b",
+        "name": "search_project_evidence",
+        "status": "success",
+        "duration_ms": 4660.1
+      },
+      "elapsed_s": 8.83
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "request_project_context",
+        "status": "success",
+        "duration_ms": 4668.5
+      },
+      "elapsed_s": 8.84
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "select_tools"
+      },
+      "elapsed_s": 8.85
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "tool_selection"
+      },
+      "elapsed_s": 8.85
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 1
+      },
+      "elapsed_s": 12.28
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 66
+      },
+      "elapsed_s": 12.48
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 130
+      },
+      "elapsed_s": 12.96
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 195
+      },
+      "elapsed_s": 13.36
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 263
+      },
+      "elapsed_s": 13.73
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 332
+      },
+      "elapsed_s": 14.17
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 401
+      },
+      "elapsed_s": 14.47
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 465
+      },
+      "elapsed_s": 15.05
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 531
+      },
+      "elapsed_s": 15.35
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 596
+      },
+      "elapsed_s": 15.76
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 662
+      },
+      "elapsed_s": 16.09
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 730
+      },
+      "elapsed_s": 16.41
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 797
+      },
+      "elapsed_s": 16.63
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 861
+      },
+      "elapsed_s": 16.79
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 927
+      },
+      "elapsed_s": 17.02
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "tool_selection",
+        "received_characters": 994
+      },
+      "elapsed_s": 17.45
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "tool_selection",
+        "duration_ms": 8772.9,
+        "ttft_ms": 3433.3,
+        "status": "completed",
+        "finish_reason": "stop",
+        "usage": {
+          "input_tokens": 16469,
+          "output_tokens": 302,
+          "total_tokens": 16771
+        }
+      },
+      "elapsed_s": 17.62
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "select_tools",
+        "status": "success",
+        "duration_ms": 8779.4
+      },
+      "elapsed_s": 17.62
+    },
+    {
+      "event": "stage_started",
+      "data": {
+        "stage": "finalize_answer"
+      },
+      "elapsed_s": 17.64
+    },
+    {
+      "event": "llm_started",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer"
+      },
+      "elapsed_s": 17.64
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2
+      },
+      "elapsed_s": 20.97
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 66
+      },
+      "elapsed_s": 21.37
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 132
+      },
+      "elapsed_s": 21.73
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 198
+      },
+      "elapsed_s": 21.91
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 264
+      },
+      "elapsed_s": 22.13
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 333
+      },
+      "elapsed_s": 22.46
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 399
+      },
+      "elapsed_s": 22.88
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 464
+      },
+      "elapsed_s": 23.1
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 531
+      },
+      "elapsed_s": 23.43
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 597
+      },
+      "elapsed_s": 23.83
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 663
+      },
+      "elapsed_s": 24.21
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 729
+      },
+      "elapsed_s": 24.53
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 797
+      },
+      "elapsed_s": 24.86
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 861
+      },
+      "elapsed_s": 25.11
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 931
+      },
+      "elapsed_s": 25.43
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 995
+      },
+      "elapsed_s": 25.9
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1059
+      },
+      "elapsed_s": 26.43
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1123
+      },
+      "elapsed_s": 26.85
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1189
+      },
+      "elapsed_s": 27.07
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1255
+      },
+      "elapsed_s": 27.4
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1319
+      },
+      "elapsed_s": 27.68
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1387
+      },
+      "elapsed_s": 28.01
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1451
+      },
+      "elapsed_s": 28.28
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1516
+      },
+      "elapsed_s": 28.5
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1580
+      },
+      "elapsed_s": 28.77
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1649
+      },
+      "elapsed_s": 29.05
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1713
+      },
+      "elapsed_s": 29.27
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1778
+      },
+      "elapsed_s": 29.41
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1842
+      },
+      "elapsed_s": 29.7
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1906
+      },
+      "elapsed_s": 29.87
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 1972
+      },
+      "elapsed_s": 30.1
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2037
+      },
+      "elapsed_s": 30.41
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2103
+      },
+      "elapsed_s": 30.62
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2167
+      },
+      "elapsed_s": 30.79
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2233
+      },
+      "elapsed_s": 31.08
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2301
+      },
+      "elapsed_s": 31.43
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2365
+      },
+      "elapsed_s": 31.64
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2430
+      },
+      "elapsed_s": 31.86
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2494
+      },
+      "elapsed_s": 32.12
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2558
+      },
+      "elapsed_s": 32.38
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2622
+      },
+      "elapsed_s": 32.65
+    },
+    {
+      "event": "llm_progress",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "received_characters": 2686
+      },
+      "elapsed_s": 32.82
+    },
+    {
+      "event": "llm_finished",
+      "data": {
+        "operation": "GroundedProjectQuestionLLMAnswer",
+        "duration_ms": 15303.8,
+        "ttft_ms": 3338.0,
+        "status": "completed",
+        "finish_reason": "tool_calls",
+        "usage": {
+          "input_tokens": 15938,
+          "output_tokens": 799,
+          "total_tokens": 16737
+        }
+      },
+      "elapsed_s": 32.94
+    },
+    {
+      "event": "stage_finished",
+      "data": {
+        "stage": "finalize_answer",
+        "status": "success",
+        "duration_ms": 15316.2
+      },
+      "elapsed_s": 32.94
+    },
+    {
+      "event": "answer_delta",
+      "data": {
+        "text": "Условия начала пилота (P007, по состоянию на 2026-06-19):\n\nПо порядку допуска к пилоту (DOC-P007-PROCEDURE) пилот может начаться ТОЛЬКО после одновременного выполнения двух обязательных условий:\n1. Завершение маскирования данных — маскирование должно быть завершено и проверено. На текущий момент не завершено: остались два открытых исключения (masking_complete=false, задача T704 «Закрыть два исключения проверки маскирования» в работе), протокол 18 июня прямо фиксирует, что это блокирует пилот.\n2. Утверждение матрицы доступа — матрица пока подготовлена только как проект (задача T702 заблокирована; решение DEC702 «ожидает»; команда ИБ, ожидаемая дата по DEP701 — 2026-06-23). Проект документа не равен утверждённому решению (риск RK702: черновик могут ошибочно принять за утверждение).\n\nНаличие 20 синтетических тестовых обращений не заменяет эти условия: незавершённое маскирование блокирует пилот независимо от их наличия.\n\nЧто НЕ является разрешением на старт:\n- Предложение начать пилот 22 июня (обсуждалось 17 июня) не одобрено — дата и плановый срок не дают допуска (FAQ, комментарий Анны Волковой по T702: плановый срок 23 июня не разрешает начать пилот).\n- Завершённые обсуждения/переписка и готовый проект матрицы не равны фактическому выполнению условий.\n\nЦелевой результат проекта фиксирует: «Пилот на 20 синтетических обращениях после маскирования и утверждения матрицы доступа». Приёмка пилота (T711) также заблокирована: нет допуска и итогового отчёта по качеству. Отдельное подписанное решение нужно только для промышленного запуска (DEC706), а не для ограниченного пилота."
+      },
+      "elapsed_s": 32.94
+    },
+    {
+      "event": "usage",
+      "data": {
+        "input_tokens": 35704,
+        "output_tokens": 1405,
+        "total_tokens": 37109
+      },
+      "elapsed_s": 32.94
+    },
+    {
+      "event": "final",
+      "data": {
+        "answer": {
+          "answer": "Условия начала пилота (P007, по состоянию на 2026-06-19):\n\nПо порядку допуска к пилоту (DOC-P007-PROCEDURE) пилот может начаться ТОЛЬКО после одновременного выполнения двух обязательных условий:\n1. Завершение маскирования данных — маскирование должно быть завершено и проверено. На текущий момент не завершено: остались два открытых исключения (masking_complete=false, задача T704 «Закрыть два исключения проверки маскирования» в работе), протокол 18 июня прямо фиксирует, что это блокирует пилот.\n2. Утверждение матрицы доступа — матрица пока подготовлена только как проект (задача T702 заблокирована; решение DEC702 «ожидает»; команда ИБ, ожидаемая дата по DEP701 — 2026-06-23). Проект документа не равен утверждённому решению (риск RK702: черновик могут ошибочно принять за утверждение).\n\nНаличие 20 синтетических тестовых обращений не заменяет эти условия: незавершённое маскирование блокирует пилот независимо от их наличия.\n\nЧто НЕ является разрешением на старт:\n- Предложение начать пилот 22 июня (обсуждалось 17 июня) не одобрено — дата и плановый срок не дают допуска (FAQ, комментарий Анны Волковой по T702: плановый срок 23 июня не разрешает начать пилот).\n- Завершённые обсуждения/переписка и готовый проект матрицы не равны фактическому выполнению условий.\n\nЦелевой результат проекта фиксирует: «Пилот на 20 синтетических обращениях после маскирования и утверждения матрицы доступа». Приёмка пилота (T711) также заблокирована: нет допуска и итогового отчёта по качеству. Отдельное подписанное решение нужно только для промышленного запуска (DEC706), а не для ограниченного пилота.",
+          "evidence_ids": [
+            "search_project_evidence:documents:P007:documents:DOC-P007-PROCEDURE:v1:c0002:0",
+            "search_project_evidence:documents:P007:documents:DOC-P007-FAQ:v1:c0004:1",
+            "search_project_evidence:documents:P007:documents:DOC-P007-MINUTES:v1:c0002:3",
+            "search_project_evidence:documents:P007:documents:DOC-P007-X02:v1:c0005:4",
+            "search_project_evidence:documents:P007:documents:DOC-P007-MEETING17:v1:c0009:7",
+            "search_project_evidence:documents:P007:documents:DOC-P007-ACCESS:v1:c0006:2",
+            "search_project_evidence:task_comments:P007:task_comments:TC7004:5",
+            "get_problem_context:pending_decisions:DEC702:25",
+            "get_project_summary:risky_dependencies:DEP701:10",
+            "get_project_summary:top_risks:RK702:6",
+            "get_project_summary:blocked_tasks:T702:2",
+            "get_project_summary:blocked_tasks:T711:3",
+            "get_problem_context:pending_decisions:DEC706:23",
+            "get_problem_context:project:P007:0"
+          ],
+          "used_tools": [
+            "get_project_summary",
+            "get_problem_context",
+            "search_project_evidence"
+          ],
+          "suggested_questions": [
+            "Что блокирует допуск к пилоту прямо сейчас?",
+            "Кто владелец решения по утверждению матрицы доступа?"
+          ],
+          "evidence_sources": [
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-PROCEDURE:v1:c0002:0",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Порядок сопровождения и допуска к пилоту — Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота",
+              "reference": "P007:documents:DOC-P007-PROCEDURE:v1:c0002",
+              "excerpt": "Обязательные условия начала пилота Пилот может начаться ТОЛЬКО после завершения маскирования данных и утверждения матрицы доступа. Оба условия обязательны одновременно. Незавершённое маскирование блокирует пилот независимо от наличия синтетических тестовых обращений.",
+              "data": {
+                "id": "P007:documents:DOC-P007-PROCEDURE:v1:c0002",
+                "source_table": "documents",
+                "source_id": "DOC-P007-PROCEDURE:v1:c0002",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-PROCEDURE",
+                "title": "Порядок сопровождения и допуска к пилоту — Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота",
+                "text": "Обязательные условия начала пилота\n\nПилот может начаться ТОЛЬКО после завершения маскирования данных и утверждения матрицы доступа. Оба условия обязательны одновременно. Незавершённое маскирование блокирует пилот независимо от наличия синтетических тестовых обращений.",
+                "occurred_at": "2026-06-16T12:00:00",
+                "score": 0.0287391216352965,
+                "retrieval": {
+                  "dense_rank": 1,
+                  "dense_score": 0.7282837247003269,
+                  "bm25_rank": 21,
+                  "bm25_score": 3.7573102691418714,
+                  "fusion_score": 0.0287391216352965,
+                  "rerank_rank": 1
+                },
+                "metadata": {
+                  "file": "procedure.md",
+                  "locator": "procedure.md#Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота; blocks 3-4",
+                  "section": "Порядок сопровождения и допуска к пилоту / Обязательные условия начала пилота",
+                  "version": "1",
+                  "char_end": 268,
+                  "block_end": 4,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 3,
+                  "document_id": "DOC-P007-PROCEDURE",
+                  "published_at": "2026-06-16"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-FAQ:v1:c0004:1",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "FAQ сопровождения — FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?",
+              "reference": "P007:documents:DOC-P007-FAQ:v1:c0004",
+              "excerpt": "Разрешён ли пилот 22 июня? Нет, дата не является разрешением. 17 июня обсуждалось предложение начать пилот 22 июня, а 18 июня отдельно уточнено, что срок маскирования не даёт допуска. Начало возможно только после завершения и проверки маскирования и после утверждения матрицы доступа. Оба условия обязательны одновременно.",
+              "data": {
+                "id": "P007:documents:DOC-P007-FAQ:v1:c0004",
+                "source_table": "documents",
+                "source_id": "DOC-P007-FAQ:v1:c0004",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-FAQ",
+                "title": "FAQ сопровождения — FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?",
+                "text": "Разрешён ли пилот 22 июня?\n\nНет, дата не является разрешением. 17 июня обсуждалось предложение начать пилот 22 июня, а 18 июня отдельно уточнено, что срок маскирования не даёт допуска. Начало возможно только после завершения и проверки маскирования и после утверждения матрицы доступа. Оба условия обязательны одновременно.",
+                "occurred_at": "2026-06-19T12:00:00",
+                "score": 0.03200204813108039,
+                "retrieval": {
+                  "dense_rank": 2,
+                  "dense_score": 0.627507284582534,
+                  "bm25_rank": 3,
+                  "bm25_score": 8.180323139567513,
+                  "fusion_score": 0.03200204813108039,
+                  "rerank_rank": 2
+                },
+                "metadata": {
+                  "file": "support-faq.md",
+                  "locator": "support-faq.md#FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?; blocks 7-8",
+                  "section": "FAQ для сопровождения P007 / Разрешён ли пилот 22 июня?",
+                  "version": "1",
+                  "char_end": 323,
+                  "block_end": 8,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 7,
+                  "document_id": "DOC-P007-FAQ",
+                  "published_at": "2026-06-19"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-MINUTES:v1:c0002:3",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Протокол совещания 18 июня 2026 — Протокол совещания 18 июня 2026 года / Готовность пилота",
+              "reference": "P007:documents:DOC-P007-MINUTES:v1:c0002",
+              "excerpt": "Готовность пилота Маскирование данных не завершено; это блокирует начало пилота. Матрица доступа ожидает утверждения. Пилот на 20 синтетических обращениях пока не начат. Сотрудники сохраняют обязанность утверждать ответы.",
+              "data": {
+                "id": "P007:documents:DOC-P007-MINUTES:v1:c0002",
+                "source_table": "documents",
+                "source_id": "DOC-P007-MINUTES:v1:c0002",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-MINUTES",
+                "title": "Протокол совещания 18 июня 2026 — Протокол совещания 18 июня 2026 года / Готовность пилота",
+                "text": "Готовность пилота\n\nМаскирование данных не завершено; это блокирует начало пилота. Матрица доступа ожидает утверждения. Пилот на 20 синтетических обращениях пока не начат. Сотрудники сохраняют обязанность утверждать ответы.",
+                "occurred_at": "2026-06-18T12:00:00",
+                "score": 0.02326468344774981,
+                "retrieval": {
+                  "dense_rank": 9,
+                  "dense_score": 0.5317430978740444,
+                  "bm25_rank": 54,
+                  "bm25_score": 2.797562023888954,
+                  "fusion_score": 0.02326468344774981,
+                  "rerank_rank": 4
+                },
+                "metadata": {
+                  "file": "minutes-2026-06-18.md",
+                  "locator": "minutes-2026-06-18.md#Протокол совещания 18 июня 2026 года / Готовность пилота; blocks 3-4",
+                  "section": "Протокол совещания 18 июня 2026 года / Готовность пилота",
+                  "version": "1",
+                  "char_end": 222,
+                  "block_end": 4,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 3,
+                  "document_id": "DOC-P007-MINUTES",
+                  "published_at": "2026-06-18"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-X02:v1:c0005:4",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Два исключения стендовой проверки — Два исключения стендовой проверки / Стенд / Решение о допуске",
+              "reference": "P007:documents:DOC-P007-X02:v1:c0005",
+              "excerpt": "Решение о допуске `masking_complete=false`. Открытые исключения не позволяют считать маскирование завершённым или выдавать разрешение на пилот. Число 16 относится только к стендовым строкам.",
+              "data": {
+                "id": "P007:documents:DOC-P007-X02:v1:c0005",
+                "source_table": "documents",
+                "source_id": "DOC-P007-X02:v1:c0005",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-X02",
+                "title": "Два исключения стендовой проверки — Два исключения стендовой проверки / Стенд / Решение о допуске",
+                "text": "Решение о допуске\n\n`masking_complete=false`. Открытые исключения не позволяют считать маскирование завершённым или выдавать разрешение на пилот. Число 16 относится только к стендовым строкам.",
+                "occurred_at": "2026-06-18T12:00:00",
+                "score": 0.022424242424242423,
+                "retrieval": {
+                  "dense_rank": 15,
+                  "dense_score": 0.49312987800775565,
+                  "bm25_rank": 50,
+                  "bm25_score": 2.876605352280765,
+                  "fusion_score": 0.022424242424242423,
+                  "rerank_rank": 5
+                },
+                "metadata": {
+                  "file": "expanded/doc-p007-x02a.md",
+                  "locator": "expanded/doc-p007-x02a.md#Два исключения стендовой проверки / Стенд / Решение о допуске; blocks 9-10",
+                  "section": "Два исключения стендовой проверки / Стенд / Решение о допуске",
+                  "version": "1",
+                  "char_end": 191,
+                  "block_end": 10,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 9,
+                  "document_id": "DOC-P007-X02",
+                  "published_at": "2026-06-18"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-MEETING17:v1:c0009:7",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Живой протокол обсуждения 17 июня 2026 года — Живой протокол обсуждения 17 июня 2026 года / Итог и следующий контроль",
+              "reference": "P007:documents:DOC-P007-MEETING17:v1:c0009",
+              "excerpt": "Итог и следующий контроль Итог: пилот на 20 синтетических обращениях не начат; допуск заблокирован невыполненными условиями. Анна ведёт T701 и T702, Игорь готовит техническую проверку, Марина сопровождает матрицу, Павел ведёт T706, Денис — T708. Следующий контроль планируется после стендовой проверки, но сам план не означает её выполнения. Участники отдельно подтвердили, что готовый проект документа не равен согласованному решению, а наличие тестовых обращений не равно началу пилота. Эти оговорки внесены в карто...",
+              "data": {
+                "id": "P007:documents:DOC-P007-MEETING17:v1:c0009",
+                "source_table": "documents",
+                "source_id": "DOC-P007-MEETING17:v1:c0009",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-MEETING17",
+                "title": "Живой протокол обсуждения 17 июня 2026 года — Живой протокол обсуждения 17 июня 2026 года / Итог и следующий контроль",
+                "text": "Итог и следующий контроль\n\nИтог: пилот на 20 синтетических обращениях не начат; допуск заблокирован невыполненными условиями. Анна ведёт T701 и T702, Игорь готовит техническую проверку, Марина сопровождает матрицу, Павел ведёт T706, Денис — T708. Следующий контроль планируется после стендовой проверки, но сам план не означает её выполнения.\n\nУчастники отдельно подтвердили, что готовый проект документа не равен согласованному решению, а наличие тестовых обращений не равно началу пилота. Эти оговорки внесены в карточки поручений и должны сохраняться при передаче материала тестировщикам.",
+                "occurred_at": "2026-06-17T12:00:00",
+                "score": 0.02459499263622975,
+                "retrieval": {
+                  "dense_rank": 10,
+                  "dense_score": 0.5142010756850893,
+                  "bm25_rank": 37,
+                  "bm25_score": 3.417618049194691,
+                  "fusion_score": 0.02459499263622975,
+                  "rerank_rank": 7
+                },
+                "metadata": {
+                  "file": "minutes-2026-06-17.md",
+                  "locator": "minutes-2026-06-17.md#Живой протокол обсуждения 17 июня 2026 года / Итог и следующий контроль; blocks 17-19",
+                  "section": "Живой протокол обсуждения 17 июня 2026 года / Итог и следующий контроль",
+                  "version": "1",
+                  "char_end": 591,
+                  "block_end": 19,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 17,
+                  "document_id": "DOC-P007-MEETING17",
+                  "published_at": "2026-06-17"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:documents:P007:documents:DOC-P007-ACCESS:v1:c0006:2",
+              "tool": "search_project_evidence",
+              "source_type": "documents",
+              "title": "Проект матрицы доступа — Проект матрицы доступа — P007 / Контрольные условия",
+              "reference": "P007:documents:DOC-P007-ACCESS:v1:c0006",
+              "excerpt": "Контрольные условия До допуска Анна должна получить подтверждение завершённого маскирования. Игорь готовит офлайн-проверку шаблонов на 18 июня; результатов на дату документа ещё нет. Марина представляет матрицу на утверждение, а Денис готовит проверку отказа от неподтверждённых ответов. Предложение начать пилот 22 июня обсуждается 17 июня, но не одобрено: срок поручения не является разрешением.",
+              "data": {
+                "id": "P007:documents:DOC-P007-ACCESS:v1:c0006",
+                "source_table": "documents",
+                "source_id": "DOC-P007-ACCESS:v1:c0006",
+                "entity_type": "document",
+                "entity_id": "DOC-P007-ACCESS",
+                "title": "Проект матрицы доступа — Проект матрицы доступа — P007 / Контрольные условия",
+                "text": "Контрольные условия\n\nДо допуска Анна должна получить подтверждение завершённого маскирования. Игорь готовит офлайн-проверку шаблонов на 18 июня; результатов на дату документа ещё нет. Марина представляет матрицу на утверждение, а Денис готовит проверку отказа от неподтверждённых ответов. Предложение начать пилот 22 июня обсуждается 17 июня, но не одобрено: срок поручения не является разрешением.",
+                "occurred_at": "2026-06-17T12:00:00",
+                "score": 0.027205882352941177,
+                "retrieval": {
+                  "dense_rank": 20,
+                  "dense_score": 0.4769887639886886,
+                  "bm25_rank": 8,
+                  "bm25_score": 6.256174301331144,
+                  "fusion_score": 0.027205882352941177,
+                  "rerank_rank": 3
+                },
+                "metadata": {
+                  "file": "access-matrix-draft.md",
+                  "locator": "access-matrix-draft.md#Проект матрицы доступа — P007 / Контрольные условия; blocks 11-12",
+                  "section": "Проект матрицы доступа — P007 / Контрольные условия",
+                  "version": "1",
+                  "char_end": 398,
+                  "block_end": 12,
+                  "synthetic": true,
+                  "char_start": 0,
+                  "block_start": 11,
+                  "document_id": "DOC-P007-ACCESS",
+                  "published_at": "2026-06-17"
+                }
+              }
+            },
+            {
+              "id": "search_project_evidence:task_comments:P007:task_comments:TC7004:5",
+              "tool": "search_project_evidence",
+              "source_type": "task_comments",
+              "title": "Комментарий по ВЕД-702",
+              "reference": "P007:task_comments:TC7004",
+              "excerpt": "Допуск заблокирован незавершённым маскированием и неутверждённой матрицей. Плановый срок 23 июня не разрешает начать пилот.",
+              "data": {
+                "id": "P007:task_comments:TC7004",
+                "source_table": "task_comments",
+                "source_id": "TC7004",
+                "entity_type": "task_comment",
+                "entity_id": "T702",
+                "title": "Комментарий по ВЕД-702",
+                "text": "Допуск заблокирован незавершённым маскированием и неутверждённой матрицей. Плановый срок 23 июня не разрешает начать пилот.",
+                "occurred_at": "2026-06-18T14:00:00",
+                "linked_task_id": "T702",
+                "score": 0.025917252146760345,
+                "retrieval": {
+                  "dense_rank": 45,
+                  "dense_score": 0.4218764398245317,
+                  "bm25_rank": 1,
+                  "bm25_score": 9.561333601163852,
+                  "fusion_score": 0.025917252146760345,
+                  "rerank_rank": 6
+                },
+                "metadata": {
+                  "channel": "трекер",
+                  "task_title": "Утвердить матрицу доступа и допуск к пилоту",
+                  "author_name": "Анна Волкова",
+                  "source_system": "Синтетический трекер"
+                }
+              }
+            },
+            {
+              "id": "get_problem_context:pending_decisions:DEC702:25",
+              "tool": "get_problem_context",
+              "source_type": "pending_decisions",
+              "title": "Матрица доступа подготовлена как проект и ожидает утверждения",
+              "reference": "DEC702",
+              "excerpt": "Матрица доступа подготовлена как проект и ожидает утверждения",
+              "data": {
+                "id": "DEC702",
+                "decision_type": "организационное",
+                "description": "Матрица доступа подготовлена как проект и ожидает утверждения",
+                "decision_owner": "Марина Соколова",
+                "status": "ожидает",
+                "decision_date": "2026-06-18"
+              }
+            },
+            {
+              "id": "get_project_summary:risky_dependencies:DEP701:10",
+              "tool": "get_project_summary",
+              "source_type": "risky_dependencies",
+              "title": "Утверждение матрицы доступа",
+              "reference": "DEP701",
+              "excerpt": null,
+              "data": {
+                "id": "DEP701",
+                "dependency_type": "согласование",
+                "depends_on": "Утверждение матрицы доступа",
+                "owner_team": "Информационная безопасность",
+                "expected_date": "2026-06-23",
+                "status": "ожидает",
+                "criticality": "высокая",
+                "linked_task_id": "T702",
+                "delay_days": 0
+              }
+            },
+            {
+              "id": "get_project_summary:top_risks:RK702:6",
+              "tool": "get_project_summary",
+              "source_type": "top_risks",
+              "title": "Черновик матрицы могут ошибочно принять за утверждение",
+              "reference": "RK702",
+              "excerpt": "Черновик матрицы могут ошибочно принять за утверждение",
+              "data": {
+                "id": "RK702",
+                "risk_type": "проектный",
+                "description": "Черновик матрицы могут ошибочно принять за утверждение",
+                "probability": 3,
+                "impact": 5,
+                "score": 15,
+                "status": "активен",
+                "owner_name": "Марина Соколова",
+                "linked_task_id": "T702"
+              }
+            },
+            {
+              "id": "get_project_summary:blocked_tasks:T702:2",
+              "tool": "get_project_summary",
+              "source_type": "blocked_tasks",
+              "title": "Утвердить матрицу доступа и допуск к пилоту",
+              "reference": "T702",
+              "excerpt": "Маскирование не завершено; матрица доступа не утверждена",
+              "data": {
+                "id": "T702",
+                "external_id": "ВЕД-702",
+                "title": "Утвердить матрицу доступа и допуск к пилоту",
+                "assignee_name": "Анна Волкова",
+                "status": "Заблокирована",
+                "priority": "критический",
+                "planned_due_date": "2026-06-23",
+                "blocker_reason": "Маскирование не завершено; матрица доступа не утверждена",
+                "overdue_days": 0
+              }
+            },
+            {
+              "id": "get_project_summary:blocked_tasks:T711:3",
+              "tool": "get_project_summary",
+              "source_type": "blocked_tasks",
+              "title": "Провести приемку ограниченного пилота",
+              "reference": "T711",
+              "excerpt": "Нет допуска к пилоту и итогового отчета по качеству",
+              "data": {
+                "id": "T711",
+                "external_id": "ВЕД-711",
+                "title": "Провести приемку ограниченного пилота",
+                "assignee_name": "Денис Лебедев",
+                "status": "Заблокирована",
+                "priority": "критический",
+                "planned_due_date": "2026-06-25",
+                "blocker_reason": "Нет допуска к пилоту и итогового отчета по качеству",
+                "overdue_days": 0
+              }
+            },
+            {
+              "id": "get_problem_context:pending_decisions:DEC706:23",
+              "tool": "get_problem_context",
+              "source_type": "pending_decisions",
+              "title": "Для промышленного запуска нужно отдельное подписанное решение; его пока нет",
+              "reference": "DEC706",
+              "excerpt": "Для промышленного запуска нужно отдельное подписанное решение; его пока нет",
+              "data": {
+                "id": "DEC706",
+                "decision_type": "организационное",
+                "description": "Для промышленного запуска нужно отдельное подписанное решение; его пока нет",
+                "decision_owner": "Анна Волкова",
+                "status": "ожидает",
+                "decision_date": "2026-06-18"
+              }
+            },
+            {
+              "id": "get_problem_context:project:P007:0",
+              "tool": "get_problem_context",
+              "source_type": "project",
+              "title": "Помощник сопровождения ведомственных проектов",
+              "reference": "P007",
+              "excerpt": "Ответы сотрудникам по проектным данным с проверяемыми источниками.",
+              "data": {
+                "id": "P007",
+                "name": "Помощник сопровождения ведомственных проектов",
+                "priority": "высокий",
+                "start_date": "2026-06-15",
+                "planned_end_date": "2026-07-15",
+                "business_goal": "Ответы сотрудникам по проектным данным с проверяемыми источниками.",
+                "expected_result": "Пилот на 20 синтетических обращениях после маскирования и утверждения матрицы доступа.",
+                "business_value": "Цель: время проверки с 10 до 4 минут; фактический эффект не измерен."
+              }
+            }
+          ],
+          "claims": [],
+          "verification": {
+            "status": "not_checked",
+            "checked_claims": 0,
+            "supported_claims": 0,
+            "recovery_rounds": 0
+          }
+        },
+        "metrics": {
+          "duration_ms": 32829.0,
+          "ttft_ms": 3394.0,
+          "stages_ms": {
+            "route_request": 4005.8,
+            "rerank": 3982.6,
+            "request_project_context": 4668.5,
+            "select_tools": 8779.4,
+            "finalize_answer": 15316.2
+          },
+          "tool_calls": 3,
+          "tools": [
+            {
+              "call_id": "tool_7d1a5a41a92349ebbef9c51cdadaee5d",
+              "name": "get_problem_context",
+              "status": "success",
+              "duration_ms": 100.7
+            },
+            {
+              "call_id": "tool_9a89b1d193734e118c8ddcf950d99a8d",
+              "name": "get_project_summary",
+              "status": "success",
+              "duration_ms": 104.1
+            },
+            {
+              "call_id": "tool_174d896a433041a78d43eb0546c7c97b",
+              "name": "search_project_evidence",
+              "status": "success",
+              "duration_ms": 4660.1
+            }
+          ],
+          "llm_calls": [
+            {
+              "operation": "RequestRoute",
+              "duration_ms": 3991.5,
+              "ttft_ms": 3394.0,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 482,
+                "output_tokens": 42,
+                "total_tokens": 524
+              }
+            },
+            {
+              "operation": "EvidenceReranking",
+              "duration_ms": 3977.5,
+              "ttft_ms": 1364.5,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 2815,
+                "output_tokens": 262,
+                "total_tokens": 3077
+              }
+            },
+            {
+              "operation": "tool_selection",
+              "duration_ms": 8772.9,
+              "ttft_ms": 3433.3,
+              "status": "completed",
+              "finish_reason": "stop",
+              "usage": {
+                "input_tokens": 16469,
+                "output_tokens": 302,
+                "total_tokens": 16771
+              }
+            },
+            {
+              "operation": "GroundedProjectQuestionLLMAnswer",
+              "duration_ms": 15303.8,
+              "ttft_ms": 3338.0,
+              "status": "completed",
+              "finish_reason": "tool_calls",
+              "usage": {
+                "input_tokens": 15938,
+                "output_tokens": 799,
+                "total_tokens": 16737
+              }
+            }
+          ],
+          "rerank_calls": [
+            {
+              "status": "success",
+              "model": "glm-5.3-flash",
+              "duration_ms": 3982.6,
+              "candidate_count": 16,
+              "returned_count": 8
+            }
+          ],
+          "input_tokens": 35704,
+          "output_tokens": 1405,
+          "total_tokens": 37109,
+          "usage": {
+            "input_tokens": 35704,
+            "output_tokens": 1405,
+            "total_tokens": 37109
+          }
+        }
+      },
+      "elapsed_s": 32.94
+    }
+  ],
+  "error": null
+}

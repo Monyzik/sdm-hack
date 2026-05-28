@@ -1,0 +1,1588 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-05T15:41:17.842234+00:00",
+  "dataset_sha256": "82cb94f9ed913be2f656902f421b4cc9554dbec6d7c5057a0d9a97af89973237",
+  "source_files_sha256": {
+    "data/demo/budget_line_items.csv": "c7ce94a2514579ff456cf83cf8501072bc3ce572c06909bf37f77dff0bca0fcc",
+    "data/demo/budgets.csv": "538a2df3da6b1c35a0faa91dddfd3f77dadefab0282ed7e6a6fbf3bd315cf72a",
+    "data/demo/change_requests.csv": "d2c3a33ee4f4a6d1909dfe004558a357b56664b0bca1d76985b0141cb3f73c60",
+    "data/demo/communication_messages.csv": "0cd35853c9e72d44116d9d05d62d2abaf6f5e1477de295562e28c324705eeab1",
+    "data/demo/communications.csv": "c2021789e2d23b1a21c719efbfe3d4e46050e9e1302ae178a3dcbebe263f335c",
+    "data/demo/decisions.csv": "7db2bd529f13c80649e3bde06b8ab194a20c25e60536a8f52df6cfcc5c1cc23e",
+    "data/demo/dependencies.csv": "652d683964b4ab753a849f2175e1a10722918ea2eb307a62cceae2f33c5b9f2f",
+    "data/demo/milestones.csv": "20bceceff2be88fa64c81b20746cd41568d21d73468ef045089fdf5329523eaf",
+    "data/demo/projects.csv": "403eeeef5cc8d253f54c8778e6d75aebf99ba5035f7ece7a86f505ccdb0cacd2",
+    "data/demo/resource_allocations.csv": "36e7c4df86aab6a193babc125b403b30277e6ffb943d66be9aa897cb1d902ea5",
+    "data/demo/resources.csv": "7cd896b791d9cc20cf0084614857f5ad8aef1fa3803dbc7297ce0fbd26299d49",
+    "data/demo/risks.csv": "f3a171901af5ae12140b08382c20559215d32a36daa29911ca7424ec75a1624f",
+    "data/demo/task_comments.csv": "04a316b524d0f1929e919d95161ef154b55b870b2a5185fdac25e22d1bc89aac",
+    "data/demo/task_dependencies.csv": "666c2065bb2c475a1c07f6de7d9a61af5f694eccc60a8d3ebbd860b04d7e1ee3",
+    "data/demo/task_history.csv": "d4754e2c1fe220740f263fb8ba87bf2f4dc3bd8602671ee3a50d3d6367d8d4e3",
+    "data/demo/tasks.csv": "e775ef7f6549c6534e1895b6ac0fd82481837c8e9ffd72d77c19d039f1c93696",
+    "scripts/generate_interview_data.py": "12a59b3cae547cb9f7a58fc36a3bb1ab06178450a54f063109ff9075fa74b4c6",
+    "scripts/demo_schema.py": "8e7a71b70bf5de2e4516da485920a64ce482ba9200e45f78fa07def698cbb779",
+    "data/interview/scenario.json": "479191d05b0fa4340bb707d9853f5b85ab96692fb900f4d1678fce65b86b6234",
+    "data/interview/conversations.json": "9e1a80fb6549eb4f08abd6f04c334316bfbcea3abe92ff801ad258785962641d",
+    "data/interview/task-comments.json": "9a04c31534cff9e820b7858bb990b48b6086861ec86e69ec4f28413a76b46dc0",
+    "data/interview/manifest.json": "ad1692e4f30be1feea4f9ddf5cbaea622607ac262abd552aa68249c466e56bbc",
+    "data/interview/passport.md": "2b5f8e9e8275bf4411527bfe520f8a675007e8a9708bdaa8121b6e4c28836ec0",
+    "data/interview/procedure.md": "6b1c78ff9c1e1649b5dee2690fee27b1082c6bd2af7e6a0436e5c68b3fbd7c43",
+    "data/interview/minutes-2026-06-18.md": "e1796d675b84806909b39262c48decda39131c29f0dcf1e2e6730f52521d8352",
+    "data/interview/access-matrix-draft.md": "c66fa481a2fed9a3ff41229ec4860d260d3c9d2630bc65e051f869cbcd0592cb",
+    "data/interview/finance-note.md": "a564a0eda2598ef32afd3dc38cc339b2857eb1692fd45bc347c128ef49253ea3",
+    "data/interview/support-faq.md": "f20c98f33ba26a3b22dff47af501eb0834b9215370b5267ac7ae9971c1db01a5",
+    "data/interview/acceptance-checklist.md": "366f771a2b8e30b2fa4ab0d7a7dbe0f345d5d21c5bf7414ce16cbb5642455125",
+    "data/interview/source-register.md": "550f68bf62fbf5455ac83d9be2c4a8988370f28ce65788c28d765d3a67f1af78",
+    "data/interview/architecture-note.md": "71b026505a34038f55687c0c007a10720416f08a4394bf6cae0e8cb3792380e8",
+    "data/interview/quality-plan.md": "3db118c6e7cf5090c47909b4e482ea447e1f873e115f7b9443c942069ec4bb3a",
+    "data/interview/incident-runbook.md": "0a0390b7cfacbe1b742b9bf257b530c2669035ef8c2b54a863614db5658764fe",
+    "data/interview/minutes-2026-06-17.md": "87f4a2211b51633831cc7aa40a7ba4701c3efddfb76fc25302f54aa60d5e76e9"
+  },
+  "corpus_sha256": "ebc4938fe1f7b07ba0230c0cc95051a7e7b2ff1d1f6a3f7fd278d70c68918303",
+  "git_revision": "2c896c97dbb7bcfd1283f0179d6a5c0cc605a30c",
+  "git_dirty": true,
+  "code_files_sha256": {
+    "sdm/__init__.py": "d490624ad89f2d77a560f76812322a6c2963278cd7712157f46fed23ead3421d",
+    "sdm/agents/__init__.py": "c3d5aa3b0c5e27b3086d2c04e27ab9b4b3d57d0d786bb516eda33dfbc8b60362",
+    "sdm/agents/api.py": "455e9442ec2cc100bd04996f62a349bd23d3f2e6369e8478b5a031197a8df2c2",
+    "sdm/agents/budget.py": "9d9c69df1d16a1ef9c134fd974f50294d6805270dc16f7c148f515747d491e57",
+    "sdm/agents/db.py": "8dc1896d4728a8561af8abf645bbc693c562c7f4058091bfcefab9ea7a11ee21",
+    "sdm/agents/llm.py": "201ab749922c57623f9a051b141413659b3f3d74e4a53f9a875481f3389ccc5f",
+    "sdm/agents/llm_config.py": "2756ab916990bc0f37a853d83a3fb09c5f643c1f379f98047f3c62c481a712b1",
+    "sdm/agents/project_qa/__init__.py": "b3a159c0a1bf05e3aba7f4ce59d48d6eccf874293e038850518097e8e35da39e",
+    "sdm/agents/project_qa/agent.py": "6c9d8fb543bc2a5035d1429bd11772534009d7cad004a76f7b9962d94f60ad6a",
+    "sdm/agents/project_qa/graph.py": "68489e0d330361c7d55a81be2ff8a7b6ab47e071462134b2ee2d9da65197ac67",
+    "sdm/agents/project_qa/message_utils.py": "720581b3a5c77f8f5708410b4a52feeda9ac1f466c0b24e5a107fd6b7f4e07d1",
+    "sdm/agents/project_qa/nodes/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdm/agents/project_qa/nodes/context.py": "552ca561ccf2678e0258da2ac0b3bea8781fee2ca52fc467d1d23e5d12bd0682",
+    "sdm/agents/project_qa/nodes/final.py": "720be9e6545de25fdec28b46aaf5e431039c977de6b5ede6cc7031251a6db40e",
+    "sdm/agents/project_qa/nodes/model.py": "a8de12b5029c6d2b98fd83b8f3b9c69c1b52a2f23ef8244c3ef443e4652e5d7d",
+    "sdm/agents/project_qa/nodes/router.py": "2c34e3caf333dd1f3a322b167a74422f6d39fc66440116fdac31b3e29f672824",
+    "sdm/agents/project_qa/nodes/tool_call.py": "ed3377a83048adab7b3fd23e9ff192db92cc5e83f23af02cb2bcaf8dca520037",
+    "sdm/agents/project_qa/prompts.py": "dade40947a325aaee307fc083f8530d1757f690c2b38efbd7ab644c2695d0058",
+    "sdm/agents/project_qa/schemas.py": "163134bf3583a45616609f909d7a02189d2c89ef03e3a75243be539df3ab4acc",
+    "sdm/agents/project_qa/state.py": "92c96a3c34ba9daee5b6aa981dd8d913c63bedb79a93fed7e7ad480d9c53380c",
+    "sdm/agents/prompt_utils.py": "87b5525b128bf1b914bf86eb7383045d91abcb938fcd7a0b2894421a9c1a6de8",
+    "sdm/agents/routes/__init__.py": "d1f02f4a68171150e95808c28516c7261d7b0f72d757ee81eb01e186ea5768c1",
+    "sdm/agents/routes/assistance.py": "abf6085fc5af31516f256027b5fbd29234f5409ce4dd21fbb28a1ad1442c0ffb",
+    "sdm/agents/streaming.py": "1659472627e48ad765bc745c5970839b6817ebeda82f2fd397cd90ea21064e8d",
+    "sdm/agents/text.py": "d0d573207ecc3a0419875df256578a7c9dce69d1f582a2ce845aa4f6b7158385",
+    "sdm/agents/tools/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "sdm/agents/tools/project_facts/__init__.py": "ba7e343a4d2a35c306142b054bd9bbdd89da71bd0a3c134fad3dee7e536571a7",
+    "sdm/agents/tools/project_facts/executor.py": "3253c3f1b29e59fc022420cc069dbe070193683f2a2d603745b887ac99984c16",
+    "sdm/agents/tools/project_facts/factory.py": "3b0db46a85ef50f5ff90b89a869f87c723058fa67e267a50b83a5d9e3fa7dc82",
+    "sdm/agents/tools/project_facts/filters.py": "d1dcb853dbb5877905276ffe8d99d6bfe8d0522880cd593517d6cc6d71605764",
+    "sdm/agents/tools/project_facts/formatting.py": "b6e004f85978a847bfe55f53fa7a7b157cfacc382945bd692bfa5942b3765ffa",
+    "sdm/agents/tools/project_facts/schemas.py": "faafa3279b1af0483143374859f4dca7256573b1d7a1f373857ceedc575e1e06",
+    "sdm/agents/tools/project_facts/sources.py": "9e4e51ecf639fdca07e7f89eaa8b7bfe5172d1a4f45909ed9ba93b5fe15152e2",
+    "sdm/backend/__init__.py": "653abd1d85d47cd3811f08cf1484c6da47a03ff084939bea2b31ce3eab800c76",
+    "sdm/backend/api/__init__.py": "809576a4040a98883ff6cdf0988a744736010b6ee8924c2bca86883a9bc51d97",
+    "sdm/backend/api/project_summary.py": "5bb6115e255dcc02a6ba3bed227abd57443e669b785f94ef83414511809854a1",
+    "sdm/backend/core/__init__.py": "ced47bb79b65e131f0ecd2464ea0c62cb91277ce4d8a6f3450b5f4a9ad2d5bf4",
+    "sdm/backend/core/config.py": "c4ea2a887baf2df78ddf378d20664dd813adfe560a87c47e8f4d855adbc68a83",
+    "sdm/backend/database/__init__.py": "2f45f03e47994332cf5368fb8375f0712b65885ac1459155e5b80a18e212ffbe",
+    "sdm/backend/database/init_db.py": "881fff0d7a6acbe0deabcc1f51e0d56ad8c175b59ce621d257bf398faff73cd6",
+    "sdm/backend/database/models.py": "87fbe8c1188535d7c88271425fd4c4a977d20478c2a7d3faae4cc718397a29e0",
+    "sdm/backend/database/project_import.py": "e89440c5ccb959afcc76d820bdad01d0b97752ae3d84d9f972058ce2c4d52687",
+    "sdm/backend/database/session.py": "7ebc29d2fbde273736dc4bc42996e0d62615a4649814c128f2a54ea64bde4b5a",
+    "sdm/backend/dependencies.py": "3955919c60286870a17a8cdf6758cf459d88ee4e3bb99633f69aa2a3862acc2f",
+    "sdm/backend/main.py": "99e89a8865fb6aa5cd0bbda5e58a4caccd3d9e97d60b615c2494d3ec6dfa9919",
+    "sdm/backend/schemas/__init__.py": "76a9d9e59c3d6ae5e587e65fce24c7cd7c93e0d30032b64f65f5ad218244c7fa",
+    "sdm/backend/schemas/project_summary.py": "7caaccd576487916acc7f073371048bc95d6dd35ae2fa578027280ffa21d05c1",
+    "sdm/backend/schemas/retrieval.py": "5acf3a1d60b3cda91389b7b65acc6669105d25fce71d13b3f63b8e9b1db9eee8",
+    "sdm/backend/services/__init__.py": "4a60f6630ce69ecd78ba7a40bf0ccece1b211b5e530cd9703870c32ef539e472",
+    "sdm/backend/services/data_classes.py": "903e87d937df313b6001b800c154884510c872d2b53c335e11f9a45e14426c76",
+    "sdm/backend/services/document_evidence.py": "9eafcbd544ca7c5e2eaf3f95862e2fa1f983e8d376cd791cf5c02cc3d4f1479a",
+    "sdm/backend/services/embeddings/__init__.py": "26321a75b38b7fe68610a8a960e37130b9c10634f72ae3a612690c992d28cd0e",
+    "sdm/backend/services/embeddings/client.py": "3155781b5575bddba5774d5f4da5443d8a0e471672ea3806fc3c5f615a22bd42",
+    "sdm/backend/services/embeddings/config.py": "523f302051be3f4a3fc0607015b753369bb30d01a3f6159c1f765baf8cfae9df",
+    "sdm/backend/services/metrics.py": "e2042a81f499e908d3d22c118c2d792627057dcddbb94cce4dd4182cc1e1c053",
+    "sdm/backend/services/project_evidence.py": "b430b69353a1939a2888d6c105e8ca1aba3d72ce39cce6c370613d7ebf0ba9a4",
+    "sdm/backend/services/project_summary_repository.py": "8769033186c359ae02bb1fae27da7ab3141b67e623d21d441ebde8dc51c46806",
+    "sdm/backend/services/project_summary_service.py": "9430b5f615163260e6f6f6f7bbe4370a2a63992015e049b9e8fd475b8231bea6",
+    "sdm/backend/services/protocols.py": "5070fcccbd184c10632366de6353309acaf025cec9cde153dc186b8752b514e1",
+    "sdm/backend/services/ranking.py": "5391d095bfacc65668a4aefdeb05b63b184c1c43de18553d85d010b47ebdd724",
+    "sdm/backend/services/retrieval.py": "0fbf22ba98e465ec25261a88d95698d15d90a375151b75c03805709923d2e990",
+    "sdm/evaluation/__init__.py": "879365495d3f109bfd41c8ca8c9544d16bf1715953a986c86a5886a7c711ee67",
+    "sdm/evaluation/__main__.py": "74fff10eb2bd330c92909b27a5a9ae84f41b3f268a5c04f51f849276919f19c6",
+    "sdm/evaluation/runner.py": "e27bc6ca7d803f409e1c267fc9aeda04f098bca61f3f4438e554a5cbae6664b7"
+  },
+  "code_sha256": "afd0a9cf1672839fb6b6622d2e0f6861dc46310cf4d7314a7d60567153fe93c6",
+  "models": {
+    "LLM_MODEL": "glm-5.3-flash",
+    "EMBEDDING_MODEL": "qwen/qwen3-embedding-8b"
+  },
+  "index_preflight": "not performed; first retrieval may include cold index work",
+  "qa_review_status": "unreviewed",
+  "retrieval_top_k": 8,
+  "case_count": 60,
+  "qa_case_count": 0,
+  "qa_limit": null,
+  "selected_case_ids": [
+    "E001",
+    "E002",
+    "E003",
+    "E004",
+    "E005",
+    "E006",
+    "E007",
+    "E008",
+    "E009",
+    "E010",
+    "E011",
+    "E012",
+    "E013",
+    "E014",
+    "E015",
+    "E016",
+    "E017",
+    "E018",
+    "E019",
+    "E020",
+    "E021",
+    "E022",
+    "E023",
+    "E024",
+    "E025",
+    "E026",
+    "E027",
+    "E028",
+    "E029",
+    "E030",
+    "E031",
+    "E032",
+    "E033",
+    "E034",
+    "E035",
+    "E036",
+    "E037",
+    "E038",
+    "E039",
+    "E040",
+    "E041",
+    "E042",
+    "E043",
+    "E044",
+    "E045",
+    "E046",
+    "E047",
+    "E048",
+    "E049",
+    "E050",
+    "E051",
+    "E052",
+    "E053",
+    "E054",
+    "E055",
+    "E056",
+    "E057",
+    "E058",
+    "E059",
+    "E060"
+  ],
+  "incomplete": false,
+  "skip_qa": true,
+  "retrieval_modes": [
+    "dense",
+    "bm25",
+    "hybrid"
+  ],
+  "retrieval_configuration": {
+    "top_k": 8,
+    "candidate_limit": 40,
+    "candidate_limit_rule": "min(60, max(top_k * 5, 20))",
+    "dense": "pgvector cosine over eligible scoped chunks",
+    "bm25": "independent lexical ranking over all eligible scoped chunks",
+    "hybrid": "reciprocal rank fusion: sum(1 / (60 + rank))",
+    "rrf_k": 60,
+    "qa_retrieval_mode": "hybrid (agent default)",
+    "configuration_kind": "expected contract; actual response diagnostics in raw.jsonl"
+  },
+  "mode_order_policy": "left rotation by zero-based selected-case index; QA last",
+  "planned_mode_order": [
+    {
+      "case_id": "E001",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E002",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E003",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E004",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E005",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E006",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E007",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E008",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E009",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E010",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E011",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E012",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E013",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E014",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E015",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E016",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E017",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E018",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E019",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E020",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E021",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E022",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E023",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E024",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E025",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E026",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E027",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E028",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E029",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E030",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E031",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E032",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E033",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E034",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E035",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E036",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E037",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E038",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E039",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E040",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E041",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E042",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E043",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E044",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E045",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E046",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E047",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E048",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E049",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E050",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E051",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E052",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E053",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E054",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E055",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E056",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E057",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    },
+    {
+      "case_id": "E058",
+      "modes": [
+        "dense",
+        "bm25",
+        "hybrid"
+      ]
+    },
+    {
+      "case_id": "E059",
+      "modes": [
+        "bm25",
+        "hybrid",
+        "dense"
+      ]
+    },
+    {
+      "case_id": "E060",
+      "modes": [
+        "hybrid",
+        "dense",
+        "bm25"
+      ]
+    }
+  ],
+  "actual_request_order": [
+    {
+      "request_index": 0,
+      "case_id": "E001",
+      "mode": "dense"
+    },
+    {
+      "request_index": 1,
+      "case_id": "E001",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 2,
+      "case_id": "E001",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 3,
+      "case_id": "E002",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 4,
+      "case_id": "E002",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 5,
+      "case_id": "E002",
+      "mode": "dense"
+    },
+    {
+      "request_index": 6,
+      "case_id": "E003",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 7,
+      "case_id": "E003",
+      "mode": "dense"
+    },
+    {
+      "request_index": 8,
+      "case_id": "E003",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 9,
+      "case_id": "E004",
+      "mode": "dense"
+    },
+    {
+      "request_index": 10,
+      "case_id": "E004",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 11,
+      "case_id": "E004",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 12,
+      "case_id": "E005",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 13,
+      "case_id": "E005",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 14,
+      "case_id": "E005",
+      "mode": "dense"
+    },
+    {
+      "request_index": 15,
+      "case_id": "E006",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 16,
+      "case_id": "E006",
+      "mode": "dense"
+    },
+    {
+      "request_index": 17,
+      "case_id": "E006",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 18,
+      "case_id": "E007",
+      "mode": "dense"
+    },
+    {
+      "request_index": 19,
+      "case_id": "E007",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 20,
+      "case_id": "E007",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 21,
+      "case_id": "E008",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 22,
+      "case_id": "E008",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 23,
+      "case_id": "E008",
+      "mode": "dense"
+    },
+    {
+      "request_index": 24,
+      "case_id": "E009",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 25,
+      "case_id": "E009",
+      "mode": "dense"
+    },
+    {
+      "request_index": 26,
+      "case_id": "E009",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 27,
+      "case_id": "E010",
+      "mode": "dense"
+    },
+    {
+      "request_index": 28,
+      "case_id": "E010",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 29,
+      "case_id": "E010",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 30,
+      "case_id": "E011",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 31,
+      "case_id": "E011",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 32,
+      "case_id": "E011",
+      "mode": "dense"
+    },
+    {
+      "request_index": 33,
+      "case_id": "E012",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 34,
+      "case_id": "E012",
+      "mode": "dense"
+    },
+    {
+      "request_index": 35,
+      "case_id": "E012",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 36,
+      "case_id": "E013",
+      "mode": "dense"
+    },
+    {
+      "request_index": 37,
+      "case_id": "E013",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 38,
+      "case_id": "E013",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 39,
+      "case_id": "E014",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 40,
+      "case_id": "E014",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 41,
+      "case_id": "E014",
+      "mode": "dense"
+    },
+    {
+      "request_index": 42,
+      "case_id": "E015",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 43,
+      "case_id": "E015",
+      "mode": "dense"
+    },
+    {
+      "request_index": 44,
+      "case_id": "E015",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 45,
+      "case_id": "E016",
+      "mode": "dense"
+    },
+    {
+      "request_index": 46,
+      "case_id": "E016",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 47,
+      "case_id": "E016",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 48,
+      "case_id": "E017",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 49,
+      "case_id": "E017",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 50,
+      "case_id": "E017",
+      "mode": "dense"
+    },
+    {
+      "request_index": 51,
+      "case_id": "E018",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 52,
+      "case_id": "E018",
+      "mode": "dense"
+    },
+    {
+      "request_index": 53,
+      "case_id": "E018",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 54,
+      "case_id": "E019",
+      "mode": "dense"
+    },
+    {
+      "request_index": 55,
+      "case_id": "E019",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 56,
+      "case_id": "E019",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 57,
+      "case_id": "E020",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 58,
+      "case_id": "E020",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 59,
+      "case_id": "E020",
+      "mode": "dense"
+    },
+    {
+      "request_index": 60,
+      "case_id": "E021",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 61,
+      "case_id": "E021",
+      "mode": "dense"
+    },
+    {
+      "request_index": 62,
+      "case_id": "E021",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 63,
+      "case_id": "E022",
+      "mode": "dense"
+    },
+    {
+      "request_index": 64,
+      "case_id": "E022",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 65,
+      "case_id": "E022",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 66,
+      "case_id": "E023",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 67,
+      "case_id": "E023",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 68,
+      "case_id": "E023",
+      "mode": "dense"
+    },
+    {
+      "request_index": 69,
+      "case_id": "E024",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 70,
+      "case_id": "E024",
+      "mode": "dense"
+    },
+    {
+      "request_index": 71,
+      "case_id": "E024",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 72,
+      "case_id": "E025",
+      "mode": "dense"
+    },
+    {
+      "request_index": 73,
+      "case_id": "E025",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 74,
+      "case_id": "E025",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 75,
+      "case_id": "E026",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 76,
+      "case_id": "E026",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 77,
+      "case_id": "E026",
+      "mode": "dense"
+    },
+    {
+      "request_index": 78,
+      "case_id": "E027",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 79,
+      "case_id": "E027",
+      "mode": "dense"
+    },
+    {
+      "request_index": 80,
+      "case_id": "E027",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 81,
+      "case_id": "E028",
+      "mode": "dense"
+    },
+    {
+      "request_index": 82,
+      "case_id": "E028",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 83,
+      "case_id": "E028",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 84,
+      "case_id": "E029",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 85,
+      "case_id": "E029",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 86,
+      "case_id": "E029",
+      "mode": "dense"
+    },
+    {
+      "request_index": 87,
+      "case_id": "E030",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 88,
+      "case_id": "E030",
+      "mode": "dense"
+    },
+    {
+      "request_index": 89,
+      "case_id": "E030",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 90,
+      "case_id": "E031",
+      "mode": "dense"
+    },
+    {
+      "request_index": 91,
+      "case_id": "E031",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 92,
+      "case_id": "E031",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 93,
+      "case_id": "E032",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 94,
+      "case_id": "E032",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 95,
+      "case_id": "E032",
+      "mode": "dense"
+    },
+    {
+      "request_index": 96,
+      "case_id": "E033",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 97,
+      "case_id": "E033",
+      "mode": "dense"
+    },
+    {
+      "request_index": 98,
+      "case_id": "E033",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 99,
+      "case_id": "E034",
+      "mode": "dense"
+    },
+    {
+      "request_index": 100,
+      "case_id": "E034",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 101,
+      "case_id": "E034",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 102,
+      "case_id": "E035",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 103,
+      "case_id": "E035",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 104,
+      "case_id": "E035",
+      "mode": "dense"
+    },
+    {
+      "request_index": 105,
+      "case_id": "E036",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 106,
+      "case_id": "E036",
+      "mode": "dense"
+    },
+    {
+      "request_index": 107,
+      "case_id": "E036",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 108,
+      "case_id": "E037",
+      "mode": "dense"
+    },
+    {
+      "request_index": 109,
+      "case_id": "E037",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 110,
+      "case_id": "E037",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 111,
+      "case_id": "E038",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 112,
+      "case_id": "E038",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 113,
+      "case_id": "E038",
+      "mode": "dense"
+    },
+    {
+      "request_index": 114,
+      "case_id": "E039",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 115,
+      "case_id": "E039",
+      "mode": "dense"
+    },
+    {
+      "request_index": 116,
+      "case_id": "E039",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 117,
+      "case_id": "E040",
+      "mode": "dense"
+    },
+    {
+      "request_index": 118,
+      "case_id": "E040",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 119,
+      "case_id": "E040",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 120,
+      "case_id": "E041",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 121,
+      "case_id": "E041",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 122,
+      "case_id": "E041",
+      "mode": "dense"
+    },
+    {
+      "request_index": 123,
+      "case_id": "E042",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 124,
+      "case_id": "E042",
+      "mode": "dense"
+    },
+    {
+      "request_index": 125,
+      "case_id": "E042",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 126,
+      "case_id": "E043",
+      "mode": "dense"
+    },
+    {
+      "request_index": 127,
+      "case_id": "E043",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 128,
+      "case_id": "E043",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 129,
+      "case_id": "E044",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 130,
+      "case_id": "E044",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 131,
+      "case_id": "E044",
+      "mode": "dense"
+    },
+    {
+      "request_index": 132,
+      "case_id": "E045",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 133,
+      "case_id": "E045",
+      "mode": "dense"
+    },
+    {
+      "request_index": 134,
+      "case_id": "E045",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 135,
+      "case_id": "E046",
+      "mode": "dense"
+    },
+    {
+      "request_index": 136,
+      "case_id": "E046",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 137,
+      "case_id": "E046",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 138,
+      "case_id": "E047",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 139,
+      "case_id": "E047",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 140,
+      "case_id": "E047",
+      "mode": "dense"
+    },
+    {
+      "request_index": 141,
+      "case_id": "E048",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 142,
+      "case_id": "E048",
+      "mode": "dense"
+    },
+    {
+      "request_index": 143,
+      "case_id": "E048",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 144,
+      "case_id": "E049",
+      "mode": "dense"
+    },
+    {
+      "request_index": 145,
+      "case_id": "E049",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 146,
+      "case_id": "E049",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 147,
+      "case_id": "E050",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 148,
+      "case_id": "E050",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 149,
+      "case_id": "E050",
+      "mode": "dense"
+    },
+    {
+      "request_index": 150,
+      "case_id": "E051",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 151,
+      "case_id": "E051",
+      "mode": "dense"
+    },
+    {
+      "request_index": 152,
+      "case_id": "E051",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 153,
+      "case_id": "E052",
+      "mode": "dense"
+    },
+    {
+      "request_index": 154,
+      "case_id": "E052",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 155,
+      "case_id": "E052",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 156,
+      "case_id": "E053",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 157,
+      "case_id": "E053",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 158,
+      "case_id": "E053",
+      "mode": "dense"
+    },
+    {
+      "request_index": 159,
+      "case_id": "E054",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 160,
+      "case_id": "E054",
+      "mode": "dense"
+    },
+    {
+      "request_index": 161,
+      "case_id": "E054",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 162,
+      "case_id": "E055",
+      "mode": "dense"
+    },
+    {
+      "request_index": 163,
+      "case_id": "E055",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 164,
+      "case_id": "E055",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 165,
+      "case_id": "E056",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 166,
+      "case_id": "E056",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 167,
+      "case_id": "E056",
+      "mode": "dense"
+    },
+    {
+      "request_index": 168,
+      "case_id": "E057",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 169,
+      "case_id": "E057",
+      "mode": "dense"
+    },
+    {
+      "request_index": 170,
+      "case_id": "E057",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 171,
+      "case_id": "E058",
+      "mode": "dense"
+    },
+    {
+      "request_index": 172,
+      "case_id": "E058",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 173,
+      "case_id": "E058",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 174,
+      "case_id": "E059",
+      "mode": "bm25"
+    },
+    {
+      "request_index": 175,
+      "case_id": "E059",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 176,
+      "case_id": "E059",
+      "mode": "dense"
+    },
+    {
+      "request_index": 177,
+      "case_id": "E060",
+      "mode": "hybrid"
+    },
+    {
+      "request_index": 178,
+      "case_id": "E060",
+      "mode": "dense"
+    },
+    {
+      "request_index": 179,
+      "case_id": "E060",
+      "mode": "bm25"
+    }
+  ],
+  "completed_records": 180,
+  "finished_at": "2026-09-05T15:41:46.520842+00:00"
+}

@@ -1,0 +1,5 @@
+mode,cases,failures,rerank_fallback_count,group_recall_at_8,mrr,success_count,success_duration_p50_ms,success_duration_p95_ms,failure_duration_p50_ms,failure_duration_p95_ms,qa_ttft_p50_ms,qa_ttft_p95_ms
+bm25,60,0,0,0.78125,0.6592985842985843,60,29.985,53.57849999999999,,,,
+dense,60,0,0,0.7708333333333334,0.6427927927927928,60,233.72,488.51249999999993,,,,
+hybrid,60,0,0,0.84375,0.6842342342342342,60,225.265,323.2699999999999,,,,
+hybrid_rerank,60,0,0,0.9270833333333334,0.8912483912483912,60,6145.92,9094.463,,,,

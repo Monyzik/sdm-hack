@@ -1,0 +1,38 @@
+{
+  "document_files": 162,
+  "independent_documents": 150,
+  "new_documents": 126,
+  "document_chunks": 346,
+  "threads": 48,
+  "messages": 216,
+  "comments": 80,
+  "evaluation_cases": 300,
+  "qa_cases": 33,
+  "negative_cases": 33,
+  "new_doc_words_min": 96,
+  "new_doc_words_max": 122,
+  "project_id": "P007",
+  "snapshot": "2026-06-19",
+  "corpus_version": "3",
+  "expected_index_rows": 769,
+  "offline_tests_passed": 177,
+  "ruff": "passed",
+  "old_document_files_preserved": 36,
+  "old_evaluation_cases_preserved": 180,
+  "new_cases_without_workstream_codes": 93,
+  "label_status": "Agent-authored synthetic labels with exact evidence quotes and independent peer-agent review, not human validated.",
+  "peer_reviews": [
+    "data-peer-review.md",
+    "operations-peer-review.md",
+    "quality-peer-review.md"
+  ],
+  "index": {
+    "project_id": "P007",
+    "chunks_indexed": 769,
+    "embedding_model": "qwen/qwen3-embedding-8b",
+    "embedding_dimensions": 4096,
+    "reused_embeddings": 595,
+    "new_embeddings": 174,
+    "cache_policy": "Exact embedding-input SHA-256 and provider profile match; captured candidates matched every persisted field before reuse."
+  }
+}
