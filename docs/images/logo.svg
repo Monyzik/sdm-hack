@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">Project QA</title>
+  <desc id="description">Документ и связанные источники внутри диалога</desc>
+  <defs>
+    <linearGradient id="background" x1="24" y1="12" x2="140" y2="152" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#3730A3"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="49" y1="35" x2="102" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E0E7FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="144" height="144" rx="40" fill="url(#background)"/>
+  <rect x="8.5" y="8.5" width="143" height="143" rx="39.5" stroke="#FFFFFF" stroke-opacity="0.16"/>
+  <path d="M37 56C37 49.3726 42.3726 44 49 44H97C103.627 44 109 49.3726 109 56V104C109 110.627 103.627 116 97 116H64L44 128V116H49C42.3726 116 37 110.627 37 104V56Z" fill="#A5B4FC" fill-opacity="0.24"/>
+  <rect x="49" y="34" width="68" height="76" rx="14" fill="url(#paper)"/>
+  <path d="M64 53H93M64 65H85" stroke="#6366F1" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64 89L82 80L100 90" stroke="#818CF8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="64" cy="89" r="5" fill="#4F46E5"/>
+  <circle cx="82" cy="80" r="5" fill="#4F46E5"/>
+  <circle cx="100" cy="90" r="5" fill="#4F46E5"/>
+  <circle cx="115" cy="111" r="22" fill="#312E81"/>
+  <circle cx="115" cy="111" r="17" fill="#A7F3D0"/>
+  <path d="M107 111L112.5 116.5L123 106" stroke="#065F46" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
