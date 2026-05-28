@@ -1,36 +1,50 @@
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Awaitable, Callable
+from typing import Any, Literal
 
 from sdm.agents.llm import LLMAdapter
+from sdm.agents.prompt_utils import prompt_data
+from sdm.agents.streaming import streamed_stage
 
-from ..message_utils import _ai_message_from_openai, _last_message, _messages_to_openai, _state_value
+from ..messages import _ai_message_from_openai, _messages_to_openai
 from ..state import ProjectQuestionState
 
 
-def call_model_node(*, llm: LLMAdapter, tools: list[dict[str, Any]], temperature: float) -> Any:
-    async def call_model(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
-        needs_project_tools = _state_value(state, "needs_project_tools", True)
-        used_tools = _state_value(state, "used_tools", [])
-        response = await llm.chat_completion(
-            messages=_messages_to_openai(_state_value(state, "messages", [])),
-            tools=tools,
-            tool_choice="required" if needs_project_tools and not used_tools else "auto",
-            temperature=temperature,
-            response_format={"type": "json_object"},
-        )
-        message = response.choices[0].message
-        ai_message = _ai_message_from_openai(message)
-        return {
-            "messages": [ai_message],
-            "final_content": None if ai_message.tool_calls else (message.content or "{}"),
-        }
+def call_model_node(
+    *, llm: LLMAdapter, tools: list[dict[str, Any]], temperature: float
+) -> Callable[[ProjectQuestionState], Awaitable[ProjectQuestionState]]:
+    async def call_model(state: ProjectQuestionState) -> ProjectQuestionState:
+        with streamed_stage("select_tools"):
+            messages = _messages_to_openai(state.get("messages", []))
+            if state.get("tool_sources"):
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": prompt_data(
+                            "available_evidence_sources",
+                            [
+                                {key: source.get(key) for key in ("id", "reference", "title")}
+                                for source in state["tool_sources"]
+                            ],
+                        ),
+                    }
+                )
+            response = await llm.chat_completion(
+                messages=messages,
+                tools=tools,
+                tool_choice="auto",
+                temperature=temperature,
+                stream=state.get("stream_response", False),
+            )
+            ai_message = _ai_message_from_openai(response.choices[0].message)
+        return {"messages": [ai_message], "final_content": None}
 
     return call_model
 
 
-def route_after_model(state: ProjectQuestionState | dict[str, Any]) -> str:
-    last_message = _last_message(_state_value(state, "messages", []))
-    if getattr(last_message, "tool_calls", None):
+def route_after_model(state: ProjectQuestionState) -> Literal["tools", "finalize"]:
+    messages = state.get("messages", [])
+    if messages and getattr(messages[-1], "tool_calls", None):
         return "tools"
     return "finalize"

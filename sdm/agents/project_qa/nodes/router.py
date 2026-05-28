@@ -1,43 +1,46 @@
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Awaitable, Callable
+from typing import Literal
 
 from sdm.agents.llm import LLMAdapter
+from sdm.agents.prompt_utils import prompt_data
+from sdm.agents.streaming import streamed_stage
 
-from ..message_utils import _state_value
 from ..prompts import REQUEST_ROUTER_PROMPT
 from ..schemas import RequestRoute
 from ..state import ProjectQuestionState
 
 
-def route_request_node(*, llm: LLMAdapter) -> Any:
-    async def route_request(state: ProjectQuestionState | dict[str, Any]) -> dict[str, Any]:
-        route = await llm.parse_pydantic(
-            response_model=RequestRoute,
-            system_prompt=REQUEST_ROUTER_PROMPT,
-            user_prompt=(
-                f"project_id={_state_value(state, 'project_id')}, "
-                f"as_of={_state_value(state, 'as_of')}\n"
-                f"{_state_value(state, 'conversation_context', '')}"
-                f"Сообщение пользователя: {_state_value(state, 'question')}"
-            ),
-            temperature=0,
-        )
-
-        intent = route.intent
-        if intent not in {"small_talk", "project_question", "out_of_scope"}:
-            intent = "project_question"
-        needs_project_tools = intent == "project_question" and bool(route.needs_project_tools)
+def route_request_node(
+    *, llm: LLMAdapter
+) -> Callable[[ProjectQuestionState], Awaitable[ProjectQuestionState]]:
+    async def route_request(state: ProjectQuestionState) -> ProjectQuestionState:
+        with streamed_stage("route_request"):
+            route = await llm.parse_pydantic(
+                response_model=RequestRoute,
+                system_prompt=REQUEST_ROUTER_PROMPT,
+                user_prompt=prompt_data(
+                    "request_to_classify",
+                    {
+                        "project_id": state["project_id"],
+                        "as_of": state["as_of"],
+                        "conversation_context": state.get("conversation_context", ""),
+                        "question": state["question"],
+                    },
+                ),
+                temperature=0,
+                stream=state.get("stream_response", False),
+            )
 
         return {
-            "request_intent": intent,
-            "needs_project_tools": needs_project_tools,
+            "request_intent": route.intent,
         }
 
     return route_request
 
 
-def route_after_request_router(state: ProjectQuestionState | dict[str, Any]) -> str:
-    if _state_value(state, "needs_project_tools", True):
-        return "model"
+def route_after_request_router(state: ProjectQuestionState) -> Literal["context", "finalize"]:
+    if state.get("request_intent", "project_question") == "project_question":
+        return "context"
     return "finalize"

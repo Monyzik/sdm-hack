@@ -15,8 +15,8 @@ asyncpg==0.31.0
 
 # LLM и графы агентов
 openai==2.38.0
-langchain-core
-langgraph
+langchain-core==1.4.0
+langgraph==1.2.2
 
 # Данные и документы
 pandas==3.0.3

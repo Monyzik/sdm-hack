@@ -1,4 +1,7 @@
 .git/
+.env
+.env.*
+!.env.example
 .idea/
 .pytest_cache/
 .mypy_cache/

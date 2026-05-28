@@ -9,6 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY sdm /app/sdm
+COPY data/interview /app/data/interview
 
 EXPOSE 8000
 

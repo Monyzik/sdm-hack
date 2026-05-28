@@ -25,10 +25,14 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
-      YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-}
-      YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}
-      YANDEX_EMBEDDING_DOC_MODEL: ${YANDEX_EMBEDDING_DOC_MODEL:-text-search-doc/latest}
-      YANDEX_EMBEDDING_QUERY_MODEL: ${YANDEX_EMBEDDING_QUERY_MODEL:-text-search-query/latest}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-8B}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+      EMBEDDING_QUERY_INSTRUCTION: ${EMBEDDING_QUERY_INSTRUCTION-Given a web search query, retrieve relevant passages that answer the query}
+      EMBEDDING_TIMEOUT_SECONDS: ${EMBEDDING_TIMEOUT_SECONDS:-30}
+      EMBEDDING_MAX_RETRIES: ${EMBEDDING_MAX_RETRIES:-3}
+      EMBEDDING_RETRY_BASE_DELAY_SECONDS: ${EMBEDDING_RETRY_BASE_DELAY_SECONDS:-1.0}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     depends_on:
@@ -43,24 +47,40 @@ services:
       dockerfile: agents.Dockerfile
     container_name: sdm_hack_agents
     restart: unless-stopped
+    # Даём текущему ответу завершиться в пределах общего лимита 180 секунд.
+    stop_grace_period: 190s
     environment:
-      BACKEND_API_URL: ${BACKEND_API_URL:-http://backend:8000}
       DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://sdm_hack:sdm_hack_password@postgres:5432/sdm_hack}
       AGENTS_CORS_ORIGINS: ${AGENTS_CORS_ORIGINS:-http://localhost:5180,http://127.0.0.1:5180}
-      LLM_PROVIDER: ${LLM_PROVIDER:-yandex}
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-}
-      POLZA_API_KEY: ${POLZA_API_KEY:-}
-      POLZA_BASE_URL: ${POLZA_BASE_URL:-https://polza.ai/api/v1}
-      POLZA_MODEL: ${POLZA_MODEL:-}
-      YANDEX_CLOUD_FOLDER: ${YANDEX_CLOUD_FOLDER:-}
-      YANDEX_CLOUD_API_KEY: ${YANDEX_CLOUD_API_KEY:-}
-      YANDEX_CLOUD_MODEL: ${YANDEX_CLOUD_MODEL:-}
+      AGENTS_REQUEST_BUDGET_SECONDS: ${AGENTS_REQUEST_BUDGET_SECONDS:-180}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_RESPONSE_FORMAT: ${LLM_RESPONSE_FORMAT:-tool_calling}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-60}
+      LLM_MAX_OUTPUT_TOKENS: ${LLM_MAX_OUTPUT_TOKENS:-8192}
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-2}
+      LLM_SEND_TEMPERATURE: ${LLM_SEND_TEMPERATURE:-false}
+      LLM_REASONING_EFFORT: ${LLM_REASONING_EFFORT:-}
+      LLM_THINKING_MODE: ${LLM_THINKING_MODE:-}
+      LLM_TOOL_STREAM: ${LLM_TOOL_STREAM:-false}
+      LLM_EXPOSE_REASONING: ${LLM_EXPOSE_REASONING:-false}
+      RAG_RERANK_ENABLED: ${RAG_RERANK_ENABLED:-true}
+      RAG_RERANK_CANDIDATES: ${RAG_RERANK_CANDIDATES:-16}
+      RAG_RERANK_TIMEOUT_SECONDS: ${RAG_RERANK_TIMEOUT_SECONDS:-30}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-Qwen/Qwen3-Embedding-8B}
+      EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-4096}
+      EMBEDDING_QUERY_INSTRUCTION: ${EMBEDDING_QUERY_INSTRUCTION-Given a web search query, retrieve relevant passages that answer the query}
+      EMBEDDING_TIMEOUT_SECONDS: ${EMBEDDING_TIMEOUT_SECONDS:-30}
+      EMBEDDING_MAX_RETRIES: ${EMBEDDING_MAX_RETRIES:-3}
+      EMBEDDING_RETRY_BASE_DELAY_SECONDS: ${EMBEDDING_RETRY_BASE_DELAY_SECONDS:-1.0}
     ports:
       - "${AGENTS_PORT:-8010}:8010"
     depends_on:
-      - backend
+      postgres:
+        condition: service_healthy
     networks:
       - sdm_hack
 
@@ -75,7 +95,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ${POSTGRES_DATA_SOURCE:-postgres_data}:/var/lib/postgresql/data
       - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]

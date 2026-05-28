@@ -1,1 +1,1 @@
-"""Product agent packages."""
+"""QA-агент и его инструменты."""

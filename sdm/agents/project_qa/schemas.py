@@ -1,11 +1,19 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, create_model
+
+from sdm.agents.text import unique
+from sdm.agents.tools.sources import MAX_EVIDENCE_SOURCES
+
+from .evidence.models import AnswerVerification, VerifiedClaim
 
 DEFAULT_AS_OF = "2026-06-19"
+PROJECT_DATA_UNAVAILABLE_ANSWER = (
+    "Не удалось получить подтверждённые данные проекта. Повторите запрос позже."
+)
 
 
 class ProjectConversationMessage(BaseModel):
@@ -17,7 +25,14 @@ class ProjectQuestionRequest(BaseModel):
     question: str = Field(min_length=1, max_length=1000)
     as_of: date | None = None
     max_depth: int = Field(default=2, ge=1, le=4)
-    conversation_context: list[ProjectConversationMessage] = Field(default_factory=list, max_length=8)
+    verify_claims: bool = Field(
+        default=True,
+        strict=True,
+        description="Проверять подтверждение утверждений источниками перед публикацией ответа.",
+    )
+    conversation_context: list[ProjectConversationMessage] = Field(
+        default_factory=list, max_length=8
+    )
 
 
 class ProjectEvidenceSource(BaseModel):
@@ -43,11 +58,38 @@ class ProjectQuestionLLMAnswer(BaseModel):
 
 class ProjectQuestionAnswer(ProjectQuestionLLMAnswer):
     evidence_sources: list[ProjectEvidenceSource] = Field(default_factory=list)
+    claims: list[VerifiedClaim] = Field(default_factory=list)
+    verification: AnswerVerification | None = None
+
+
+def grounded_answer_model(
+    tool_sources: list[dict[str, Any]],
+) -> type[ProjectQuestionLLMAnswer]:
+    """Создаёт схему ответа со ссылками только на полученные источники."""
+    allowed_ids = unique(
+        [
+            str(value).strip()
+            for source in tool_sources
+            for value in [source.get("id"), *source.get("_match_keys", [])]
+            if value and str(value).strip()
+        ]
+    )
+    if not allowed_ids:
+        raise ValueError("Нет подтверждённых источников для проектного ответа.")
+
+    evidence_id_type = Literal.__getitem__(tuple(allowed_ids))
+    return create_model(
+        "GroundedProjectQuestionLLMAnswer",
+        __base__=ProjectQuestionLLMAnswer,
+        evidence_ids=(
+            list[evidence_id_type],
+            Field(min_length=1, max_length=min(MAX_EVIDENCE_SOURCES, len(allowed_ids))),
+        ),
+    )
 
 
 class RequestRoute(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     intent: Literal["small_talk", "project_question", "out_of_scope"] = "project_question"
-    needs_project_tools: bool = True
     reason: str = ""

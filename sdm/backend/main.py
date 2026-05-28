@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from sdm.backend.api.notifications import router as notifications_router
 from sdm.backend.api.project_summary import router as project_summary_router
 from sdm.backend.core.config import get_settings
 from sdm.backend.dependencies import async_engine
@@ -32,9 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(project_summary_router, prefix=settings.api_prefix)
-app.include_router(notifications_router, prefix=settings.api_prefix)
 app.include_router(project_summary_router, prefix=f"/api{settings.api_prefix}")
-app.include_router(notifications_router, prefix=f"/api{settings.api_prefix}")
 
 
 @app.get("/health")

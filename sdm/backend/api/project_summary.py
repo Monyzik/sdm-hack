@@ -11,17 +11,19 @@ from sdm.backend.schemas.project_summary import (
     PortfolioAttentionSummary,
     PortfolioSummary,
     ProjectProblemContext,
-    ProjectRetrievalContext,
-    ProjectRetrievalIndexResult,
     ProjectSummary,
     ProjectTrends,
 )
+from sdm.backend.schemas.retrieval import (
+    ProjectRetrievalContext,
+    ProjectRetrievalIndexResult,
+    RankingMode,
+)
 from sdm.backend.services.data_classes import ProjectSummarySource
+from sdm.backend.services.embeddings import EmbeddingClient, get_embedding_client
 from sdm.backend.services.project_summary_repository import ProjectSummaryRepository
 from sdm.backend.services.project_summary_service import ProjectSummaryService
 from sdm.backend.services.retrieval import reindex_project_rag, search_project_rag
-from sdm.backend.services.yandex_embeddings import YandexEmbeddingClient, get_yandex_embedding_client
-
 
 router = APIRouter(prefix="/summaries", tags=["summaries"])
 
@@ -81,7 +83,9 @@ async def get_project_problem_context(
 ) -> ProjectProblemContext:
     service = _summary_service(session)
     try:
-        return await service.build_project_problem_context(project_id, as_of=as_of, max_depth=max_depth)
+        return await service.build_project_problem_context(
+            project_id, as_of=as_of, max_depth=max_depth
+        )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
@@ -93,6 +97,7 @@ async def get_project_retrieval_context(
     as_of: date | None = Query(default=None),
     limit: int = Query(default=8, ge=1, le=20),
     entity_id: str | None = Query(default=None, min_length=1, max_length=64),
+    ranking: RankingMode = Query(default="hybrid"),
     session: AsyncSession = Depends(get_session),
 ) -> ProjectRetrievalContext:
     source = await _project_source_or_404(session, project_id)
@@ -106,6 +111,7 @@ async def get_project_retrieval_context(
             as_of=as_of,
             limit=limit,
             entity_id=entity_id,
+            ranking=ranking,
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
@@ -157,11 +163,11 @@ async def _project_source_or_404(session: AsyncSession, project_id: str) -> Proj
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
-def _embedding_client_or_503() -> YandexEmbeddingClient:
+def _embedding_client_or_503() -> EmbeddingClient:
     try:
-        return get_yandex_embedding_client()
+        return get_embedding_client()
     except ValueError as exc:
         raise HTTPException(
             status_code=503,
-            detail=f"Не настроен сервис эмбеддингов Yandex: {exc}",
+            detail=f"Не настроен сервис эмбеддингов: {exc}",
         ) from exc
